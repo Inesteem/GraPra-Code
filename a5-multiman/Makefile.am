@@ -5,5 +5,5 @@ SUBDIRS = src #doc #tmp utils # lib-config-src # man
 #doc:
 #	cd doc; make doc
 
-EXTRA_DIST=terrain.scm render-data terrain.shader reader-extensions.scm
+EXTRA_DIST=multiman.scm render-data multiman.shader reader-extensions.scm
 

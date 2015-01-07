@@ -101,8 +101,6 @@ struct render_time_table {
 	}
 };
 
-drawelement_container_t ufo;
-
 void loop() {
 
 	// 
@@ -157,15 +155,6 @@ void loop() {
     else
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-	for (drawelement_container_t::iterator it = ufo.begin(); it != ufo.end(); ++it) {
-		drawelement *de = *it;
-		de->bind();
-		de->apply_default_matrix_uniforms();
-		de->apply_default_tex_uniforms_and_bind_textures();
-		setup_dir_light(de->Shader());
-		de->draw_em();
-		de->unbind();
-	}
 
 	render_timer.done_with("draw");
 
@@ -201,7 +190,7 @@ extern "C" {
 
 void actual_main() {
 	register_scheme_functions_for_key_handling();
-	load_configfile("terrain.scm");
+	load_configfile("multiman.scm");
 	cout << "cfg done" << endl;
 	//glDebugMessageCallbackARB(gl_error, 0);
 
@@ -223,16 +212,6 @@ void actual_main() {
 	// 
 	// further initializations may go here
 	//
-		ObjLoader loader("ufo", "./render-data/models/ufo.obj");
-		loader.TranslateToOrigin();
-		loader.pos_and_norm_shader = find_shader("pos+norm");
-		loader.pos_norm_and_tc_shader = find_shader("pos+norm+tc");
-		loader.GenerateNonsharingMeshesAndDrawElements(ufo);
-		matrix4x4f mat;
-		vec3f axis = {1,0,0};
-		make_rotation_matrix4x4f(&mat, &axis, -M_PI/2);
-		ufo.front()->Modelmatrix(&mat);
-
 	
 	// 
 	// pass control to the renderer. won't return.
