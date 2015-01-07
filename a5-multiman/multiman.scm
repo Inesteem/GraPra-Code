@@ -11,7 +11,7 @@
 
 (set-move-factor! 1)
 
-(let ((rc-file (string-append (getenv "HOME") "/.terrainrc")))
+(let ((rc-file (string-append (getenv "HOME") "/.multimanrc")))
   (if (file-exists? rc-file)
       (load rc-file)))
 

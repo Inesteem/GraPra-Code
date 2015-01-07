@@ -1,7 +1,7 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.61)
-AC_INIT([terrain], [1.0.0], [[kai.selgrad@cs.fau.de]])
+AC_INIT([multiman], [1.0.0], [[kai.selgrad@cs.fau.de]])
 AM_INIT_AUTOMAKE
 
 AC_DEFUN([AX_STDCXX11_FLAG], [

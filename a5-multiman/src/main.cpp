@@ -171,7 +171,7 @@ void loop() {
 }
 
 void gl_error(unsigned int source, unsigned int type, unsigned int id, unsigned int severity, int length, const char* message, void*) {
-	check_for_gl_errors("OpenGL Error Callback (gl_error)\n$ gdb src/terrain\n$ break gl_error\n$ run");
+	check_for_gl_errors("OpenGL Error Callback (gl_error)\n$ gdb src/multiman\n$ break gl_error\n$ run");
 }
 
 SCM_DEFINE(s_res, "screenres", 0, 0, 0, (), "") {
@@ -228,7 +228,7 @@ int main(int argc, char **argv)
 	append_image_path("./render-data/images/");
 // 	int guile_mode = with_guile;
 	int guile_mode = guile_cfg_only;
-	startup_cgl("terrain", 3, 3, argc, argv, render_settings::screenres_x, render_settings::screenres_y, actual_main, guile_mode, true, 0);
+	startup_cgl("multiman", 3, 3, argc, argv, render_settings::screenres_x, render_settings::screenres_y, actual_main, guile_mode, true, 0);
 	return 0;
 }
 
