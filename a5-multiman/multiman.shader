@@ -101,3 +101,32 @@
 #:inputs (list "in_pos" "in_norm" "in_tc")>
 
 
+#<make-shader "text-shader"
+#:vertex-shader #{
+#version 150 core
+	in vec3 in_pos;
+	in vec2 in_tc;
+	uniform mat4 proj;
+	uniform mat4 view;
+	uniform mat4 model;
+	out vec2 tc;
+	void main() {
+		gl_Position = proj * view * model * vec4(in_pos,1.);
+		tc = in_tc;
+	}
+}
+#:fragment-shader #{
+#version 150 core
+	in vec2 tc;
+	uniform vec3 color;
+	out vec4 out_col;
+	uniform sampler2D tex;
+	void main() {
+		if(texture(tex, tc).r >= 0.5 || texture(tex, tc).g >= 0.5 || texture(tex, tc).b >= 0.5)
+			out_col = vec4(texture(tex, tc).rgb, 1.);
+		else
+			discard;
+		
+	}
+}
+#:inputs (list "in_pos" "in_tc")>

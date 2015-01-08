@@ -8,6 +8,7 @@ multiman_SOURCES = 	main.cpp \
 				wall-timer.h \
 				rendering.cpp rendering.h \
 				drawelement.cpp drawelement.h \
+				label.cpp label.h \
 				objloader.cpp objloader.h
 
 snarf_opts = $(AM_CPPFLAGS) $(multiman_CPPFLAGS) $(CPPFLAGS)
