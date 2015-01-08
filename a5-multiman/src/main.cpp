@@ -5,6 +5,7 @@
 #include <GL/freeglut.h>
 
 #include "cmdline.h"
+#include "heightmap.h"
 #include "wall-timer.h"
 #include "rendering.h"
 #include "drawelement.h"
@@ -22,6 +23,7 @@ using namespace std;
 #define doc(X)
 
 void render_gui_overlay(bool gameover);
+heightmap *the_heightmap;
 
 unsigned char navi_key = 0;
 unsigned char key_to_move_up = 'i',
@@ -156,6 +158,7 @@ void loop() {
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 
+	the_heightmap->draw();
 	render_timer.done_with("draw");
 
 	// 
@@ -212,6 +215,7 @@ void actual_main() {
 	// 
 	// further initializations may go here
 	//
+	the_heightmap = new heightmap("./render-data/images/eire.png", 6);
 	
 	// 
 	// pass control to the renderer. won't return.
