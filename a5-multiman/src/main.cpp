@@ -5,12 +5,14 @@
 #include <GL/freeglut.h>
 
 #include "cmdline.h"
-//#include "heightmap.h"
+#include "heightmap.h"
+#include "simple_heightmap.h"
 #include "wall-timer.h"
 #include "rendering.h"
 #include "drawelement.h"
 #include "objloader.h"
 #include "clientside-networking.h"
+#include "gameobject.h"
 
 #include <libcgl/scheme.h>
 #include <libcgl/impex.h>
@@ -25,7 +27,8 @@ using namespace std;
 
 void render_gui_overlay(bool gameover);
 //heightmap *the_heightmap;
-
+simple_heightmap *sh;
+ObjHandler *objhandler;
 unsigned char navi_key = 0;
 unsigned char key_to_move_up = 'i',
 			  key_to_move_down = 'k',
@@ -54,6 +57,7 @@ static bool reload_pending = false;
 void keyhandler(unsigned char key, int x, int y) {
 	if (key == 'W')      wireframe = !wireframe;
 	else if (key == 'R') reload_pending = true;
+    else if (key == 'O') sh->toggle_next_scaling();
 	else {
 		navi_key = key;
 		standard_keyboard(key,x,y);
@@ -161,7 +165,8 @@ void loop() {
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 
-	//the_heightmap->draw();
+    //the_heightmap->draw();
+    sh->draw();
 	render_timer.done_with("draw");
 
 	// 
@@ -215,13 +220,18 @@ void actual_main() {
 	glDepthFunc(GL_LESS);
 	glClearDepth(1.0);
 
-	networking_prologue();
+    networking_prologue();
 
 	// 
 	// further initializations may go here
 	//
-	//the_heightmap = new heightmap("./render-data/images/eire.png", 6);
-	
+    //the_heightmap = new heightmap("./render-data/images/eire.png", 6);
+    objhandler = new ObjHandler();
+    objhandler->addObj("wuerfel", "./render-data/models/wuerfel.obj", find_shader("tree-shader"), 1.0f);
+
+    sh = new simple_heightmap(objhandler,"./render-data/images/level0.png",0.2);
+
+
 	// 
 	// pass control to the renderer. won't return.
 	//

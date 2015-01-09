@@ -10,7 +10,10 @@ multiman_SOURCES = 	main.cpp \
 			drawelement.cpp drawelement.h \
 			objloader.cpp objloader.h \
 			messages.cpp messages.h \
-			clientside-networking.cpp clientside-networking.h
+			clientside-networking.cpp clientside-networking.h \
+			heightmap.cpp heightmap.h \
+                        simple_heightmap.cpp simple_heightmap.h \
+                        gameobject.cpp gameobject.h
 
 multiman_server_SOURCES = 	server-main.cpp \
 				messages.cpp messages.h 

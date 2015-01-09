@@ -131,6 +131,85 @@
 }
 #:inputs (list "in_pos" "in_tc")>
 
+#<make-shader "heightmap_shader"
+#:vertex-shader #{
+#version 150 core
+        in vec3 in_pos;
+        uniform mat4 proj;
+        uniform mat4 view;
+        uniform mat4 model;
+        out vec3 out_pos;
+        void main() {
+                gl_Position = proj * view * model * vec4(in_pos,1.);
+                out_pos = in_pos;
+        }
+}
+#:fragment-shader #{
+#version 150 core
+
+        in vec3 out_pos;
+        out vec4 out_col;
+
+        void main() {
+            out_col = vec4(0.5,0.5,0.5, 1.0);
+
+        }
+}
+#:inputs (list "in_pos")>
+
+#<make-shader "building-shader"
+#:vertex-shader #{
+#version 150 core
+        in vec3 in_pos;
+        uniform mat4 proj;
+        uniform mat4 view;
+        uniform mat4 model;
+        out vec3 out_pos;
+        void main() {
+                gl_Position = proj * view * model * vec4(in_pos,1.);
+                out_pos = in_pos;
+        }
+}
+#:fragment-shader #{
+#version 150 core
+
+        in vec3 out_pos;
+        out vec4 out_col;
+
+        void main() {
+            out_col = vec4(0.5,0.5,0.5, 1.0);
+
+        }
+}
+#:inputs (list "in_pos")>
+
+
+#<make-shader "tree-shader"
+#:vertex-shader #{
+#version 150 core
+        in vec3 in_pos;
+        uniform mat4 proj;
+        uniform mat4 view;
+        uniform mat4 model;
+        out vec3 out_pos;
+        void main() {
+                gl_Position = proj * view * model * vec4(in_pos,1.);
+                out_pos = in_pos;
+        }
+}
+#:fragment-shader #{
+#version 150 core
+
+        in vec3 out_pos;
+        out vec4 out_col;
+
+        void main() {
+            out_col = vec4(0.0,1,0, 1.0);
+
+        }
+}
+#:inputs (list "in_pos")>
+
 #<make-shader "terrain"
 #:vertex-shader #{
 #version 150 core
