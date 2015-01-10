@@ -148,10 +148,14 @@
 #version 150 core
 
         in vec3 out_pos;
+
+        uniform sampler2D grass;
+        uniform sampler2D stone;
+
         out vec4 out_col;
 
         void main() {
-            out_col = vec4(0.5,0.5,0.5, 1.0);
+            out_col = texture2D(grass,vec2(out_pos.x,out_pos.z));
 
         }
 }

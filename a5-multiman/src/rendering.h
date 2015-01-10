@@ -13,6 +13,7 @@ namespace render_settings {
 	extern float character_radius;
 	extern float character_float_h;
 	extern int screenres_x, screenres_y;
+    extern float tile_size_x, tile_size_y;
 };
 
 void setup_dir_light(shader_ref shader);

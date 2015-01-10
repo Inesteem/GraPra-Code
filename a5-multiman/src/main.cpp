@@ -29,6 +29,7 @@ void render_gui_overlay(bool gameover);
 //heightmap *the_heightmap;
 simple_heightmap *sh;
 ObjHandler *objhandler;
+bool standard_mouse = false;
 unsigned char navi_key = 0;
 unsigned char key_to_move_up = 'i',
 			  key_to_move_down = 'k',
@@ -54,10 +55,21 @@ SCM_DEFINE(s_set_keymap, "define-keymap", 1, 0, 0, (SCM str), "") {
 
 static bool reload_pending = false;
 
+void mouse(int button, int state, int x, int y) {
+    if(standard_mouse){
+         standard_mouse_func(button, state, x, y);
+    } else {
+    }
+
+}
+
+
+
 void keyhandler(unsigned char key, int x, int y) {
 	if (key == 'W')      wireframe = !wireframe;
 	else if (key == 'R') reload_pending = true;
     else if (key == 'O') sh->toggle_next_scaling();
+    else if (key == 'M') standard_mouse = !standard_mouse;
 	else {
 		navi_key = key;
 		standard_keyboard(key,x,y);
@@ -199,6 +211,10 @@ extern "C" {
 	void load_configfile(const char *);
 }
 
+
+
+
+
 void actual_main() {
 	register_scheme_functions_for_key_handling();
 	load_configfile("multiman.scm");
@@ -211,7 +227,8 @@ void actual_main() {
 	register_idle_function(loop);
 	register_keyboard_function(keyhandler);
 	register_keyboard_up_function(keyhandler_up);
-	register_mouse_function(standard_mouse_func);
+
+    register_mouse_function(mouse);
 	glutIgnoreKeyRepeat(1);
 
 	use_camera(find_camera("playercam"));
@@ -227,9 +244,9 @@ void actual_main() {
 	//
     //the_heightmap = new heightmap("./render-data/images/eire.png", 6);
     objhandler = new ObjHandler();
-    objhandler->addObj("wuerfel", "./render-data/models/wuerfel.obj", find_shader("tree-shader"), 1.0f);
+    objhandler->addObj("tree", "./render-data/models/tree.obj", find_shader("pos+norm+tc"), 0.3f);
 
-    sh = new simple_heightmap(objhandler,"./render-data/images/level0.png",0.2);
+    sh = new simple_heightmap(objhandler,"./render-data/images/smalllvl.png",1.0f);
 
 
 	// 

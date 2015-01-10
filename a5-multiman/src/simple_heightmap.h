@@ -1,15 +1,19 @@
 #ifndef SIMPLE_HEIGHTMAP_H
 #define SIMPLE_HEIGHTMAP_H
 
-#include <mesh.h>
+
 #include "drawelement.h"
-#include <string>
+#include "gameobject.h"
+
+#include <mesh.h>
 #include <libmcm/vectors.h>
 #include <libmcm/matrix.h>
 #include <libcgl/impex.h>
+
+#include <libcgl/texture.h>
 #include <iostream>
 #include <vector>
-#include "gameobject.h"
+#include <string>
 
 using namespace std;
 
@@ -33,7 +37,8 @@ private:
     shader_ref m_shader;
     vector<char> m_gamefield;
     vector<GameObject> m_gameobjects;
-
+    texture_ref grass = find_texture("terrain_1");
+    texture_ref stone = find_texture("terrain_2");
 };
 
 

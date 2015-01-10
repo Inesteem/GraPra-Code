@@ -1,5 +1,5 @@
 #include "gameobject.h"
-
+#include "rendering.h"
 //wrapper for objloader
 Obj::Obj(string name, int id, string filename, shader_ref shader, float scale):id(id),name(name){
     ObjLoader loader(name.c_str(), filename.c_str());
@@ -7,19 +7,22 @@ Obj::Obj(string name, int id, string filename, shader_ref shader, float scale):i
     loader.pos_and_norm_shader = shader;
     loader.pos_norm_and_tc_shader = shader;
     loader.default_shader = shader;
-     loader.ScaleVertexData(vec3f(scale,scale,scale));
+    bb_min = vec3f(0,0,0);
+     bb_max = vec3f(render_settings::tile_size_x,2*render_settings::tile_size_x,render_settings::tile_size_x);
+     loader.ScaleVertexDataToFit(bb_min,bb_max);
      drawelements = new vector<drawelement*>();
     loader.GenerateNonsharingMeshesAndDrawElements(*drawelements);
 
 }
 
+
+//handler for all .obj
 ObjHandler::ObjHandler(){
 
 }
 
 
-
-//handler for all .obj
+//adds an .obj
 void ObjHandler::addObj(string name, string filename, shader_ref shader, float scale){
 
     objs.push_back(Obj(name,objs.size(),filename, shader, scale));
@@ -31,11 +34,11 @@ Obj ObjHandler::getObjByID(int id){
     return objs.at(id);
 }
 
-Obj ObjHandler::getObjByName(string name){
+Obj* ObjHandler::getObjByName(string name){
     for(int i = 0; i < objs.size(); ++i){
         if(objs[i].name == name){
 
-            return objs[i];
+            return &objs[i];
         }
     }
     cout << "Couldn't find " + name + " Obj" << endl;
@@ -43,36 +46,35 @@ Obj ObjHandler::getObjByName(string name){
 }
 
 //represents a gameobject
-GameObject::GameObject(ObjHandler &objhandler, std::string name, shader_ref shader): m_shader(shader)
+GameObject::GameObject(Obj *obj, std::string name, shader_ref shader):m_obj(obj),m_name(name), m_shader(shader)
 {
-    m_drawelements = (objhandler.getObjByName(name).drawelements);
+
     make_unit_matrix4x4f(&m_model);
 
 }
 
 void GameObject::multiply_model_matrix(matrix4x4f other){
-    matrix4x4f tmp;
-   // multiply_matrices4x4f(&tmp, &m_model, &other);
-    //m_model = tmp;
+
 }
 
 void GameObject::draw(){
-    m_drawelements->front()->Modelmatrix(&m_model);
+    m_obj->drawelements->front()->Modelmatrix(&m_model);
 
-    for (vector<drawelement*>::iterator it = m_drawelements->begin(); it != m_drawelements->end(); ++it) {
+    for (vector<drawelement*>::iterator it = m_obj->drawelements->begin(); it != m_obj->drawelements->end(); ++it) {
         drawelement *de = *it;
 
         de->bind();
+        setup_dir_light(m_shader);
         de->apply_default_matrix_uniforms();
-        //de->apply_default_tex_uniforms_and_bind_textures();
-        int loc = glGetUniformLocation(gl_shader_object(m_shader), "proj");
-        glUniformMatrix4fv(loc, 1, GL_FALSE, projection_matrix_of_cam(current_camera())->col_major);
+        de->apply_default_tex_uniforms_and_bind_textures();
+       // int loc = glGetUniformLocation(gl_shader_object(m_shader), "proj");
+        //glUniformMatrix4fv(loc, 1, GL_FALSE, projection_matrix_of_cam(current_camera())->col_major);
 
-        loc = glGetUniformLocation(gl_shader_object(m_shader), "view");
-        glUniformMatrix4fv(loc, 1, GL_FALSE, gl_view_matrix_of_cam(current_camera())->col_major);
+//        loc = glGetUniformLocation(gl_shader_object(m_shader), "view");
+//        glUniformMatrix4fv(loc, 1, GL_FALSE, gl_view_matrix_of_cam(current_camera())->col_major);
 
-        loc = glGetUniformLocation(gl_shader_object(m_shader), "model");
-        glUniformMatrix4fv(loc, 1, GL_FALSE, m_model.col_major);
+//        loc = glGetUniformLocation(gl_shader_object(m_shader), "model");
+//        glUniformMatrix4fv(loc, 1, GL_FALSE, m_model.col_major);
 
 
         de->draw_em();
@@ -80,26 +82,30 @@ void GameObject::draw(){
     }
 }
 
-Tree::Tree(ObjHandler &objhandler, string name, int x, int y): GameObject(objhandler,name, find_shader("tree-shader")){
+Tree::Tree(Obj *obj, string name, int x, int y): GameObject(obj,name, find_shader("pos+norm+tc")){
     identifier = 't';
     m_pos = vec2i(x,y);
-    m_model.col_major[1  + 4 * 3] = m_pos.x;
-    m_model.col_major[2  + 4 * 3] = 0;
-    m_model.col_major[3  + 4 * 3] = m_pos.y;
+    vec3f tmp = obj->bb_min + obj->bb_max;
+    tmp /= 2;
+    m_model.col_major[3 * 4 + 0] = m_pos.x*render_settings::tile_size_x+render_settings::tile_size_x/2;
+    m_model.col_major[3 * 4 + 1] = tmp.y;
+    m_model.col_major[3 * 4 + 2] = m_pos.y*render_settings::tile_size_y+render_settings::tile_size_y/2;
+
 
 }
 
-Building::Building(ObjHandler &objhandler,string name, int x, int y, unsigned int owner):
-    GameObject(objhandler, name ,find_shader("building-shader")),
+Building::Building(Obj *obj, string name, int x, int y, unsigned int owner):
+    GameObject(obj, name ,find_shader("pos+norm+tc")),
     m_owner(owner)
 
 {
     identifier = 'b';
     m_pos = vec2i(x,y);
-
-    m_model.col_major[1  + 4 * 3] = m_pos.x;
-    m_model.col_major[2  + 4 * 3] = 0;
-    m_model.col_major[3  + 4 * 3] = m_pos.y;
+    vec3f tmp = obj->bb_min + obj->bb_max;
+    tmp /= 2;
+    m_model.col_major[3 * 4 + 0] = m_pos.x*render_settings::tile_size_x+render_settings::tile_size_x/2;
+    m_model.col_major[3 * 4 + 1] = tmp.y;
+    m_model.col_major[3 * 4 + 2] = m_pos.y*render_settings::tile_size_y+render_settings::tile_size_y/2;
 
 }
 
