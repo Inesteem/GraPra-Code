@@ -58,11 +58,11 @@ void GameObject::multiply_model_matrix(matrix4x4f other){
 }
 
 void GameObject::draw(){
-    m_obj->drawelements->front()->Modelmatrix(&m_model);
+   // m_obj->drawelements->front()->Modelmatrix(&m_model);
 
     for (vector<drawelement*>::iterator it = m_obj->drawelements->begin(); it != m_obj->drawelements->end(); ++it) {
         drawelement *de = *it;
-
+		de->Modelmatrix(&m_model);
         de->bind();
         setup_dir_light(m_shader);
         de->apply_default_matrix_uniforms();
@@ -75,6 +75,9 @@ void GameObject::draw(){
 
 //        loc = glGetUniformLocation(gl_shader_object(m_shader), "model");
 //        glUniformMatrix4fv(loc, 1, GL_FALSE, m_model.col_major);
+
+//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
 
         de->draw_em();
