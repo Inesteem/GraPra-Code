@@ -245,9 +245,12 @@ void actual_main() {
     //the_heightmap = new heightmap("./render-data/images/eire.png", 6);
     objhandler = new ObjHandler();
     objhandler->addObj("tree", "./render-data/models/tree.obj", find_shader("pos+norm+tc"), 0.3f);
+    objhandler->addObj("building_lot", "./render-data/models/building_lot.obj", find_shader("pos+norm+tc"), 0.3f);
 
     sh = new simple_heightmap(objhandler,"./render-data/images/smalllvl.png",1.0f);
 
+
+	glutSetCursor(GLUT_CURSOR_INFO);
 
 	// 
 	// pass control to the renderer. won't return.
