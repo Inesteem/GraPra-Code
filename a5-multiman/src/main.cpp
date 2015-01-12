@@ -238,17 +238,20 @@ void actual_main() {
 	glDepthFunc(GL_LESS);
 	glClearDepth(1.0);
 
-	messageReader = new client_message_reader(objhandler);
-    	messageReader->networking_prologue();
 
 	// 
 	// further initializations may go here
 	//
 	    objhandler = new ObjHandler();
-	    objhandler->addObj("tree", "./render-data/models/tree.obj", find_shader("pos+norm+tc"), 0.3f);
-	    objhandler->addObj("building_lot", "./render-data/models/building_lot.obj", find_shader("pos+norm+tc"), 0.3f);
+        objhandler->addObj("tree", "./render-data/models/tree.obj", find_shader("pos+norm+tc"));
+        objhandler->addObj("building_lot", "./render-data/models/building_lot.obj", find_shader("pos+norm+tc"));
 
-	    sh = new simple_heightmap(objhandler,"./render-data/images/smalllvl.png", 32 ,32);
+
+    sh = new simple_heightmap();
+    messageReader = new client_message_reader(objhandler, sh);
+        messageReader->networking_prologue();
+
+
 
 
 	glutSetCursor(GLUT_CURSOR_INFO);

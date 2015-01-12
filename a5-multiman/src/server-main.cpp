@@ -65,7 +65,7 @@ void initGame() {
 	gameStage = new GameStage();
 
 	unsigned int x, y;
-	vec3f *mapData = load_image3f("./render-data/images/level0.png", &x, &y);
+    vec3f *mapData = load_image3f("./render-data/images/smalllvl.png", &x, &y);
 
 	msg::init_game ig = make_message<msg::init_game>();
 	ig.mapX = x;
