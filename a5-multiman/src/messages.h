@@ -18,6 +18,7 @@ namespace msg {
 		enum {
 			init_game = 1,
 			spawn_house,
+			spawn_tree,
 			init_done/*
 			initial_player_data_position,
 			board_info,
@@ -154,6 +155,12 @@ namespace msg {
 		uint16_t y;
 	} __attribute__((aligned(8)));
 
+	struct spawn_tree : public message {
+		spawn_tree() : message(code::spawn_tree) {}		
+		uint16_t x;
+		uint16_t y;
+	} __attribute__((aligned(8)));
+
 	struct init_done : public message {
 		init_done() : message(code::init_done) {}
 	} __attribute__((aligned(8)));
@@ -214,6 +221,7 @@ protected:
 	// server -> client
 	virtual void handle_message(msg::init_game *m) { warn(m); }
 	virtual void handle_message(msg::spawn_house *m) { warn(m); }
+	virtual void handle_message(msg::spawn_tree *m) { warn(m); }
 	virtual void handle_message(msg::init_done *m) { warn(m); }
 	
 	// client -> server

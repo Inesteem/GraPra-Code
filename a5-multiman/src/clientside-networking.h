@@ -21,6 +21,7 @@ public:
 protected:
 	virtual void handle_message(msg::init_game *m);
 	virtual void handle_message(msg::spawn_house *m);
+	virtual void handle_message(msg::spawn_tree *m);
 	virtual void handle_message(msg::init_done *m);
 
 

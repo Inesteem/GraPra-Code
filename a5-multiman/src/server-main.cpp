@@ -86,6 +86,11 @@ void initGame() {
 			} else if(color.y > 0.9f) {
 				cout << "Tree at (" << r << "," << c << ")" << endl;
 				gameStage->spawnTree(r, c);
+
+				msg::spawn_tree st = make_message<msg::spawn_tree>();
+				st.x = r;
+				st.y = c;
+				broadcast(&st);
 			}
 		}
 	}

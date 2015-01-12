@@ -131,6 +131,12 @@ void simple_heightmap::draw(){
         m_buildings[i].draw();
     }
 
+    for(int i = 0; i < m_trees.size(); ++i){
+        m_trees[i].draw();
+    }
+
+
+
 
 
 }

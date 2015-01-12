@@ -67,6 +67,7 @@ void message_reader::handle_message() {
 		case msg::code::init_game:	handle_message((msg::init_game*)buffer); break;
 		case msg::code::init_done:	handle_message((msg::init_done*)buffer); break;
 		case msg::code::spawn_house:	handle_message((msg::spawn_house*)buffer); break;
+		case msg::code::spawn_tree:	handle_message((msg::spawn_tree*)buffer); break;
 
 		default:
 			cerr << "got a message with unknown code " << (int)buffer[1] << endl;

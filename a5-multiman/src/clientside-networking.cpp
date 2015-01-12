@@ -249,6 +249,12 @@ void client_message_reader::handle_message(msg::spawn_house *m)
 	std::cout << "Spawning house at (" << m->x << "," << m->y << ")" << std::endl;
 }
 
+void client_message_reader::handle_message(msg::spawn_tree *m)
+{
+	m_sh->add_tree(m->x, m->y);
+	std::cout << "Spawning tree at (" << m->x << "," << m->y << ")" << std::endl;
+}
+
 void client_message_reader::handle_message(msg::init_done *m)
 {	
 	cout << "Initializeing done, starting game..." << endl;
