@@ -7,8 +7,10 @@ Obj::Obj(string name, int id, string filename, shader_ref shader, float scale):i
     loader.pos_and_norm_shader = shader;
     loader.pos_norm_and_tc_shader = shader;
     loader.default_shader = shader;
+    vec3f min, max;
+    loader.BoundingBox(min, max);
     bb_min = vec3f(0,0,0);
-     bb_max = vec3f(render_settings::tile_size_x,2*render_settings::tile_size_x,render_settings::tile_size_x);
+     bb_max = vec3f(render_settings::tile_size_x,(max.y-min.y)/(max.x-min.x)*render_settings::tile_size_x,(max.z-min.z)/(max.x-min.x)*render_settings::tile_size_y);
      loader.ScaleVertexDataToFit(bb_min,bb_max);
      drawelements = new vector<drawelement*>();
     loader.GenerateNonsharingMeshesAndDrawElements(*drawelements);

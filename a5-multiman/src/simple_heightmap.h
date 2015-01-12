@@ -21,8 +21,8 @@ using namespace std;
 class simple_heightmap
 {
 public:
-    simple_heightmap(ObjHandler *objhandler,const std::string filename, float scale);
-    void toggle_next_scaling();
+    simple_heightmap(ObjHandler *objhandler, const std::string filename, int width, int height);
+
     void update();
     void draw();
     void add_tree(int x, int y);
@@ -33,7 +33,7 @@ public:
 private:
     ObjHandler *m_objhandler;
     unsigned int m_width, m_height;
-    float m_scale_factor;
+
     matrix4x4f m_model;
     mesh_ref m_mesh;
     shader_ref m_shader;

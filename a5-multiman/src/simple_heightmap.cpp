@@ -2,12 +2,13 @@
 #include "simple_heightmap.h"
 #include "rendering.h"
 #include <vector>
-simple_heightmap::simple_heightmap(ObjHandler *objhandler, const std::string filename, float scale): m_objhandler(objhandler), m_scale_factor(scale)
-{
+simple_heightmap::simple_heightmap(ObjHandler *objhandler, const std::string filename, int width, int height): m_objhandler(objhandler){
     m_mesh = make_mesh("mesh_heightmap", 1);
     vec3f* colors(load_image3f(filename.c_str(), &m_width, &m_height));
-    cout << m_width << " " << m_height << endl;
-
+   // cout << m_width << " " << m_height << endl;
+    if(width != m_width || height != m_height){
+        cerr << filename << " width or height doesnt match received widht or height!" << endl;
+    }
     m_gamefield = vector<char>(m_width*m_height);
     for(int i = 0; i < m_gamefield.size(); i++){
         m_gamefield[i] = 'n';
@@ -26,7 +27,8 @@ simple_heightmap::simple_heightmap(ObjHandler *objhandler, const std::string fil
             }
             if(colors[i + j *m_height].x > 0.8) {
                 m_gamefield[i] = 'b';
-                m_gameobjects.push_back(Building(objhandler->getObjByName("tree"),"tree",i,j,0));
+                m_gameobjects.push_back(Building(objhandler->getObjByName("building_lot"),"building_lot",i,j,0));
+
             }
 
         }
@@ -35,9 +37,6 @@ simple_heightmap::simple_heightmap(ObjHandler *objhandler, const std::string fil
     }
     m_shader = find_shader("heightmap_shader");
     make_unit_matrix4x4f(&m_model);
-    m_model.col_major[0 * 4 + 0] *= m_scale_factor;
-    m_model.col_major[1 * 4 + 1] *= m_scale_factor;
-    m_model.col_major[2 * 4 + 2] *= m_scale_factor;
     std::vector<unsigned int> index;
     for(int i = 0; i < m_height-1; ++i){
         for(int j = 0; j < m_width; ++j){
@@ -54,16 +53,6 @@ simple_heightmap::simple_heightmap(ObjHandler *objhandler, const std::string fil
     }
 
 
-//    for(int i = 0; i < m_height-1; ++i){
-//        for(int j = 0; j < m_width-1; ++j){
-//            index.push_back(i   + j * m_height);
-//            index.push_back(i+1 + j * m_height);
-//            index.push_back(i+1 + (j+1) * m_height);
-//            index.push_back(i+1 + (j+1) * m_height);
-//            index.push_back(i+1 + (j) * m_height);
-//            index.push_back(i + (j) * m_height);
-//        }
-//    }
     bind_mesh_to_gl(m_mesh);
     add_vertex_buffer_to_mesh(m_mesh, "in_pos", GL_FLOAT, m_width*m_height, 3, (float*) pos.data() , GL_STATIC_DRAW);
     //add_vertex_buffer_to_mesh(m_mesh, "in_tc", GL_FLOAT, m_width*m_height, 3, nullptr , GL_STATIC_DRAW);
@@ -88,6 +77,7 @@ void simple_heightmap::draw(){
 
     loc = glGetUniformLocation(gl_shader_object(m_shader), "model");
     glUniformMatrix4fv(loc, 1, GL_FALSE, m_model.col_major);
+
     bind_texture(grass, 0);
     loc = glGetUniformLocation(gl_shader_object(m_shader), "grass");
     glUniform1i(loc, 0);
@@ -99,27 +89,16 @@ void simple_heightmap::draw(){
 
     unbind_mesh_from_gl(m_mesh);
     unbind_shader(m_shader);
+    unbind_texture(grass);
     for(int i = 0; i < m_gameobjects.size(); ++i){
         m_gameobjects[i].multiply_model_matrix(m_model);
         m_gameobjects[i].draw();
     }
 
+
+
 }
 
-void simple_heightmap::toggle_next_scaling(){
-    if(m_scale_factor == 0.2f) {
-        m_scale_factor = 0.1f;
-    } else if(m_scale_factor == 0.1f){
-        m_scale_factor = 1;
-    } else if(m_scale_factor == 1){
-        m_scale_factor = 0.5f;
-    } else if(m_scale_factor == 0.5f){
-        m_scale_factor = 0.2f;
-    }
-    make_unit_matrix4x4f(&m_model);
-    m_model.col_major[0 * 4 + 0] *= m_scale_factor;
-    m_model.col_major[1 * 4 + 1] *= m_scale_factor;
-    m_model.col_major[2 * 4 + 2] *= m_scale_factor;
-}
+
 
 
