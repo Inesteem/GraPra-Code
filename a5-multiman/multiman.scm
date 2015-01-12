@@ -21,6 +21,7 @@
 (texture-from-file "terrain_hm" "eire.png" 'tex2d #t)
 (texture-from-file "terrain_0" "terrain_0_water.png" 'tex2d #t)
 (texture-from-file "terrain_1" "terrain_1.png" 'tex2d #t)
+;(texture-from-file "terrain_1" "ground_gras.png" 'tex2d #t)
 (texture-from-file "terrain_2" "terrain_2.png" 'tex2d #t)
 (texture-from-file "terrain_3" "terrain_3.png" 'tex2d #t)
 

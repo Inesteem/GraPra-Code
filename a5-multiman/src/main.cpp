@@ -246,6 +246,7 @@ void actual_main() {
     objhandler = new ObjHandler();
     objhandler->addObj("tree", "./render-data/models/tree.obj", find_shader("pos+norm+tc"), 0.3f);
     objhandler->addObj("building_lot", "./render-data/models/building_lot.obj", find_shader("pos+norm+tc"), 0.3f);
+    objhandler->addObj("shovel", "./render-data/models/shovel.obj", find_shader("pos+norm+tc"), 0.3f);
 
     sh = new simple_heightmap(objhandler,"./render-data/images/smalllvl.png", 32 ,32);
 

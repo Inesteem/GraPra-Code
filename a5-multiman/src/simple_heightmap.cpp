@@ -28,6 +28,7 @@ simple_heightmap::simple_heightmap(ObjHandler *objhandler, const std::string fil
             if(colors[i + j *m_height].x > 0.8) {
                 m_gamefield[i] = 'b';
                 m_gameobjects.push_back(Building(objhandler->getObjByName("building_lot"),"building_lot",i,j,0));
+                m_gameobjects.push_back(Building(objhandler->getObjByName("shovel"),"shovel",i,j,0));
 
             }
 
