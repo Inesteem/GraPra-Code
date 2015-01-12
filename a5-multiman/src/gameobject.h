@@ -13,8 +13,8 @@ using namespace std;
 
 struct Obj {
 
-    Obj(string name, int id, string filename, shader_ref shader, float scale);
-
+    Obj(string name, int id, string filename, shader_ref shader);
+    Obj(string name, int id, string filename, shader_ref shader, vec3f scale);
     vector<drawelement*> *drawelements;
 
     int id;
@@ -28,8 +28,10 @@ struct Obj {
 class ObjHandler{
 public:
     ObjHandler();
-
-    void addObj(string name, string filename, shader_ref shader, float scale);
+    //adds .obj and tries to scale to fit map
+    void addObj(string name, string filename, shader_ref shader);
+    //adds .obj with custom scale
+    void addObj_withScale(string name, string filename, shader_ref shader, vec3f scale);
     Obj *getObjByName(string name);
     Obj getObjByID(int id);
 private:

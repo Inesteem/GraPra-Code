@@ -24,7 +24,9 @@ void broadcast(msg::message *m);
 class server_message_reader : public message_reader {
 	int player_id; // the messages are sent by this player
 public:
-	server_message_reader(message_reader::socket *sock, int player) : message_reader(sock), player_id(player) {}
+	server_message_reader(message_reader::socket *socket, int player) : message_reader(), player_id(player) {
+		setSocket(socket);
+	}
 };
 
 namespace client_connections {
@@ -67,7 +69,7 @@ std::vector<Building> buildings;
 
 void initGame() {
 	unsigned int x, y;
-	vec3f *mapData = load_image3f("./render-data/images/level0.png", &x, &y);
+    vec3f *mapData = load_image3f("./render-data/images/smalllvl.png", &x, &y);
 
 	msg::init_game ig = make_message<msg::init_game>();
 	ig.mapX = x;
@@ -77,7 +79,7 @@ void initGame() {
 	for(unsigned int r = 0; r < y; r++) {
 		for(unsigned int c = 0; c < x; c++) {
 			vec3f color = mapData[r*x + c];
-			if(color.x == 1.0f){// && color.y == 0.0f && color.z == 0.0f) {
+            if(color.x > 0.8f){// && color.y == 0.0f && color.z == 0.0f) {
 				cout << "Building at (" << r << "," << c << ")" << endl;
 				Building b(r,c);
 				buildings.push_back(b);

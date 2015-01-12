@@ -29,6 +29,8 @@ void render_gui_overlay(bool gameover);
 //heightmap *the_heightmap;
 simple_heightmap *sh;
 ObjHandler *objhandler;
+client_message_reader *messageReader;
+
 bool standard_mouse = false;
 unsigned char navi_key = 0;
 unsigned char key_to_move_up = 'i',
@@ -121,7 +123,6 @@ struct render_time_table {
 };
 
 void loop() {
-
 	// 
 	// administrative
 	//
@@ -151,7 +152,7 @@ void loop() {
 
 	render_timer.done_with("keys");
 
-	reader->read_and_handle();
+	messageReader->read_and_handle();
 
 	// 
 	// update logic
@@ -237,17 +238,20 @@ void actual_main() {
 	glDepthFunc(GL_LESS);
 	glClearDepth(1.0);
 
-    networking_prologue();
 
 	// 
 	// further initializations may go here
 	//
-    //the_heightmap = new heightmap("./render-data/images/eire.png", 6);
-    objhandler = new ObjHandler();
-    objhandler->addObj("tree", "./render-data/models/tree.obj", find_shader("pos+norm+tc"), 0.3f);
-    objhandler->addObj("building_lot", "./render-data/models/building_lot.obj", find_shader("pos+norm+tc"), 0.3f);
+	    objhandler = new ObjHandler();
+        objhandler->addObj("tree", "./render-data/models/tree.obj", find_shader("pos+norm+tc"));
+        objhandler->addObj("building_lot", "./render-data/models/building_lot.obj", find_shader("pos+norm+tc"));
 
-    sh = new simple_heightmap(objhandler,"./render-data/images/smalllvl_height.png", 32 ,32);
+
+    sh = new simple_heightmap();
+    messageReader = new client_message_reader(objhandler, sh);
+        messageReader->networking_prologue();
+
+
 
 
 	glutSetCursor(GLUT_CURSOR_INFO);
