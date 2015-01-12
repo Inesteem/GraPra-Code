@@ -229,7 +229,7 @@ void client_message_reader::networking_prologue() {
 	}
 }
 
-client_message_reader::client_message_reader() : message_reader() {
+client_message_reader::client_message_reader(ObjHandler *objHandler) : message_reader(), objHandler(objHandler) {
 	//setup_done = false;
 }
 

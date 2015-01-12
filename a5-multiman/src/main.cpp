@@ -238,7 +238,7 @@ void actual_main() {
 	glDepthFunc(GL_LESS);
 	glClearDepth(1.0);
 
-	messageReader = new client_message_reader();
+	messageReader = new client_message_reader(objhandler);
     	messageReader->networking_prologue();
 
 	// 

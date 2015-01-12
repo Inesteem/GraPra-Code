@@ -4,11 +4,14 @@
 #include "messages.h"
 #include "wall-timer.h"
 #include <string>
+#include "gameobject.h"
 
 class client_message_reader : public message_reader {
 
+	ObjHandler *objHandler;
+
 public:
-	client_message_reader();
+	client_message_reader(ObjHandler *objHandler);
 
 	void send_message(msg::message &msg);
 	void networking_prologue();
