@@ -11,7 +11,7 @@ using namespace std;
 boost::asio::ip::tcp::socket *server_connection = 0;
 extern bool game_is_running;
 
-void send_message(msg::message &msg) {
+void client_message_reader::send_message(msg::message &msg) {
 	try {
 		boost::asio::write(*server_connection, boost::asio::buffer(&msg, msg.message_size), boost::asio::transfer_all());
 	}
@@ -165,7 +165,7 @@ void drawStartScreen(bool loadingDone, bool failure, const string &addText) {
 }
 */
 
-void networking_prologue() {
+void client_message_reader::networking_prologue() {
 	using boost::asio::ip::tcp;
 	
 	//drawStartScreen();
@@ -202,8 +202,7 @@ void networking_prologue() {
 		
 		//drawStartScreen();
 
-		reader = new client_message_reader(server_connection);
-		
+		setSocket(server_connection);
 		/*
 		while (!reader->eof()) {
 			//drawStartScreen();
@@ -230,7 +229,7 @@ void networking_prologue() {
 	}
 }
 
-client_message_reader::client_message_reader(message_reader::socket *sock) : message_reader(sock) {
+client_message_reader::client_message_reader() : message_reader() {
 	//setup_done = false;
 }
 

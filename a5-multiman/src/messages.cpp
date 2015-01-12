@@ -4,7 +4,7 @@
 
 using namespace std;
 
-message_reader::message_reader(socket *sock) : sock(sock), got_eof(false), msg_size(0) { 
+message_reader::message_reader() : got_eof(false), msg_size(0) { 
 	 curr_input = buffer; 
 }
 

@@ -201,9 +201,10 @@ private:
 	size_t msg_size;
 
 public:
-	message_reader(socket *sock);
+	message_reader();
 	void read_and_handle();
 	bool eof() { return got_eof; }
+	void setSocket(socket *s) { sock = s; }
 
 protected:
 	void read_message_part();

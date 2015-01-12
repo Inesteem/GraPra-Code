@@ -24,7 +24,9 @@ void broadcast(msg::message *m);
 class server_message_reader : public message_reader {
 	int player_id; // the messages are sent by this player
 public:
-	server_message_reader(message_reader::socket *sock, int player) : message_reader(sock), player_id(player) {}
+	server_message_reader(message_reader::socket *socket, int player) : message_reader(), player_id(player) {
+		setSocket(socket);
+	}
 };
 
 namespace client_connections {
