@@ -36,7 +36,7 @@ SUFFIXES: .x
 # AM_CXXFLAGS = -Wall -ansi -pedantic -ggdb -pg
 
 # setting c preprocessor flags for main project
-multiman_CPPFLAGS = -D PACKAGE=\"$(PACKAGE)\" -D VERSION=\"$(VERSION)\" $(CGL_CFLAGS) $(CCGL_CFLAGS) $(GLEW_FLAGS)
+multiman_CPPFLAGS = -D PACKAGE=\"$(PACKAGE)\" -D VERSION=\"$(VERSION)\" $(CGL_CFLAGS) $(CCGL_CFLAGS) $(GLEW_FLAGS) -std=c++11
 multiman_LDADD = $(CGL_LIBS) $(CCGL_LIBS) $(GLEW_LIBS) $(BOOST_ASIO_LIB)
 
 multiman_server_CPPFLAGS = -D PACKAGE=\"$(PACKAGE)\" -D VERSION=\"$(VERSION)\" $(BOOST_CPPFLAGS)
