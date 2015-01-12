@@ -12,8 +12,9 @@ multiman_SOURCES = 	main.cpp \
 			messages.cpp messages.h \
 			clientside-networking.cpp clientside-networking.h \
 			heightmap.cpp heightmap.h \
-                        simple_heightmap.cpp simple_heightmap.h \
-                        gameobject.cpp gameobject.h
+            simple_heightmap.cpp simple_heightmap.h \
+            mouseactions.cpp mouseactions.h \
+            gameobject.cpp gameobject.h
 
 multiman_server_SOURCES = 	server-main.cpp \
 				messages.cpp messages.h 
