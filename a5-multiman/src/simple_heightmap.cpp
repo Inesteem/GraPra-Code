@@ -19,14 +19,13 @@ simple_heightmap::simple_heightmap(ObjHandler *objhandler, const std::string fil
 
 
             pos[i + j * m_height] = vec3f(j*render_settings::tile_size_x,0,i*render_settings::tile_size_y);
-            //  pos[i + j *m_height].y = colors[i + j *m_height].z;
+              pos[i + j *m_height].y = colors[i + j *m_height].z;
             if(colors[i + j *m_height].y > 0.8){
                 m_gamefield[i] = 't';
                 m_gameobjects.push_back(Tree(objhandler->getObjByName("tree"),"tree",i,j));
             }
             if(colors[i + j *m_height].x > 0.8) {
                 m_gamefield[i] = 'b';
-
                 m_gameobjects.push_back(Building(objhandler->getObjByName("tree"),"tree",i,j,0));
             }
 
@@ -46,8 +45,9 @@ simple_heightmap::simple_heightmap(ObjHandler *objhandler, const std::string fil
             index.push_back(i + j*m_height);
             index.push_back((i+1)  + j*m_height);
             } else {
-                index.push_back(i+ (m_width-j-1)*m_height)  ;
                 index.push_back((i+1) + (m_width -j -1) * m_height);
+                index.push_back(i+ (m_width-j-1)*m_height)  ;
+
             }
 
         }

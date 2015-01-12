@@ -25,6 +25,8 @@ public:
     void toggle_next_scaling();
     void update();
     void draw();
+    void add_tree(int x, int y);
+    void add_building(int level, int x, int y);
 
 
 
