@@ -14,6 +14,8 @@
 //#include "gamelogic.h"
 #include "wall-timer.h"
 
+#include "server-logic.h"
+
 using namespace std;
 //using namespace gamelogic;
 
@@ -57,17 +59,11 @@ void broadcast(msg::message *m) {
 	since_last_broadcast.restart();
 }
 
-class Building
-{
-public: 
-	int x, y;
-
-	Building(int x, int y) : x(x), y(y) {}
-};
-
-std::vector<Building> buildings;
+GameStage *gameStage;
 
 void initGame() {
+	gameStage = new GameStage();
+
 	unsigned int x, y;
 	vec3f *mapData = load_image3f("./render-data/images/level0.png", &x, &y);
 
@@ -79,23 +75,28 @@ void initGame() {
 	for(unsigned int r = 0; r < y; r++) {
 		for(unsigned int c = 0; c < x; c++) {
 			vec3f color = mapData[r*x + c];
-			if(color.x == 1.0f){// && color.y == 0.0f && color.z == 0.0f) {
+			if(color.x > 0.9f) {
 				cout << "Building at (" << r << "," << c << ")" << endl;
-				Building b(r,c);
-				buildings.push_back(b);
+				gameStage->spawnHouse(r, c);
+
+				msg::spawn_house sh = make_message<msg::spawn_house>();
+				sh.x = r;
+				sh.y = c;
+				broadcast(&sh);
+			} else if(color.y > 0.9f) {
+				cout << "Tree at (" << r << "," << c << ")" << endl;
+				gameStage->spawnTree(r, c);
 			}
 		}
 	}
 
-	for(std::vector<Building>::iterator it = buildings.begin(); it != buildings.end(); it++ ) {
-		msg::spawn_house sh = make_message<msg::spawn_house>();
-		sh.x = (*it).x;
-		sh.y = (*it).y;
-		broadcast(&sh);
-	}
-
 	msg::init_done id = make_message<msg::init_done>();
 	broadcast(&id);
+}
+
+void updateGame()
+{
+
 }
 
 int main(int argc, char **argv)
@@ -119,64 +120,7 @@ int main(int argc, char **argv)
 			acceptor.accept(*client_connections::socket[i]);
 			cout << "got it" << endl;
 			client_connections::reader[i] = new server_message_reader(client_connections::socket[i], i);
-
-			/*msg::connected msg = make_message<msg::connected>();
-			msg.your_id = i;
-			msg.players = cmdline.players;
-
-			boost::system::error_code ignored_error;
-			boost::asio::write(*client_connections::socket[i], boost::asio::buffer(&msg, msg.message_size), boost::asio::transfer_all(), ignored_error);*/
 		}
-
-/*
-		png::image<png::rgb_pixel> image(cmdline.map);
-		int w = image.get_width();
-		int h = image.get_height();
-		std::vector<Box> boxes;
-		
-		for (size_t y = 0; y < h; ++y)
-			for (size_t x = 0; x < w; ++x) {
-				png::rgb_pixel px = image.get_pixel(x, h-y-1);
-				msg::box_type::t type = msg::box_type::none;
-				if (px.red <= 10 && px.green <= 10 && px.blue <= 10)	type = msg::box_type::stone;
-				if (px.red >= 100 && px.red <= 150 && px.green >= 100 && px.green <= 150 && px.blue >= 100 && px.blue <= 150) type = msg::box_type::wood;
-				if (type != msg::box_type::none)
-					boxes.push_back(Box(x, y, type));
-			}
-		
-		board = new Board(w, h);
-		msg::board_info bi = make_message<msg::board_info>();
-		bi.w = w;
-		bi.h = h;
-		bi.boxes = boxes.size();
-		broadcast(&bi);
-
-		for (int i = 0; i < boxes.size(); ++i) {
-			msg::spawn_box sb = make_message<msg::spawn_box>();
-			sb.x = boxes[i].x;
-			sb.y = boxes[i].y;
-			sb.box_type = (int)boxes[i].type;
-			board->CreateBox(sb.x, sb.y, sb.box_type);
-			broadcast(&sb);
-		}
-		
-		players = cmdline.players;
-		player = new Player*[players];
-		for (int i = 0; i < players; ++i) {
-			player[i] = new Player(i);
-			msg::initial_player_data_position pp = make_message<msg::initial_player_data_position>();
-			pp.player = i;
-			Player::Pos pos = board->FindPosition();
-			pp.x = pos.x;
-			pp.y = pos.y;
-			broadcast(&pp);
-			player[i]->Position(pp.x,pp.y);
-			player[i]->Damage(0,-1); // send healt init message.
-		}
-
-
-		msg::start_game sg = make_message<msg::start_game>();
-		broadcast(&sg);*/
 
 		initGame();
 
@@ -200,24 +144,7 @@ int main(int argc, char **argv)
 
 			if (!game_over)
 			{
-				/*
-				for (int i = 0; i < players; ++i)
-					player[i]->Tick();
-
-				int clear = 0;
-				for (deque<Bomb*>::iterator it = bombs.begin(); it != bombs.end(); ++it)
-					if ((*it)->Tick())
-						++clear;
-				while (clear-- > 0)      // NOTE: this does no longer work when bombs may have different timeouts!
-					bombs.pop_front();
-
-				for (int i = 0; i < players; ++i) {
-					if (player[i]->frags >= cmdline.frag_limit) {
-						game_over = true;
-						msg::game_over go = make_message<msg::game_over>();
-						broadcast(&go);
-					}
-				}*/
+				updateGame();
 			}
 
 			if (info_timer.look() > wall_time_timer::sec(3)) {
