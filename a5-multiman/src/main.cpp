@@ -247,7 +247,7 @@ void actual_main() {
     objhandler->addObj("tree", "./render-data/models/tree.obj", find_shader("pos+norm+tc"), 0.3f);
     objhandler->addObj("building_lot", "./render-data/models/building_lot.obj", find_shader("pos+norm+tc"), 0.3f);
 
-    sh = new simple_heightmap(objhandler,"./render-data/images/smalllvl.png", 32 ,32);
+    sh = new simple_heightmap(objhandler,"./render-data/images/smalllvl_height.png", 32 ,32);
 
 
 	glutSetCursor(GLUT_CURSOR_INFO);

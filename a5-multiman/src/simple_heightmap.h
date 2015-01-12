@@ -25,8 +25,9 @@ public:
 
     void update();
     void draw();
-    void add_tree(int x, int y);
-    void add_building(int level, int x, int y);
+  //  void add_tree(int x, int y);
+ //   void add_building(int level, int x, int y);
+   // void add_units(int count, int x, int y);
 
 
 
@@ -38,9 +39,13 @@ private:
     mesh_ref m_mesh;
     shader_ref m_shader;
     vector<char> m_gamefield;
-    vector<GameObject> m_gameobjects;
+    vector<Tree> m_trees;
+    vector<Building> m_buildings;
+    vector<GameObject> m_other_stuff;
     texture_ref grass = find_texture("terrain_1");
     texture_ref stone = find_texture("terrain_2");
+    texture_ref water = find_texture("terrain_0");
+    texture_ref snow = find_texture("terrain_3");
 };
 
 

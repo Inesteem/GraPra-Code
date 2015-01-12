@@ -48,7 +48,7 @@ Obj* ObjHandler::getObjByName(string name){
 }
 
 //represents a gameobject
-GameObject::GameObject(Obj *obj, std::string name, shader_ref shader):m_obj(obj),m_name(name), m_shader(shader)
+GameObject::GameObject(Obj *obj, std::string name, shader_ref shader, float height):m_obj(obj),m_name(name), m_shader(shader), m_height(height)
 {
 
     make_unit_matrix4x4f(&m_model);
@@ -56,7 +56,11 @@ GameObject::GameObject(Obj *obj, std::string name, shader_ref shader):m_obj(obj)
 }
 
 void GameObject::multiply_model_matrix(matrix4x4f other){
+    m_model = other*m_model;
+}
 
+void GameObject::set_height(float height){
+    m_model.col_major[3 * 4 + 1] = m_model.col_major[3 * 4 + 1] + height;
 }
 
 void GameObject::draw(){
@@ -87,21 +91,21 @@ void GameObject::draw(){
     }
 }
 
-Tree::Tree(Obj *obj, string name, int x, int y): GameObject(obj,name, find_shader("pos+norm+tc")){
+Tree::Tree(Obj *obj, string name, int x, int y, float height): GameObject(obj,name, find_shader("pos+norm+tc"), height){
     identifier = 't';
     m_pos = vec2i(x,y);
     vec3f tmp = obj->bb_min + obj->bb_max;
     tmp /= 2;
     m_model.col_major[3 * 4 + 0] = m_pos.x*render_settings::tile_size_x+render_settings::tile_size_x/2;
-    m_model.col_major[3 * 4 + 1] = tmp.y;
+    m_model.col_major[3 * 4 + 1] = tmp.y + m_height;
     m_model.col_major[3 * 4 + 2] = m_pos.y*render_settings::tile_size_y+render_settings::tile_size_y/2;
 
 
 }
 
-Building::Building(Obj *obj, string name, int x, int y, unsigned int owner):
-    GameObject(obj, name ,find_shader("pos+norm+tc")),
-    m_owner(owner)
+Building::Building(Obj *obj, string name, int x, int y, unsigned int owner,int size, float height):
+    GameObject(obj, name ,find_shader("pos+norm+tc"), height),
+    m_owner(owner) , m_size(size)
 
 {
     identifier = 'b';
@@ -109,7 +113,7 @@ Building::Building(Obj *obj, string name, int x, int y, unsigned int owner):
     vec3f tmp = obj->bb_min + obj->bb_max;
     tmp /= 2;
     m_model.col_major[3 * 4 + 0] = m_pos.x*render_settings::tile_size_x+render_settings::tile_size_x/2;
-    m_model.col_major[3 * 4 + 1] = tmp.y;
+    m_model.col_major[3 * 4 + 1] = tmp.y + m_height;
     m_model.col_major[3 * 4 + 2] = m_pos.y*render_settings::tile_size_y+render_settings::tile_size_y/2;
 
 }
