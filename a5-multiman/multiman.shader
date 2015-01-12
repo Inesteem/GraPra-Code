@@ -151,11 +151,42 @@
 
         uniform sampler2D grass;
         uniform sampler2D stone;
+        uniform sampler2D water;
+        uniform sampler2D snow;
+
 
         out vec4 out_col;
 
         void main() {
-            out_col = texture2D(grass,vec2(out_pos.x,out_pos.z));
+            float border_water = 0.0 * 10;
+                     float border_water_grass = 0.01 * 10;
+                     float border_grass = 0.2 * 10;
+                     float border_grass_rock = 0.3 * 10;
+                     float border_rock = 0.75 * 10;
+                     float border_rock_snow = 0.85 * 10;
+
+                     vec4 color_water = vec4(texture(water, vec2(out_pos.x,out_pos.z)).rgb, 1.0);
+                     vec4 color_grass = vec4(texture(grass, vec2(out_pos.x,out_pos.z)).rgb, 1.0);
+                     vec4 color_rock = vec4(texture(stone,vec2(out_pos.x,out_pos.z)).rgb, 1.0);
+                     vec4 color_snow = vec4(texture(snow, vec2(out_pos.x,out_pos.z)).rgb, 1.0);
+
+
+                     if (out_pos.y <= border_water) {
+                             out_col = color_water;
+                     } else if (out_pos.y <= border_water_grass) {
+                             out_col = mix(color_water, color_grass, smoothstep(border_water, border_water_grass, out_pos.y));
+                     } else if (out_pos.y <= border_grass) {
+                             out_col = color_grass;
+                     } else if (out_pos.y <= border_grass_rock) {
+                             out_col = mix(color_grass, color_rock, smoothstep(border_grass, border_grass_rock, out_pos.y));
+                     } else if (out_pos.y <= border_rock) {
+                             out_col = color_rock;
+                     } else if (out_pos.y <= border_rock_snow) {
+                             out_col = mix(color_rock, color_snow, smoothstep(border_rock, border_rock_snow, out_pos.y));
+                     } else {
+                             out_col = color_snow;
+                     }
+
 
         }
 }

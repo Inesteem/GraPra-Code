@@ -17,7 +17,8 @@ multiman_SOURCES = 	main.cpp \
             menu.cpp menu.h \
             gameobject.cpp gameobject.h
 
-multiman_server_SOURCES = 	server-main.cpp \
+multiman_server_SOURCES = 	server-logic.cpp server-logic.h \
+				server-main.cpp \
 				messages.cpp messages.h 
 
 snarf_opts = $(AM_CPPFLAGS) $(multiman_CPPFLAGS) $(CPPFLAGS)
