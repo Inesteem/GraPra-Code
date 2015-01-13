@@ -139,9 +139,17 @@ Building::Building(Obj *obj, string name, int x, int y, unsigned int owner,int s
     m_model.col_major[3 * 4 + 0] = m_pos.x*render_settings::tile_size_x;
     m_model.col_major[3 * 4 + 1] = m_center.y + m_height;
     m_model.col_major[3 * 4 + 2] = m_pos.y*render_settings::tile_size_y;
+    
+    label.setup_display();
+//	label.set_camera("lcam");
+//	label.set_shader("special-text-shader");;
+    label.update_label_pos(2*x, 2*y, height+2);
 
 }
 
+void Building::draw_label(){
+	label.render_gui_overlay();
+}
 //UNITGROUP
 
 UnitGroup::UnitGroup(Obj *obj, simple_heightmap *sh, string name, vec2i start, vec2i end, unsigned int owner, unsigned int unit_count, float time_to_rech_end, float height):

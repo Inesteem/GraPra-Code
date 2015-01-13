@@ -14,6 +14,7 @@ multiman_SOURCES = 	main.cpp \
 			heightmap.cpp heightmap.h \
             simple_heightmap.cpp simple_heightmap.h \
             mouseactions.cpp mouseactions.h \
+            label.cpp label.h \
             menu.cpp menu.h \
             gameobject.cpp gameobject.h \
             game.cpp game.h

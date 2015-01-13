@@ -36,6 +36,10 @@ void Game::draw(){
     for(int i = 0; i < m_buildings.size(); ++i){
         m_buildings[i].draw();
     }
+    for(int i = 0; i < m_buildings.size(); ++i){
+        m_buildings[i].draw_label();
+    }
+
 
     for(int i = 0; i < m_trees.size(); ++i){
         m_trees[i].draw();

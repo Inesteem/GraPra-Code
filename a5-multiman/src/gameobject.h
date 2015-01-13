@@ -2,6 +2,7 @@
 #define GAMEOBJECT_H
 
 #include "drawelement.h"
+#include "label.h"
 #include "simple_heightmap.h"
 #include "objloader.h"
 #include "wall-timer.h"
@@ -76,12 +77,17 @@ public:
 
 class Building:public GameObject{
 public:
+Label label;
     Building(Obj *obj, string name, int x, int y, unsigned int owner, int size, float height );
     void upgrade();
+
+	void draw_label();
 
 private:
     unsigned int m_owner;
     int m_size;
+    
+    
 };
 
 class UnitGroup: public GameObject{

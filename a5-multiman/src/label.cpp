@@ -6,7 +6,6 @@
 #include <iostream>
 using namespace std;
 
-
 void Label::setup_display(){
 	// make texture_ref invalid	
 	texture.id = -1;
@@ -189,10 +188,9 @@ void Label::update_gui_texture_long(long l){
 void Label::initialize_gui_overlay() {
 
 	mesh = make_mesh("quad", 2);
-//  vec3f pos[4] = { {-0.5,0,-0.5}, {0.5,0,-0.5}, {0.5,0,0.5}, {-0.5,0,0.5} };
-    vec3f pos[4] = { {-0.5,-0.5,0}, {0.5,-0.5,0}, {0.5,0.5,0}, {-0.5,0.5,0} };
+//  vec3f pos[4] = { {-0.5,0, -0.5}, {0.5,0,-0.5}, {0.5,0,0.5}, {-0.5,0,0.5} };
+  vec3f pos[4] = { {-0.5,-0.5,0}, {0.5,-0.5,0}, {0.5,0.5,0}, {-0.5,0.5,0} };
 	
-	//vec3f pos[4] = { {0,0,-10}, {1,0,-10}, {1,1,-10}, {0,1,-10} };
 	vec2f tc[4] = { {0,1}, {1,1}, {1,0}, {0,0} };
 	unsigned int idx[6] = { 0, 1, 2, 2, 3, 0 };
 	
@@ -218,7 +216,9 @@ void Label::render_gui_overlay() {
 
 	matrix4x4f view = *gl_view_matrix_of_cam(current_camera());
 	
+//	vec3f CameraRight_worldspace = {view.row_col(0,0), view.row_col(0,1), view.row_col(0,2)};
 	vec3f CameraRight_worldspace = {view.row_col(0,0), view.row_col(0,1), view.row_col(0,2)};
+//	vec3f CameraUp_worldspace = {view.row_col(1,0), view.row_col(1,1), view.row_col(1,2)};
 	vec3f CameraUp_worldspace = {view.row_col(1,0), view.row_col(1,1), view.row_col(1,2)};
 	vec2f BillboardSize = vec2f(1.0,1.0);
 
@@ -265,19 +265,19 @@ void Label::render_gui_overlay() {
 void Label::update_label_model(matrix4x4f model){
 	this-> model = model;
 }
-void Label::update_label_pos(float x, float y, long l){
-	pos = vec3f(x,0, y);
+void Label::update_label_pos(float x, float y, float z){
+	pos = vec3f(x,z, y);
 	make_unit_matrix4x4f(&model);	
 	model.row_col(0,3) = x;
 	model.row_col(2,3) = y;
-	//model.row_col(2,3) = z;
+	model.row_col(1,3) = z;
 
-	float secs = l/10;
 
-	float angle = secs*M_PI/180;
+	float angle = 90*M_PI/180;
 
 	matrix4x4f scale;
 	vec3f svec = {0.07, 0.1,0.1};
+//	vec3f svec = {10, 10,10};
 	make_scale_matrix4x4f(&scale,&svec);
 	multiply_matrices4x4f(&model,&model,&scale);
 	

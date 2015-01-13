@@ -380,9 +380,8 @@ out vec2 tc;
 				BillboardPos
 				+ CameraRight_worldspace * in_pos.x  * BillboardSize.x
 				+ CameraUp_worldspace * in_pos.y * BillboardSize.y;
-				;
 	
-			gl_Position = model * proj * view * vec4(vp_w , 1.);
+			gl_Position = proj * view * vec4(vp_w , 1.);
 			tc = in_tc;
 		}
 }
@@ -395,11 +394,7 @@ uniform sampler2D tex;
 //uniform float LifeLevel;
 
 		void main(){
-		
-			float LifeLevel = 0.9;
-		
-//			out_col = texture2D(tex, tc );
-//			if (tc.x < LifeLevel && tc.y > 0.3 && tc.y < 0.7 && tc.x > 0.04 )
+
 //				out_col = vec4(0.2, 0.8, 0.2, 1.0); // Opaque green
 			gl_FragDepth = 0.001;
 		
