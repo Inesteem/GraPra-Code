@@ -229,7 +229,7 @@ void client_message_reader::networking_prologue() {
 	}
 }
 
-client_message_reader::client_message_reader(ObjHandler *objHandler, simple_heightmap *sh) : message_reader(), m_objHandler(objHandler), m_sh(sh) {
+client_message_reader::client_message_reader(Game *game) : message_reader(), game(game) {
 	//setup_done = false;
 }
 
@@ -240,18 +240,18 @@ client_message_reader::client_message_reader(ObjHandler *objHandler, simple_heig
 void client_message_reader::handle_message(msg::init_game *m)
 {
 	std::cout << "Initilizing map with, x = " << m->mapX << ", y = " << m->mapY << std::endl;
-    m_sh->init(m_objHandler,"./render-data/images/smalllvl_height.png",m->mapX,m->mapY);
+    game->init("./render-data/images/smalllvl_height.png",m->mapX,m->mapY);
 }
 
 void client_message_reader::handle_message(msg::spawn_house *m)
 {
-   m_sh->add_building("building_lot",1,m->x,m->y);
+   game->add_building("building_lot",1,m->x,m->y);
 	std::cout << "Spawning house at (" << m->x << "," << m->y << ")" << std::endl;
 }
 
 void client_message_reader::handle_message(msg::spawn_tree *m)
 {
-	m_sh->add_tree(m->x, m->y);
+    game->add_tree(m->x, m->y);
 	std::cout << "Spawning tree at (" << m->x << "," << m->y << ")" << std::endl;
 }
 

@@ -15,7 +15,8 @@ multiman_SOURCES = 	main.cpp \
             simple_heightmap.cpp simple_heightmap.h \
             mouseactions.cpp mouseactions.h \
             menu.cpp menu.h \
-            gameobject.cpp gameobject.h
+            gameobject.cpp gameobject.h \
+            game.cpp game.h
 
 multiman_server_SOURCES = 	server-logic.cpp server-logic.h \
 				server-main.cpp \
