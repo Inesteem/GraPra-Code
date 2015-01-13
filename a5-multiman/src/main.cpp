@@ -39,6 +39,8 @@ unsigned char key_to_move_up = 'i',
 			  key_to_move_right = 'l';
 
 bool wireframe = false;
+bool send_troups = false;
+vec2f = mouse_pos;
 
 SCM_DEFINE(s_set_keymap, "define-keymap", 1, 0, 0, (SCM str), "") {
 	cout << "def km" << endl;
@@ -62,10 +64,19 @@ void mouse(int button, int state, int x, int y) {
          standard_mouse_func(button, state, x, y);
     } else {
     }
+ 
+	//schieberegler
+	if(button == GLUT_RIGHT_BUTTON){
+		if(state == DOWN){
+			send_troups = true;
+			mouse_pos = vec2f(x,y);
+		}
+		else 
+			send_troups = false;
+			
+	}    
 
 }
-
-
 
 void keyhandler(unsigned char key, int x, int y) {
 	if (key == 'W')      wireframe = !wireframe;
