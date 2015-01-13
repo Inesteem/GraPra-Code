@@ -3,7 +3,7 @@
 
 
 #include "drawelement.h"
-#include "gameobject.h"
+
 
 #include <mesh.h>
 #include <libmcm/vectors.h>
@@ -23,17 +23,16 @@ class simple_heightmap
 public:
     simple_heightmap();
     float get_height(int x, int y);
-    void init(ObjHandler *objhandler, const std::string filename, int width, int height);
+    void init(const std::string filename, int width, int height);
     void update();
     void draw();
-    void add_tree(int x, int y);
-    void add_building(string name, int size, int x, int y);
+
    // void add_units(int count, int x, int y);
 
 
 
 private:
-    ObjHandler *m_objhandler;
+
     unsigned int m_width, m_height;
 
     vector<float> m_heights;
@@ -42,8 +41,7 @@ private:
     mesh_ref m_mesh;
     shader_ref m_shader;
     vector<char> m_gamefield;
-    vector<Tree> m_trees;
-    vector<Building> m_buildings;
+
     //vector<GameObject> m_other_stuff;
     texture_ref grass = find_texture("terrain_1");
     texture_ref stone = find_texture("terrain_2");
