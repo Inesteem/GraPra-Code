@@ -357,3 +357,87 @@
 	}
 }
 #:inputs (list "in_pos" "in_norm" "in_tc")>
+
+
+#<make-shader "billboard-shader"
+#:vertex-shader #{
+#version 150 core
+	in vec3 in_pos;
+	in vec2 in_tc;
+	uniform mat4 proj;
+	uniform mat4 view;
+	uniform mat4 model;
+	out vec2 tc;
+	void main() {
+		gl_Position = proj * view * model * vec4(in_pos, 1.);
+		float newy= in_tc.y -1;
+		if(newy < 0) newy=-newy;
+		vec2 texc = vec2(in_tc.x, newy);
+		tc = texc;
+	}
+}#version 330 core
+
+// Interpolated values from the vertex shaders
+in vec2 tc;
+// Ouput data
+out vec4 color;
+uniform sampler2D myTextureSampler;
+uniform float LifeLevel;
+
+void main(){
+	// Output color = color of the texture at the specified UV
+	color = texture2D( myTextureSampler, tc );
+	
+	// Hardcoded life level, should be in a separate texture.
+	if (UV.x < LifeLevel && UV.y > 0.3 && UV.y < 0.7 && UV.x > 0.04 )
+		color = vec4(0.2, 0.8, 0.2, 1.0); // Opaque green
+}
+
+
+#:geometry-shader #{
+#version 150 core
+
+
+	layout(points) in;
+	layout(triangle_strip, max_vertices=4) out;
+
+	uniform float particle_size;
+	uniform mat4 proj;
+	uniform mat4 view;
+	out vec3 center;
+
+	void main(){
+		vec4 pos = gl_in[0].gl_Position;
+		center = pos.xyz;
+		float r = 2.5 * particle_size;
+		gl_Position = proj * (view * pos + vec4(r,r,0,0));
+		EmitVertex();
+		gl_Position = proj * (view * pos + vec4(r,-r,0,0));
+		EmitVertex();
+		gl_Position = proj * (view * pos + vec4(-r,r,0,0));
+		EmitVertex();
+		gl_Position = proj * (view * pos + vec4(-r,-r,0,0));
+		EmitVertex();
+
+		EndPrimitive();
+	}
+}
+
+#:fragment-shader #{
+#version 150 core
+	in vec2 tc;
+	uniform vec3 color;
+	out vec4 out_col;
+	uniform sampler2D tex;
+	void main() {
+		//ghost layer
+		gl_FragDepth = 0.001;
+	
+	//	if(texture(tex, tc).r >= 0.5 || texture(tex, tc).g >= 0.5 || texture(tex, tc).b >= 0.5)
+			out_col = vec4(texture(tex, tc).rgb, 1.);
+	//	else
+	//		discard;
+		
+	}
+}
+#:inputs (list "in_pos" "in_tc")>

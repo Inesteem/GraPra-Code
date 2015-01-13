@@ -42,6 +42,7 @@ class Label {
 		texture_ref texture;
 		std::string texture_name = "label_texture";		
 		vec3f 		texture_color = {1.f, 0.f, 0.f};
+		vec3f 		pos;
 		
 		// Intern helper functions
 		void do_cairo_stuff(std::string display, vec3f color, std::string name);
