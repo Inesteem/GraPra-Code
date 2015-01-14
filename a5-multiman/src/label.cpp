@@ -278,6 +278,7 @@ SlideBar::SlideBar(){
 	screen_pos = vec3f(0,0,0);
 	texture = find_texture("slidebar2");
 	LifeLevel = 0;
+	down = false;
 
 
 	vec3f cam_pos = {0,0,0}, cam_dir = {0,0,-1}, cam_up = {0,1,0};
@@ -354,23 +355,25 @@ void SlideBar::render_slidebar(){
 }
 
 void SlideBar::update_mouse_pos(float x, float y){
-
-	float LifeLevel_max = 0.955;
-	float mouse_diff_max = 187;
-	float mouse_diff = screen_pos.y - y;
-	LifeLevel = 0;
-	if(mouse_diff != 0){
-		LifeLevel = mouse_diff/mouse_diff_max;
-		if(LifeLevel > LifeLevel_max)
+	if(!down){
+		float LifeLevel_max = 0.955;
+		float mouse_diff_max = 187;
+		float mouse_diff = screen_pos.y - y;
+		LifeLevel = 0;
+		if(mouse_diff != 0){
+			LifeLevel = mouse_diff/mouse_diff_max;
+			if(LifeLevel > LifeLevel_max)
 			LifeLevel = LifeLevel_max;
-	}
+		}
+	} else {
 	
 	
 }
 
 
 void SlideBar::update_pos(float x, float y){
-
+	if(y+200 > 1000)
+		down = true;
 	screen_pos = vec3f(x,y,0);
 	
 	camera_ref old_camera = current_camera();
@@ -413,8 +416,8 @@ void SlideBar::update_pos(float x, float y){
 void SlideBar::reset_bar(){
 	mom_count = 0;
 	LifeLevel = 0;
+	down = false;
 }
-
 
 //Setters
 
