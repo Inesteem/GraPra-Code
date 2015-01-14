@@ -79,6 +79,7 @@ void mouse(int button, int state, int x, int y) {
 		if(state == GLUT_DOWN){
 			send_troups = true;
 			slidebar->update_pos(x,y);
+			cout << "here" << endl;
 		}
 		else {
 			send_troups = false;

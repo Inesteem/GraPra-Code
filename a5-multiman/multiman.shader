@@ -436,15 +436,28 @@ in vec2 tc;
 out vec4 out_col;
 uniform sampler2D tex;
 uniform float LifeLevel;
+uniform float down;
 
 		void main(){
 		
 			out_col = texture2D(tex, tc );
 			out_col.w = 0.3;
-		if (tc.y < LifeLevel && tc.x > 0.3 && tc.x < 0.7 && tc.y > 0.04 )
-				out_col = vec4(0.2, 0.8, 0.2, .7); // Opaque green
-		if (out_col.x > 0.5 && out_col.y > 0.5 && out_col.z > 0.5)
-			discard;
+
+			if (out_col.x > 0.5 && out_col.y > 0.5 && out_col.z > 0.5)
+				discard;
+
+			else if(down == 0 && LifeLevel > 0){
+				if (tc.y < LifeLevel && tc.x > 0.3 && tc.x < 0.7 && tc.y > 0.04 )
+						out_col = vec4(0.2, 0.8, 0.2, .7); // Opaque green
+			}
+			else if(down == 1 && LifeLevel < 0){
+				float temp_ll = 1+LifeLevel;
+				if (tc.y > temp_ll && tc.x > 0.3 && tc.x < 0.7 && tc.y < 0.96 )
+					out_col = vec4(0.2, 0.8, 0.2, .7); // Opaque green
+		
+		}
+			
+
 
 
 		}

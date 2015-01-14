@@ -32,7 +32,7 @@ Label::Label(){
 	cairo_surface_data = 0;
 	nChars = 3;
 	fontSize = 20;
-	
+	use_cam = false;
 	
 }
 
@@ -60,9 +60,18 @@ void Label::set_fontSize(unsigned int fontSize){
 }
 
 void Label::set_shader(const char *shader_name){
-
 	label_shader = find_shader(shader_name);
+}
 
+
+void Label::set_shader(shader_ref shader){
+	label_shader = shader;
+}
+
+
+void Label::set_camera(camera_ref camera){
+	use_cam = true;
+	label_camera = camera;
 }
 
 // Intern helper functions
@@ -190,6 +199,9 @@ void Label::initialize_gui_overlay() {
 
 void Label::render_gui_overlay() {
 	
+	camera_ref old_camera = current_camera();
+	if(use_cam)
+		use_camera(label_camera);
 
 	bind_shader(label_shader);
 
@@ -237,6 +249,8 @@ void Label::render_gui_overlay() {
 	glDepthMask(GL_TRUE);
 
 	unbind_texture(texture);
+	
+	use_camera(old_camera);
 }
 
 //some new stuff
@@ -342,6 +356,13 @@ void SlideBar::render_slidebar(){
 	loc = glGetUniformLocation(gl_shader_object(sbar_shader), "LifeLevel");
 	glUniform1f(loc,LifeLevel);
 
+	float d = 0;
+	if(down)
+		d = 1;
+
+	loc = glGetUniformLocation(gl_shader_object(sbar_shader), "down");
+	glUniform1f(loc,d);
+
 	bind_mesh_to_gl(mesh);
 	draw_mesh_as(mesh,GL_TRIANGLE_STRIP);
 	unbind_mesh_from_gl(mesh);
@@ -355,30 +376,42 @@ void SlideBar::render_slidebar(){
 }
 
 void SlideBar::update_mouse_pos(float x, float y){
-	if(!down){
-		float LifeLevel_max = 0.955;
-		float mouse_diff_max = 187;
-		float mouse_diff = screen_pos.y - y;
-		LifeLevel = 0;
-		if(mouse_diff != 0){
-			LifeLevel = mouse_diff/mouse_diff_max;
-			if(LifeLevel > LifeLevel_max)
-			LifeLevel = LifeLevel_max;
-		}
-	} else {
-	
+
+	float LifeLevel_max = 0.955;
+	float mouse_diff_max = 187;
+	float mouse_diff = screen_pos.y - y;
+	LifeLevel = 0;
+	if(mouse_diff == 0)
+		return;
+	int sign = 1;
+	if(down)
+		sign = -1;
+		
+	LifeLevel = mouse_diff/mouse_diff_max;
+	cout << sign << " " << LifeLevel << endl;
+	if(sign * LifeLevel > LifeLevel_max)
+		LifeLevel = sign * LifeLevel_max;
+	if(down && LifeLevel > 0)
+		LifeLevel == 0;
+	else if(!down && LifeLevel < 0)
+		LifeLevel == 0;
 	
 }
 
 
 void SlideBar::update_pos(float x, float y){
-	if(y+200 > 1000)
-		down = true;
+
 	screen_pos = vec3f(x,y,0);
 	
+	if(y-200 < 0){
+		down = true;
+		y += 200;
+	}	
 	camera_ref old_camera = current_camera();
 	use_camera(sbar_camera);	
 	pos = moac::ClickWorldPosition(x, y);
+	label_mom_count.setup_display();
+	label_mom_count.set_camera(current_camera());
 	use_camera(old_camera);
 
 	float angle = 90*M_PI/180;
@@ -389,7 +422,6 @@ void SlideBar::update_pos(float x, float y){
 	model.row_col(0,3) = pos.x;
 	model.row_col(1,3) = pos.y;	
 
-	cout << x << " " << y << endl;
 
 //	make_unit_matrix4x4f(&model);
 //	model.row_col(0,0) = 0.2;

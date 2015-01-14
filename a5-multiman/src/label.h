@@ -44,6 +44,7 @@ class Label {
 		// Some Helper-Attributes
 		mesh_ref 	mesh;
 		shader_ref 	label_shader;	
+		camera_ref 	label_camera;	
 		matrix4x4f model;
 		// The overlay textures
 		// SET id's to -1 in constructor !!!!!!!!!!
@@ -51,6 +52,7 @@ class Label {
 		std::string texture_name = "label_texture";		
 		vec3f 		texture_color = {1.f, 0.f, 0.f};
 		vec3f 		pos;
+		bool		use_cam;
 		
 		// Intern helper functions
 		void do_cairo_stuff(std::string display, vec3f color, std::string name);
@@ -70,6 +72,8 @@ class Label {
 		void set_nChars(unsigned int nChars);
 		void set_fontSize(unsigned int fontSize);
 		void set_shader(const char *shader_name);
+		void set_camera(camera_ref camera);
+		void set_shader(shader_ref shader);
 		
 		void setup_display();
 
@@ -90,9 +94,8 @@ class SlideBar {
 
 		
 		// Some Helper-Attributes
-		Label 		l_max_count;
 		int 		max_count;
-		Label 		l_mom_count;
+		Label 		label_mom_count;
 		int 		mom_count;
 		mesh_ref 	mesh;
 		shader_ref 	sbar_shader;
@@ -108,6 +111,7 @@ class SlideBar {
 
 		int 		unit_count;
 		float 		LifeLevel;
+		bool		down;
 
 		
 	public:
