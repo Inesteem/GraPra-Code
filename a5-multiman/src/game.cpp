@@ -1,6 +1,8 @@
 #include "game.h"
+#include "messages.h"
+#include "clientside-networking.h"
 
-Game::Game(ObjHandler *objhandler, simple_heightmap *sh): m_objhandler(objhandler), m_sh(sh)
+Game::Game(ObjHandler *objhandler, simple_heightmap *sh, client_message_reader *message_reader): m_objhandler(objhandler), m_sh(sh), m_messageReader(message_reader)
 {
 }
 
@@ -19,6 +21,9 @@ void Game::init(string filename, int widht, int height){
 void Game::add_unit_group(vec2i start, vec2i end, unsigned int count){
     cout << "spawning enemies at: " << start.x << "," << start.y << " count: " << count << endl;
     m_unitgroups.push_back(UnitGroup(m_objhandler->getObjByName("tree"),m_sh,"bomb",start,end,0,count, 3000, m_sh->get_height(start.x, start.y)));
+
+    msg::spawn_troup_client stc = make_message<msg::spawn_troup_client>();
+    m_messageReader->send_message(stc);
 }
 
 Building* Game::get_building_at(int x, int y){

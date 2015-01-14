@@ -14,6 +14,7 @@
 #include "clientside-networking.h"
 #include "gameobject.h"
 #include "game.h"
+#include "messages.h"
 
 #include <libcgl/scheme.h>
 #include <libcgl/impex.h>
@@ -264,10 +265,11 @@ void actual_main() {
       //  objhandler->addObj("bomb","./render-data/models/bbm.obj", find_shader("pos+norm+tc"));
 
     sh = new simple_heightmap();
-    game = new Game(objhandler,sh);
+
+    game = new Game(objhandler,sh, messageReader);
+
     messageReader = new client_message_reader(game);
         messageReader->networking_prologue();
-
 
 	glutSetCursor(GLUT_CURSOR_INFO);
 

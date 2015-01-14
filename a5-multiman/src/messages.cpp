@@ -43,31 +43,15 @@ void message_reader::read_message_part() {
 	
 void message_reader::handle_message() {
 	switch (buffer[1]) {
-/*
-		case msg::code::connected:                    handle_message((msg::connected*)buffer); break;
-		case msg::code::initial_player_data_position: handle_message((msg::initial_player_data_position*)buffer); break;
-		case msg::code::board_info:                   handle_message((msg::board_info*)buffer); break;
-		case msg::code::spawn_box:                    handle_message((msg::spawn_box*)buffer); break;
-		case msg::code::start_game:                   handle_message((msg::start_game*)buffer); break;
-		case msg::code::force_player_position:        handle_message((msg::force_player_position*)buffer); break;
-		case msg::code::start_move:                   handle_message((msg::start_move*)buffer); break;
-		case msg::code::spawn_bomb:                   handle_message((msg::spawn_bomb*)buffer); break;
-		case msg::code::bomb_explosion:               handle_message((msg::bomb_explosion*)buffer); break;
-		case msg::code::player_health_info:           handle_message((msg::player_health_info*)buffer); break;
-		case msg::code::frags_update:                 handle_message((msg::frags_update*)buffer); break;
-
-		case msg::code::key_updown:                   handle_message((msg::key_updown*)buffer); break;
-		case msg::code::key_drop:                     handle_message((msg::key_drop*)buffer); break;
-		case msg::code::player_name:                  handle_message((msg::player_name*)buffer); break;
-
-		case msg::code::keep_alive:                   // we just drop it 
-			break;
-*/
-
-		case msg::code::init_game:	handle_message((msg::init_game*)buffer); break;
-		case msg::code::init_done:	handle_message((msg::init_done*)buffer); break;
-		case msg::code::spawn_house:	handle_message((msg::spawn_house*)buffer); break;
-		case msg::code::spawn_tree:	handle_message((msg::spawn_tree*)buffer); break;
+        case msg::code::init_game:                  handle_message((msg::init_game*)buffer); break;
+        case msg::code::init_done:                  handle_message((msg::init_done*)buffer); break;
+        case msg::code::spawn_house:                handle_message((msg::spawn_house*)buffer); break;
+        case msg::code::spawn_tree:                 handle_message((msg::spawn_tree*)buffer); break;
+        case msg::code::spawn_troup_server:         handle_message((msg::spawn_troup_server*)buffer); break;
+        case msg::code::spawn_troup_client:         handle_message((msg::spawn_troup_client*)buffer); break;
+        case msg::code::next_troup_destination:     handle_message((msg::next_troup_destination*)buffer); break;
+        case msg::code::troup_arrived:              handle_message((msg::troup_arrived*)buffer); break;
+        case msg::code::building_owner_changed:     handle_message((msg::building_owner_changed*)buffer); break;
 
 		default:
 			cerr << "got a message with unknown code " << (int)buffer[1] << endl;
