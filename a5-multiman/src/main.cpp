@@ -23,6 +23,7 @@
 #include <libguile.h>
 #include <math.h>
 
+SlideBar *slidebar;
 
 using namespace std;
 
@@ -43,8 +44,7 @@ unsigned char key_to_move_up = 'i',
 			  key_to_move_right = 'l';
 
 bool wireframe = false;
-//bool send_troups = false;
-//vec2f = mouse_pos;
+bool send_troups = false;
 
 SCM_DEFINE(s_set_keymap, "define-keymap", 1, 0, 0, (SCM str), "") {
 	cout << "def km" << endl;
@@ -63,6 +63,12 @@ SCM_DEFINE(s_set_keymap, "define-keymap", 1, 0, 0, (SCM str), "") {
 
 static bool reload_pending = false;
 
+
+void mouse_move(int x, int y) {
+	if(send_troups)
+		slidebar->update_mouse_pos(x,y);
+}
+
 void mouse(int button, int state, int x, int y) {
     if(standard_mouse){
          standard_mouse_func(button, state, x, y);
@@ -77,15 +83,17 @@ void mouse(int button, int state, int x, int y) {
     }
  
 	//schieberegler
-//	if(button == GLUT_RIGHT_BUTTON){
-//		if(state == DOWN){
-//			send_troups = true;
-//			mouse_pos = vec2f(x,y);
-//		}
-//		else 
-//			send_troups = false;
-//			
-//	}    
+	if(button == GLUT_RIGHT_BUTTON){
+		if(state == GLUT_DOWN){
+			send_troups = true;
+			slidebar->update_pos(x,y);
+			cout << "here" << endl;
+		}
+		else {
+			send_troups = false;
+			slidebar->reset_bar();
+		}
+	}    
 
 }
 
@@ -237,7 +245,7 @@ void loop() {
 	// 
 	// update logic
 	//
-        game->update();
+    game->update();
 	render_timer.done_with("updates");
 
 	// 
@@ -260,6 +268,9 @@ void loop() {
 
     //the_heightmap->draw();
     game->draw();
+    
+    if(send_troups)
+		slidebar->render_slidebar();
     
 	render_timer.done_with("draw");
 
@@ -311,6 +322,7 @@ void actual_main() {
 	register_keyboard_up_function(keyhandler_up);
 
     register_mouse_function(mouse);
+    register_mouse_motion_function(mouse_move);
 	glutIgnoreKeyRepeat(1);
 
 	use_camera(find_camera("playercam"));
@@ -334,9 +346,17 @@ void actual_main() {
     game = new Game(objhandler,sh, messageReader);
 
     messageReader = new client_message_reader(game);
-        messageReader->networking_prologue();
+       messageReader->networking_prologue();
+
+	// set different cursors
 
 	glutSetCursor(GLUT_CURSOR_INFO);
+	
+	// Dark blue background
+	glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
+
+	slidebar=new SlideBar();
+	slidebar->initialize_slidebar();
 
 	// 
 	// pass control to the renderer. won't return.
