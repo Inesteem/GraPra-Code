@@ -411,8 +411,8 @@ void SlideBar::update_pos(float x, float y){
 	use_camera(sbar_camera);	
 	pos = moac::ClickWorldPosition(x, y);
 	label_mom_count.setup_display();
-	label_mom_count.set_camera(current_camera());
-	label_mom_count.set_shader(current_camera());
+	label_mom_count.set_camera(sbar_camera);
+	label_mom_count.set_shader(sbar_shader);
 	use_camera(old_camera);
 
 	float angle = 90*M_PI/180;
