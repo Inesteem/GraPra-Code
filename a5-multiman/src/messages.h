@@ -24,7 +24,8 @@ namespace msg {
             spawn_troup_client,
             next_troup_destination,
             troup_arrived,
-            building_owner_changed
+            building_owner_changed,
+            building_unit_generated
 		};
 	}
 
@@ -37,20 +38,20 @@ namespace msg {
 
 	struct init_game : public message {
 		init_game() : message(code::init_game) {}
-		uint16_t mapX;
-		uint16_t mapY;
+        uint8_t mapX;
+        uint8_t mapY;
 	} __attribute__((aligned(8)));
 
 	struct spawn_house : public message {
 		spawn_house() : message(code::spawn_house) {}		
-		uint16_t x;
-		uint16_t y;
+        uint8_t x;
+        uint8_t y;
 	} __attribute__((aligned(8)));
 
 	struct spawn_tree : public message {
 		spawn_tree() : message(code::spawn_tree) {}		
-		uint16_t x;
-		uint16_t y;
+        uint8_t x;
+        uint8_t y;
 	} __attribute__((aligned(8)));
 
 	struct init_done : public message {
@@ -59,24 +60,43 @@ namespace msg {
 
     struct spawn_troup_server : public message {
         spawn_troup_server() : message(code::spawn_troup_server) {}
+        uint8_t playerId;
+        uint8_t troupId;
+        uint8_t sourceId;
+        uint8_t destinationId;
     } __attribute__((aligned(8)));
 
     struct next_troup_destination : public message {
         next_troup_destination() : message(code::next_troup_destination) {}
+        uint8_t mapX;
+        uint8_t mapY;
     } __attribute__((aligned(8)));
 
     struct troup_arrived : public message {
         troup_arrived() : message(code::troup_arrived) {}
+        uint8_t troupId;
     } __attribute__((aligned(8)));
 
     struct building_owner_changed : public message {
         building_owner_changed() : message(code::building_owner_changed) {}
+        uint8_t buildingId;
+        uint8_t oldOwner;
+        uint8_t newOwner;
+    } __attribute__((aligned(8)));
+
+    struct building_unit_generated : public message {
+        building_unit_generated() : message(code::building_unit_generated) {}
+        uint8_t buildingId;
+        uint8_t newUnitCount;
     } __attribute__((aligned(8)));
 
 	// client -> server
 
     struct spawn_troup_client : public message {
         spawn_troup_client() : message(code::spawn_troup_client) {}
+        uint8_t playerId;
+        uint8_t sourceId;
+        uint8_t destinationId;
     } __attribute__((aligned(8)));
 }
 
@@ -118,6 +138,7 @@ protected:
     virtual void handle_message(msg::next_troup_destination *m) { warn(m); }
     virtual void handle_message(msg::troup_arrived *m) { warn(m); }
     virtual void handle_message(msg::building_owner_changed *m) { warn(m); }
+    virtual void handle_message(msg::building_unit_generated *m) { warn(m); }
 };
 
 

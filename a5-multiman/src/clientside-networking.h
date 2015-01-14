@@ -25,7 +25,7 @@ protected:
     virtual void handle_message(msg::next_troup_destination *m) { warn(m); }
     virtual void handle_message(msg::troup_arrived *m) { warn(m); }
     virtual void handle_message(msg::building_owner_changed *m) { warn(m); }
-
+    virtual void handle_message(msg::building_unit_generated *m) { warn(m); }
 };
 
 
