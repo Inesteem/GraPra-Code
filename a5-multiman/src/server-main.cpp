@@ -14,6 +14,7 @@
 //#include "gamelogic.h"
 #include "wall-timer.h"
 
+#include "server-networking.h"
 #include "server-logic.h"
 
 using namespace std;
@@ -21,53 +22,9 @@ using namespace std;
 
 // NOTE: in opengl +y is up, in our array representation +y is down.
 
-void broadcast(msg::message *m);
-
-class server_message_reader : public message_reader {
-	int player_id; // the messages are sent by this player
-public:
-	server_message_reader(message_reader::socket *socket, int player) : message_reader(), player_id(player) {
-		setSocket(socket);
-	}
-
-    virtual void handle_message(msg::spawn_troup_client *m) {
-        cout << "Spawning troup..." << endl;
-    }
-};
-
-namespace client_connections {
-	unsigned int sockets = 0;
-	boost::asio::ip::tcp::socket **socket;
-	server_message_reader **reader;
-}
-
-struct quit_signal {
-	int status;
-	quit_signal(int s) : status(s) {}
-};
-void quit(int status) { throw quit_signal(status); }
-
-wall_time_timer since_last_broadcast;
-
-
-void broadcast(msg::message *m) {
-	int i = 0;
-	try {
-		for (i = 0; i < client_connections::sockets; ++i)
-			boost::asio::write(*client_connections::socket[i], boost::asio::buffer(m, m->message_size), boost::asio::transfer_all());
-	}
-	catch (boost::system::system_error &err) {
-		cerr << "Error sending message to client of player " << i << ": " << err.what() << "\nExiting." << endl;
-		quit(-1);
-	}
-	since_last_broadcast.restart();
-}
-
 GameStage *gameStage;
 
 void initGame() {
-	gameStage = new GameStage();
-
 	unsigned int x, y;
     vec3f *mapData = load_image3f("./render-data/images/smalllvl.png", &x, &y);
 
@@ -81,31 +38,31 @@ void initGame() {
 			vec3f color = mapData[r*x + c];
 			if(color.x > 0.9f) {
 				cout << "Building at (" << r << "," << c << ")" << endl;
-				gameStage->spawnHouse(r, c);
+                Building *b = gameStage->spawnHouse(r, c);
 
 				msg::spawn_house sh = make_message<msg::spawn_house>();
 				sh.x = r;
 				sh.y = c;
+                sh.id = b->m_id;
 				broadcast(&sh);
 			} else if(color.y > 0.9f) {
 				cout << "Tree at (" << r << "," << c << ")" << endl;
-				gameStage->spawnTree(r, c);
 
 				msg::spawn_tree st = make_message<msg::spawn_tree>();
 				st.x = r;
 				st.y = c;
-				broadcast(&st);
+                broadcast(&st);
 			}
 		}
 	}
 
 	msg::init_done id = make_message<msg::init_done>();
-	broadcast(&id);
+    broadcast(&id);
 }
 
 void updateGame()
 {
-
+    gameStage->Update();
 }
 
 int main(int argc, char **argv)
@@ -120,6 +77,8 @@ int main(int argc, char **argv)
 			
 	try
 	{
+        gameStage = new GameStage();
+
 		boost::asio::io_service io_service;
 		tcp::acceptor acceptor(io_service, tcp::endpoint(tcp::v4(), 2214));
 
@@ -128,10 +87,10 @@ int main(int argc, char **argv)
 			client_connections::socket[i] = new tcp::socket(io_service);
 			acceptor.accept(*client_connections::socket[i]);
 			cout << "got it" << endl;
-			client_connections::reader[i] = new server_message_reader(client_connections::socket[i], i);
+            client_connections::reader[i] = new server_message_reader(gameStage, client_connections::socket[i], i);
 		}
 
-		initGame();
+        initGame();
 
 		bool game_over = false;
 
@@ -144,11 +103,11 @@ int main(int argc, char **argv)
 			}
 			wtt.start();
 			for (int i = 0; i < client_connections::sockets; ++i) {
-				client_connections::reader[i]->read_and_handle();
-				if (client_connections::reader[i]->eof()) {
+                client_connections::reader[i]->read_and_handle();
+                if (client_connections::reader[i]->eof()) {
 					cerr << "Player " << i << " disconnected. Exiting." << endl;
 					quit(0);
-				}
+                }
 			}
 
 			if (!game_over)
@@ -164,7 +123,7 @@ int main(int argc, char **argv)
 				//msg::keep_alive ping = make_message<msg::keep_alive>();
 				//broadcast(&ping);
 			}
-		}
+        }
 	}
 	catch (std::exception& e) {
 		std::cerr << e.what() << std::endl;
@@ -172,7 +131,6 @@ int main(int argc, char **argv)
 	catch (quit_signal &sig) {
 		exit(sig.status);
 	}
-
 
 	return 0;
 }

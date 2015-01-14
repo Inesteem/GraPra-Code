@@ -3,49 +3,66 @@
 
 #include <iostream>
 #include <vector>
+#include <unordered_map>
+
+#include "wall-timer.h"
+#include "server-networking.h"
 
 using namespace std;
 
+class GameStage;
 class GameObject
 {
 public:
-	int x, y;
+    unsigned int m_x, m_y, m_id;
+    GameStage *m_gameStage;
 
-	GameObject(int x, int y) : x(x), y(y) {}
+    GameObject(GameStage* gameStage, unsigned int x, unsigned int y, unsigned int id) : m_gameStage(gameStage), m_x(x), m_y(y), m_id(id) {}
 
 };
 
 class Troup;
 class Building : public GameObject
 {
-        unsigned int id;
+        unsigned int m_unitCount;
+
+        wall_time_timer m_generateUnitsTimer;
+        const static unsigned int m_unitGenerationTime = 3000;
 public: 
-	Building(int x, int y) : GameObject(x, y) {}
+    Building(GameStage *gameStage, unsigned int x, unsigned int y, unsigned int id);
 
     void Update();
     void IncomingTroup(Troup troup);
+    void KillUnits(unsigned int unitCount) { m_unitCount -= unitCount; }
 };
 
 class Troup : public GameObject
 {
+    Building *m_source;
+    Building *m_destination;
+    unsigned int m_unitCount;
 public:
-    Troup(Building *sourceBuilding, Building *destinationBuilding, unsigned int unitCount);
+    Troup(GameStage *gameStage, Building *sourceBuilding, Building *destinationBuilding, unsigned int unitCount, unsigned int id);
 
-    void Update();
+    bool Update();
 };
 
 class GameStage
 {
+    static unsigned int s_nextBuilding;
+    static unsigned int s_nextTroup;
 public:
-	int mapX, mapY;
+    int m_mapX, m_mapY;
 
-	void init(int x, int y);
-	void spawnHouse(int x, int y);
-	void spawnTree(int x, int y);
-    void spawnTroup(unsigned int sourceBuildingID, unsigned int destinationBuildingID, unsigned int unitCount);
+    GameStage() {}
 
-	vector<Building> buildings;
-    vector<Troup> troup;
+    void init(unsigned int x, unsigned int y);
+    void Update();
+    Building* spawnHouse(unsigned int x, unsigned int y);
+    Troup* spawnTroup(unsigned int sourceBuildingID, unsigned int destinationBuildingID, unsigned int unitCount);
+
+    unordered_map<unsigned int, Building*> m_buildings;
+    unordered_map<unsigned int, Troup*> m_troups;
 };
 
 #endif

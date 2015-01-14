@@ -19,7 +19,8 @@ multiman_SOURCES = 	main.cpp \
             gameobject.cpp gameobject.h \
             game.cpp game.h
 
-multiman_server_SOURCES = 	server-logic.cpp server-logic.h \
+multiman_server_SOURCES = 	server-networking.cpp server-networking.h \
+				server-logic.cpp server-logic.h \
 				server-main.cpp \
 				messages.cpp messages.h 
 
@@ -43,7 +44,7 @@ SUFFIXES: .x
 multiman_CPPFLAGS = -D PACKAGE=\"$(PACKAGE)\" -D VERSION=\"$(VERSION)\" $(CGL_CFLAGS) $(CCGL_CFLAGS) $(GLEW_FLAGS) -std=c++11
 multiman_LDADD = $(CGL_LIBS) $(CCGL_LIBS) $(GLEW_LIBS) $(BOOST_ASIO_LIB)
 
-multiman_server_CPPFLAGS = -D PACKAGE=\"$(PACKAGE)\" -D VERSION=\"$(VERSION)\" $(BOOST_CPPFLAGS)
+multiman_server_CPPFLAGS = -D PACKAGE=\"$(PACKAGE)\" -D VERSION=\"$(VERSION)\" $(BOOST_CPPFLAGS) -std=c++11
 multiman_server_LDADD = $(BOOST_ASIO_LIB)
 
 main.cpp: main.x
