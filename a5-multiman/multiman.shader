@@ -413,27 +413,20 @@ uniform sampler2D tex;
 #:vertex-shader #{
 #version 150 core
 
-in vec3 in_pos;
-in vec2 in_tc;
-uniform mat4 proj;
-uniform mat4 view;
-uniform mat4 model;
-uniform vec3 CameraRight_worldspace;
-uniform vec3 CameraUp_worldspace;
-uniform vec3 BillboardPos; 
-uniform vec2 BillboardSize;
-out vec2 tc;
+	in vec3 in_pos;
+	in vec2 in_tc;
+	uniform mat4 proj;
+	uniform mat4 view;
+	uniform mat4 model;
+	out vec2 tc;
+	void main() {
+		gl_Position = proj * view * model * vec4(in_pos, 1.);
+		float newy= in_tc.y -1;
+		if(newy < 0) newy=-newy;
+		vec2 texc = vec2(in_tc.x, newy);
+		tc = texc;
+	}
 
-		void main() {
-			vec3 vp_w = 
-				BillboardPos
-				+ CameraRight_worldspace * in_pos.x  * BillboardSize.x
-				+ CameraUp_worldspace * in_pos.y * BillboardSize.y;
-				;
-	
-			gl_Position = model * proj * view * vec4(vp_w , 1.);
-			tc = in_tc;
-		}
 }
 #:fragment-shader #{
 #version 150 core

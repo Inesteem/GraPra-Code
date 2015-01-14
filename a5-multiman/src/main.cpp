@@ -41,8 +41,7 @@ unsigned char key_to_move_up = 'i',
 			  key_to_move_right = 'l';
 
 bool wireframe = false;
-//bool send_troups = false;
-//vec2f = mouse_pos;
+bool send_troups = false;
 
 SCM_DEFINE(s_set_keymap, "define-keymap", 1, 0, 0, (SCM str), "") {
 	cout << "def km" << endl;
@@ -68,15 +67,16 @@ void mouse(int button, int state, int x, int y) {
     }
  
 	//schieberegler
-//	if(button == GLUT_RIGHT_BUTTON){
-//		if(state == DOWN){
-//			send_troups = true;
-//			mouse_pos = vec2f(x,y);
-//		}
-//		else 
-//			send_troups = false;
-//			
-//	}    
+	if(button == GLUT_RIGHT_BUTTON){
+		if(state == GLUT_DOWN){
+			send_troups = true;
+			slidebar.update_pos(x,y);
+		}
+		else {
+			send_troups = false;
+			slidebar.reset_bar();
+		}
+	}    
 
 }
 
@@ -195,6 +195,10 @@ void loop() {
     //the_heightmap->draw();
     game->draw();
     
+    if(send_troups)
+		slidebar.render_gui_overlay();
+    
+    
 	render_timer.done_with("draw");
 
 	// 
@@ -266,10 +270,15 @@ void actual_main() {
     sh = new simple_heightmap();
     game = new Game(objhandler,sh);
     messageReader = new client_message_reader(game);
-        messageReader->networking_prologue();
+       messageReader->networking_prologue();
 
-
+	// set different cursors
 	glutSetCursor(GLUT_CURSOR_INFO);
+	
+	// Dark blue background
+	glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
+
+	slidebar.setup_display();
 
 	// 
 	// pass control to the renderer. won't return.

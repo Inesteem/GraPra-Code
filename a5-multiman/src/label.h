@@ -22,6 +22,14 @@
 #include <sstream>
 #include <cstdlib>
 
+
+#include <GL/glew.h>
+
+
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/norm.hpp>
+
 class Label {
 	
 		// Setup Cairo
@@ -33,7 +41,6 @@ class Label {
 		unsigned char 	*data;
 		
 		// Some Helper-Attributes
-		camera_ref 	label_cam;
 		mesh_ref 	mesh;
 		shader_ref 	label_shader;	
 		matrix4x4f model;
@@ -56,13 +63,12 @@ class Label {
 	public:
 		// Konstruktors
 		Label();
-		Label(int fontSize, int nchars, const char *camera_name, const char *shader_name);
+		Label(int fontSize, int nchars, const char *shader_name);
 
 		// Setters
 		void set_nChars(unsigned int nChars);
 		void set_fontSize(unsigned int fontSize);
 		void set_shader(const char *shader_name);
-		void set_camera(const char *camera_name);
 		
 		void setup_display();
 
@@ -79,46 +85,48 @@ class Label {
 };
 
 
-//class SlideBar {
+class SlideBar {
 
 		
 		// Some Helper-Attributes
-//		label max_count;
-//		label mom_count;
-//		camera_ref 	label_cam;
-//		mesh_ref 	mesh;
-//		shader_ref 	label_shader;	
-//		matrix4x4f model;
+		Label 		l_max_count;
+		int 		max_count;
+		Label 		l_mom_count;
+		int 		mom_count;
+		mesh_ref 	mesh;
+		shader_ref 	sbar_shader;
+		camera_ref 	sbar_camera;
+			
+		texture_ref texture;
+		std::string texture_name = "sbar_texture";		
+		vec3f 		texture_color = {1.f, 0.f, 0.f};
 		
-//		texture_ref texture;
-//		texture_ref texture_background;
-//		std::string texture_name = "label_texture";		
-//		vec3f 		texture_color = {1.f, 0.f, 0.f};
-//		vec3f 		pos;
-//		int 		unit_count;
+		vec3f 		pos;
+		matrix4x4f	model;
+		vec2f 		mouse_pos;
+		bool		set_pos = false;
+		int 		unit_count;
 
-//		void make_gui_texture();
 		
-//	public:
+	public:
 		// Konstruktors
-//		SlideBar();
+		SlideBar();
 
 		// Setters
-//		void set_shader(const char *shader_name);
-//		void set_camera(const char *camera_name);
-		
-//		void setup_display();
+		void set_shader(const char *shader_name);
+		void setup_display();
 
-//		void update_pos(float x, float y, long l);
-//		void update_model(matrix4x4f model);
-//		void update_unit_count(int n);
+		void update_pos(float x, float y);
+		void update_unit_count(int count);
 		// gui-overlay.cpp
-//		void render_gui_overlay();
-//		void initialize_gui_overlay();
+		void render_gui_overlay();
+		void initialize_gui_overlay();
+		void reset_bar();
 
 
-//};
+};
 
 
+extern SlideBar slidebar;
 
 #endif
