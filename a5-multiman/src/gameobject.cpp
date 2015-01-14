@@ -2,7 +2,7 @@
 #include "rendering.h"
 #include <cmath>
 //wrapper for objloader
-Obj::Obj(string name, int id, string filename, shader_ref shader):id(id),name(name){
+Obj::Obj(string name, int id, string filename, shader_ref shader):id(id),name(name),shader(shader){
     ObjLoader loader(name.c_str(), filename.c_str());
     loader.TranslateToOrigin();
     loader.pos_and_norm_shader = shader;
@@ -17,7 +17,7 @@ Obj::Obj(string name, int id, string filename, shader_ref shader):id(id),name(na
     loader.GenerateNonsharingMeshesAndDrawElements(*drawelements);
 
 }
-Obj::Obj(string name, int id, string filename, shader_ref shader,vec3f scale):id(id),name(name){
+Obj::Obj(string name, int id, string filename, shader_ref shader,vec3f scale):id(id),name(name),shader(shader){
     ObjLoader loader(name.c_str(), filename.c_str());
     loader.TranslateToOrigin();
     loader.pos_and_norm_shader = shader;
@@ -31,6 +31,10 @@ Obj::Obj(string name, int id, string filename, shader_ref shader,vec3f scale):id
     loader.ScaleVertexData(scale);
     drawelements = new vector<drawelement*>();
     loader.GenerateNonsharingMeshesAndDrawElements(*drawelements);
+
+}
+
+Obj::Obj(string name, int id, mesh_ref mesh, texture_ref tex, shader_ref shader): id(id), name(name), mesh(mesh), tex(tex), shader(shader){
 
 }
 
@@ -66,6 +70,33 @@ Obj* ObjHandler::getObjByName(string name){
     cout << "Couldn't find " + name + " Obj" << endl;
     exit(-1);
 }
+
+
+Obj *ObjHandler::get_selection_circle(){
+    string name = "selection_circle";
+    for(int i = 0; i < objs.size(); ++i){
+        if(objs[i].name == name){
+
+            return &objs[i];
+        }
+    }
+    mesh_ref mesh = make_mesh(name.c_str(),2);
+    vector<vec3f> pos = { vec3f(0,0,0) , vec3f(1,0,0), vec3f(1,0,1) , vec3f(0,0,1) };
+    vector<vec2f> tc = { vec2f(0,0), vec2f(0,1), vec2f(1,1), vec2f(1,0) } ;
+    vector<unsigned int> index =  { 0 ,1 ,2 , 2 ,3 ,0 };
+    bind_mesh_to_gl(mesh);
+    add_vertex_buffer_to_mesh(mesh, "in_pos", GL_FLOAT, 4, 3, (float*) pos.data() , GL_STATIC_DRAW);
+    add_vertex_buffer_to_mesh(mesh, "in_tc", GL_FLOAT, 4, 2, (float*) tc.data() , GL_STATIC_DRAW);
+   // add_vertex_buffer_to_mesh(m_mesh, "in_normal", GL_FLOAT, m_width*m_height, 3,nullptr, GL_STATIC_DRAW );
+    add_index_buffer_to_mesh(mesh, index.size(), (unsigned int *) index.data(), GL_STATIC_DRAW);
+    unbind_mesh_from_gl(mesh);
+    cout << "pushed" << endl;
+    objs.push_back(Obj(name,objs.size(),mesh,find_texture("selection_circle"),find_shader("selection_circle_shader")));
+
+    return get_selection_circle();
+
+}
+
 //GAMEOBJECT
 //represents a gameobject
 GameObject::GameObject(Obj *obj, std::string name, shader_ref shader, float height):m_obj(obj),m_name(name), m_shader(shader), m_height(height)
@@ -128,9 +159,9 @@ Tree::Tree(Obj *obj, string name, int x, int y, float height): GameObject(obj,na
 }
 
 //BUILDINGS
-Building::Building(Obj *obj, string name, int x, int y, unsigned int owner,int size, float height):
+Building::Building(Obj *obj,Obj *selection_circle, string name, int x, int y, unsigned int owner,int size, float height):
     GameObject(obj, name ,find_shader("pos+norm+tc"), height),
-    m_owner(owner) , m_size(size)
+    m_owner(owner) , m_size(size), selection_circle(selection_circle)
 
 {
     identifier = 'b';
@@ -147,9 +178,58 @@ Building::Building(Obj *obj, string name, int x, int y, unsigned int owner,int s
 
 }
 
-void Building::draw_label(){
+void Building::draw(){
+    GameObject::draw();
 	label.render_gui_overlay();
 }
+
+float Building::dist_to(vec3f &pos){
+    vec3f npos = vec3f(m_model.col_major[3 * 4 + 0], m_model.col_major[3 * 4 + 1], m_model.col_major[3 * 4 + 2]);
+    vec3f dist = npos - pos;
+    return length_of_vec3f(&dist);
+
+}
+
+void Building::draw_selection_circle(){
+    vec3f color(1.0f,0,0);
+    bind_shader(selection_circle->shader);
+
+    matrix4x4f tmp;
+    make_unit_matrix4x4f(&tmp);
+
+    tmp = tmp*m_model;
+
+    tmp.col_major[3 * 4 + 1] +=  0.5f;
+
+    tmp.col_major[0 * 4 + 0] =  m_model.col_major[0 * 4 + 0] * 2*m_size;
+    tmp.col_major[1 * 4 + 1] = m_model.col_major[1 * 4 + 1] * 2*m_size;
+    tmp.col_major[2 * 4 + 2] = m_model.col_major[2 * 4 + 2] * 2*m_size;
+
+    int loc = glGetUniformLocation(gl_shader_object(selection_circle->shader), "proj");
+    glUniformMatrix4fv(loc, 1, GL_FALSE, projection_matrix_of_cam(current_camera())->col_major);
+
+    loc = glGetUniformLocation(gl_shader_object(selection_circle->shader), "view");
+    glUniformMatrix4fv(loc, 1, GL_FALSE, gl_view_matrix_of_cam(current_camera())->col_major);
+
+    loc = glGetUniformLocation(gl_shader_object(selection_circle->shader), "model");
+    glUniformMatrix4fv(loc, 1, GL_FALSE, tmp.col_major);
+
+    loc = glGetUniformLocation(gl_shader_object(selection_circle->shader), "color");
+    glUniform3fv(loc,1,(float *) &color);
+
+    bind_texture(selection_circle->tex, 0);
+    loc = glGetUniformLocation(gl_shader_object(selection_circle->shader), "tex");
+    glUniform1i(loc, 0);
+
+    bind_mesh_to_gl(selection_circle->mesh);
+
+    draw_mesh(selection_circle->mesh);
+
+    unbind_mesh_from_gl(selection_circle->mesh);
+    unbind_shader(selection_circle->shader);
+
+}
+
 //UNITGROUP
 
 UnitGroup::UnitGroup(Obj *obj, simple_heightmap *sh, string name, vec2i start, vec2i end, unsigned int owner, unsigned int unit_count, float time_to_rech_end, float height):
@@ -191,6 +271,7 @@ void UnitGroup::update_model_matrices(){
 
 void UnitGroup::move_to(vec2i pos, float time_to_reach){
     force_position(m_end);
+    m_start = m_end;
     m_end = pos;
     m_time_to_reach_end = time_to_reach;
     m_timer.restart();
@@ -201,7 +282,7 @@ void UnitGroup::update(){
 
     if(cur_time < m_time_to_reach_end){
 
-        if(m_spawned < m_unit_count && m_spawn_timer.look() > TIME_TO_SPAWN){
+        if(m_spawned < m_unit_count && m_spawn_timer.look() > time_to_spawn){
             m_spawned++;
             matrix4x4f tmp;
             make_unit_matrix4x4f(&tmp);
@@ -213,7 +294,7 @@ void UnitGroup::update(){
         float x = (float) m_start.x + cur_time*((float)m_end.x-(float)m_start.x)/m_time_to_reach_end;
         float y = (float) m_start.x + cur_time*((float)m_end.x-(float)m_start.x)/m_time_to_reach_end;
         m_model.col_major[3 * 4 + 0] = x * render_settings::tile_size_x;
-        m_model.col_major[3 * 4 + 1] = m_center.y + m_sh->get_height(m_pos.x, m_pos.y);
+        m_model.col_major[3 * 4 + 1] = m_center.y + m_sh->get_height(x, y);
         m_model.col_major[3 * 4 + 2] = y * render_settings::tile_size_y;
 
         update_model_matrices();
@@ -230,19 +311,6 @@ void UnitGroup::draw(){
         setup_dir_light(m_shader);
         de->apply_default_matrix_uniforms();
         de->apply_default_tex_uniforms_and_bind_textures();
-       // int loc = glGetUniformLocation(gl_shader_object(m_shader), "proj");
-        //glUniformMatrix4fv(loc, 1, GL_FALSE, projection_matrix_of_cam(current_camera())->col_major);
-
-//        loc = glGetUniformLocation(gl_shader_object(m_shader), "view");
-//        glUniformMatrix4fv(loc, 1, GL_FALSE, gl_view_matrix_of_cam(current_camera())->col_major);
-
-//        loc = glGetUniformLocation(gl_shader_object(m_shader), "model");
-//        glUniformMatrix4fv(loc, 1, GL_FALSE, m_model.col_major);
-
-//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-
         de->draw_em();
         de->unbind();
 

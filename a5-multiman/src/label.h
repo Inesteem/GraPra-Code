@@ -13,6 +13,7 @@
 #include "rendering.h"
 #include "drawelement.h"
 #include "objloader.h"
+#include "mouseactions.h"
 
 #include <vector>
 #include <math.h>
@@ -21,6 +22,14 @@
 #include <string>
 #include <sstream>
 #include <cstdlib>
+
+
+#include <GL/glew.h>
+
+
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/norm.hpp>
 
 class Label {
 	
@@ -33,9 +42,9 @@ class Label {
 		unsigned char 	*data;
 		
 		// Some Helper-Attributes
-		camera_ref 	label_cam;
 		mesh_ref 	mesh;
 		shader_ref 	label_shader;	
+		camera_ref 	label_camera;	
 		matrix4x4f model;
 		// The overlay textures
 		// SET id's to -1 in constructor !!!!!!!!!!
@@ -43,6 +52,7 @@ class Label {
 		std::string texture_name = "label_texture";		
 		vec3f 		texture_color = {1.f, 0.f, 0.f};
 		vec3f 		pos;
+		bool		use_cam;
 		
 		// Intern helper functions
 		void do_cairo_stuff(std::string display, vec3f color, std::string name);
@@ -56,13 +66,14 @@ class Label {
 	public:
 		// Konstruktors
 		Label();
-		Label(int fontSize, int nchars, const char *camera_name, const char *shader_name);
+		Label(int fontSize, int nchars, const char *shader_name);
 
 		// Setters
 		void set_nChars(unsigned int nChars);
 		void set_fontSize(unsigned int fontSize);
 		void set_shader(const char *shader_name);
-		void set_camera(const char *camera_name);
+		void set_camera(camera_ref camera);
+		void set_shader(shader_ref shader);
 		
 		void setup_display();
 
@@ -79,45 +90,52 @@ class Label {
 };
 
 
-//class SlideBar {
+class SlideBar {
 
 		
 		// Some Helper-Attributes
-//		label max_count;
-//		label mom_count;
-//		camera_ref 	label_cam;
-//		mesh_ref 	mesh;
-//		shader_ref 	label_shader;	
-//		matrix4x4f model;
+		int 		max_count;
+		Label 		label_mom_count;
+		int 		mom_count;
+		mesh_ref 	mesh;
+		shader_ref 	sbar_shader;
+		camera_ref 	sbar_camera;
+			
+		texture_ref texture;
+		std::string texture_name = "sbar_texture";		
+		vec3f 		texture_color = {1.f, 0.f, 0.f};
 		
-//		texture_ref texture;
-//		texture_ref texture_background;
-//		std::string texture_name = "label_texture";		
-//		vec3f 		texture_color = {1.f, 0.f, 0.f};
-//		vec3f 		pos;
-//		int 		unit_count;
+		vec3f 		pos;
+		vec3f 		screen_pos;
+		matrix4x4f	model;
 
-//		void make_gui_texture();
+		int 		unit_count;
+		float 		LifeLevel;
+		bool		down;
+
 		
-//	public:
+	public:
 		// Konstruktors
-//		SlideBar();
+		SlideBar();
 
 		// Setters
-//		void set_shader(const char *shader_name);
-//		void set_camera(const char *camera_name);
+		void set_shader(const char *shader_name);
+		void set_texture(const char *texture_name);
+		void set_camera(const char *camera_name);
 		
-//		void setup_display();
+		void setup_display();
 
-//		void update_pos(float x, float y, long l);
-//		void update_model(matrix4x4f model);
-//		void update_unit_count(int n);
+		void update_pos(float x, float y);
+		void update_mouse_pos(float x, float y);
+		void update_unit_count(int count);
 		// gui-overlay.cpp
-//		void render_gui_overlay();
-//		void initialize_gui_overlay();
+		void render_slidebar();
+		void initialize_slidebar();
+		void reset_bar();
 
+		// Setters
 
-//};
+};
 
 
 

@@ -7,7 +7,7 @@ Game::Game(ObjHandler *objhandler, simple_heightmap *sh, client_message_reader *
 }
 
 void Game::add_building(string name, int size, int x, int y){
-    m_buildings.push_back(Building(m_objhandler->getObjByName(name),name,x,y, 0,size, m_sh->get_height(x,y)));
+    m_buildings.push_back(Building(m_objhandler->getObjByName(name), m_objhandler->get_selection_circle(),name,x,y, 0,size, m_sh->get_height(x,y)));
 }
 
 void Game::add_tree(int x, int y){
@@ -26,13 +26,28 @@ void Game::add_unit_group(vec2i start, vec2i end, unsigned int count){
     m_messageReader->send_message(stc);
 }
 
-Building* Game::get_building_at(int x, int y){
+Building* Game::get_building_at(vec3f pos){
+    int k = 0;
+    float dist = m_buildings[0].dist_to(pos);
     for(int i = 0; i < m_buildings.size(); ++i){
-        if(m_buildings[i].get_pos().x == x && m_buildings[i].get_pos().y == y){
-            return &m_buildings[i];
+        cout << m_buildings[i].dist_to(pos) << endl;
+        if(dist > m_buildings[i].dist_to(pos)){
+            dist = m_buildings[i].dist_to(pos);
+            k = i;
         }
     }
+
+    if( dist < 3.0f) {
+        m_selected = &m_buildings[k];
+        cout << "Selected building: " << m_selected->get_pos().x << "," << m_selected->get_pos().y << endl;
+        return &m_buildings[k];
+    }
+    m_selected = nullptr;
     return nullptr;
+}
+
+Building* Game::get_last_selected_building(){
+    return m_selected;
 }
 
 void Game::draw(){
@@ -40,11 +55,8 @@ void Game::draw(){
 
     for(int i = 0; i < m_buildings.size(); ++i){
         m_buildings[i].draw();
+//         m_buildings[i].draw_label();
     }
-    for(int i = 0; i < m_buildings.size(); ++i){
-        m_buildings[i].draw_label();
-    }
-
 
     for(int i = 0; i < m_trees.size(); ++i){
         m_trees[i].draw();
@@ -52,6 +64,9 @@ void Game::draw(){
 
     for(int i = 0; i < m_unitgroups.size(); ++i){
         m_unitgroups[i].draw();
+    }
+    if (m_selected != nullptr){
+        m_selected->draw_selection_circle();
     }
 
 }

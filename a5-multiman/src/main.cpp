@@ -15,6 +15,7 @@
 #include "gameobject.h"
 #include "game.h"
 #include "messages.h"
+#include "mouseactions.h"
 
 #include <libcgl/scheme.h>
 #include <libcgl/impex.h>
@@ -22,6 +23,7 @@
 #include <libguile.h>
 #include <math.h>
 
+SlideBar *slidebar;
 
 using namespace std;
 
@@ -42,8 +44,7 @@ unsigned char key_to_move_up = 'i',
 			  key_to_move_right = 'l';
 
 bool wireframe = false;
-//bool send_troups = false;
-//vec2f = mouse_pos;
+bool send_troups = false;
 
 SCM_DEFINE(s_set_keymap, "define-keymap", 1, 0, 0, (SCM str), "") {
 	cout << "def km" << endl;
@@ -62,24 +63,96 @@ SCM_DEFINE(s_set_keymap, "define-keymap", 1, 0, 0, (SCM str), "") {
 
 static bool reload_pending = false;
 
+
+void mouse_move(int x, int y) {
+	if(send_troups)
+		slidebar->update_mouse_pos(x,y);
+}
+
 void mouse(int button, int state, int x, int y) {
     if(standard_mouse){
          standard_mouse_func(button, state, x, y);
     } else {
+        if(button == GLUT_LEFT_BUTTON){
+            if(state == GLUT_DOWN){
+                vec3f wp = moac::ClickWorldPosition(x,y);
+                game->get_building_at(wp);
+            }
+
+        }
     }
  
 	//schieberegler
-//	if(button == GLUT_RIGHT_BUTTON){
-//		if(state == DOWN){
-//			send_troups = true;
-//			mouse_pos = vec2f(x,y);
-//		}
-//		else 
-//			send_troups = false;
-//			
-//	}    
+	if(button == GLUT_RIGHT_BUTTON){
+		if(state == GLUT_DOWN){
+			send_troups = true;
+			slidebar->update_pos(x,y);
+			cout << "here" << endl;
+		}
+		else {
+			send_troups = false;
+			slidebar->reset_bar();
+		}
+	}    
 
 }
+
+
+void standard_keyboard(unsigned char key, int x, int y)
+{
+        vec3f tmp;
+        vec3f cam_right, cam_pos, cam_dir, cam_up;
+        matrix4x4f *lookat_matrix = lookat_matrix_of_cam(current_camera());
+        extract_pos_vec3f_of_matrix(&cam_pos, lookat_matrix);
+        extract_dir_vec3f_of_matrix(&cam_dir, lookat_matrix);
+        extract_up_vec3f_of_matrix(&cam_up, lookat_matrix);
+        extract_right_vec3f_of_matrix(&cam_right, lookat_matrix);
+        switch (key) {
+                case 27:
+                        quit(0);
+                case 'f':
+                        copy_vec3f(&tmp, &cam_dir);
+                        mul_vec3f_by_scalar(&tmp, &tmp, -cgl_cam_move_factor);
+                        add_components_vec3f(&cam_pos, &cam_pos, &tmp);
+                        break;
+                case 'r':
+                        copy_vec3f(&tmp, &cam_dir);
+                        mul_vec3f_by_scalar(&tmp, &tmp, cgl_cam_move_factor);
+                        add_components_vec3f(&cam_pos, &cam_pos, &tmp);
+                        break;
+                case 'a':
+                        copy_vec3f(&tmp, &cam_right);
+                        mul_vec3f_by_scalar(&tmp, &tmp, -cgl_cam_move_factor);
+                        add_components_vec3f(&cam_pos, &cam_pos, &tmp);
+                        break;
+                case 'd':
+                        copy_vec3f(&tmp, &cam_right);
+                        mul_vec3f_by_scalar(&tmp, &tmp, cgl_cam_move_factor);
+                        add_components_vec3f(&cam_pos, &cam_pos, &tmp);
+                        break;
+                case 's':
+                        copy_vec3f(&tmp, &cam_up);
+                        mul_vec3f_by_scalar(&tmp, &tmp, -cgl_cam_move_factor);
+                        add_components_vec3f(&cam_pos, &cam_pos, &tmp);
+                        break;
+                case 'w':
+                        copy_vec3f(&tmp, &cam_up);
+                        mul_vec3f_by_scalar(&tmp, &tmp, cgl_cam_move_factor);
+                        add_components_vec3f(&cam_pos, &cam_pos, &tmp);
+                        break;
+                case 'R':
+                        cgl_shader_reload_pending = true;
+                        break;
+                case 'p':
+                        printf("campos:   %f %f %f\n", cam_pos.x, cam_pos.y, cam_pos.z);
+                        printf("camdir:   %f %f %f\n", cam_dir.x, cam_dir.y, cam_dir.z);
+                        printf("camup:    %f %f %f\n", cam_up.x, cam_up.y, cam_up.z);
+                        break;
+        }
+        make_lookat_matrixf(lookat_matrix, &cam_pos, &cam_dir, &cam_up);
+        recompute_gl_matrices_of_cam(current_camera());
+}
+
 
 void keyhandler(unsigned char key, int x, int y) {
 	if (key == 'W')      wireframe = !wireframe;
@@ -172,7 +245,7 @@ void loop() {
 	// 
 	// update logic
 	//
-        game->update();
+    game->update();
 	render_timer.done_with("updates");
 
 	// 
@@ -195,6 +268,9 @@ void loop() {
 
     //the_heightmap->draw();
     game->draw();
+    
+    if(send_troups)
+		slidebar->render_slidebar();
     
 	render_timer.done_with("draw");
 
@@ -246,6 +322,7 @@ void actual_main() {
 	register_keyboard_up_function(keyhandler_up);
 
     register_mouse_function(mouse);
+    register_mouse_motion_function(mouse_move);
 	glutIgnoreKeyRepeat(1);
 
 	use_camera(find_camera("playercam"));
@@ -269,9 +346,17 @@ void actual_main() {
     game = new Game(objhandler,sh, messageReader);
 
     messageReader = new client_message_reader(game);
-        messageReader->networking_prologue();
+       messageReader->networking_prologue();
+
+	// set different cursors
 
 	glutSetCursor(GLUT_CURSOR_INFO);
+	
+	// Dark blue background
+	glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
+
+	slidebar=new SlideBar();
+	slidebar->initialize_slidebar();
 
 	// 
 	// pass control to the renderer. won't return.
