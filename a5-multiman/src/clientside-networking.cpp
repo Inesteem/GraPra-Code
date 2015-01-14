@@ -76,20 +76,21 @@ client_message_reader::client_message_reader(Game *game) : message_reader(), gam
 
 void client_message_reader::handle_message(msg::init_game *m)
 {
-	std::cout << "Initilizing map with, x = " << m->mapX << ", y = " << m->mapY << std::endl;
+    std::cout << "Initilizing map with, x = " << (unsigned int) m->mapX << ", y = " << (unsigned int) m->mapY << std::endl;
     game->init("./render-data/images/smalllvl_height.png",m->mapX,m->mapY);
 }
 
 void client_message_reader::handle_message(msg::spawn_house *m)
 {
+    // TODO add id (m->id) to building!!
    game->add_building("building_lot",1,m->x,m->y);
-	std::cout << "Spawning house at (" << m->x << "," << m->y << ")" << std::endl;
+    std::cout << "Spawning house at (" << (unsigned int) m->x << "," << (unsigned int) m->y << ")" << std::endl;
 }
 
 void client_message_reader::handle_message(msg::spawn_tree *m)
 {
     game->add_tree(m->x, m->y);
-	std::cout << "Spawning tree at (" << m->x << "," << m->y << ")" << std::endl;
+    std::cout << "Spawning tree at (" << (unsigned int) m->x << "," << (unsigned int) m->y << ")" << std::endl;
 }
 
 void client_message_reader::handle_message(msg::init_done *m)
@@ -97,27 +98,27 @@ void client_message_reader::handle_message(msg::init_done *m)
 	cout << "Initializeing done, starting game..." << endl;
 }
 
-void handle_message(msg::spawn_troup_server *m)
+void client_message_reader::handle_message(msg::spawn_troup_server *m)
 {
     cout << "Spawning new troup..." << endl;
 }
 
-void handle_message(msg::next_troup_destination *m)
+void client_message_reader::handle_message(msg::next_troup_destination *m)
 {
     cout << "Got new troup destination..." << endl;
 }
 
-void handle_message(msg::troup_arrived *m)
+void client_message_reader::handle_message(msg::troup_arrived *m)
 {
     cout << "Troup arrived at building..." << endl;
 }
 
-void handle_message(msg::building_owner_changed *m)
+void client_message_reader::handle_message(msg::building_owner_changed *m)
 {
     cout << "Building owner changed..." << endl;
 }
 
-void handle_message(msg::building_unit_generated *m)
+void client_message_reader::handle_message(msg::building_unit_generated *m)
 {
-    cout << "New unit count " << m->newUnitCount << " in building " << m->buildingId << endl;
+    cout << "New unit count " << (unsigned int) m->newUnitCount << " in building " << (unsigned int) m->buildingId << endl;
 }

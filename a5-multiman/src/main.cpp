@@ -240,7 +240,7 @@ void loop() {
 
 	render_timer.done_with("keys");
 
-	messageReader->read_and_handle();
+    messageReader->read_and_handle();
 
 	// 
 	// update logic
@@ -267,7 +267,7 @@ void loop() {
 
 
     //the_heightmap->draw();
-    game->draw();
+    //game->draw();
     
     if(send_troups)
 		slidebar->render_slidebar();
@@ -277,7 +277,7 @@ void loop() {
 	// 
 	// finishing up
 	//
-	
+
 	check_for_gl_errors("display");
 	swap_buffers();
 
@@ -361,7 +361,7 @@ void actual_main() {
 	// 
 	// pass control to the renderer. won't return.
 	//
-	enter_glut_main_loop();
+    enter_glut_main_loop();
 }
 
 

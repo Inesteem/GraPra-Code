@@ -21,11 +21,11 @@ protected:
 	virtual void handle_message(msg::spawn_house *m);
 	virtual void handle_message(msg::spawn_tree *m);
 	virtual void handle_message(msg::init_done *m);
-    virtual void handle_message(msg::spawn_troup_server *m) { warn(m); }
-    virtual void handle_message(msg::next_troup_destination *m) { warn(m); }
-    virtual void handle_message(msg::troup_arrived *m) { warn(m); }
-    virtual void handle_message(msg::building_owner_changed *m) { warn(m); }
-    virtual void handle_message(msg::building_unit_generated *m) { warn(m); }
+    virtual void handle_message(msg::spawn_troup_server *m);
+    virtual void handle_message(msg::next_troup_destination *m);
+    virtual void handle_message(msg::troup_arrived *m);
+    virtual void handle_message(msg::building_owner_changed *m);
+    virtual void handle_message(msg::building_unit_generated *m);
 };
 
 

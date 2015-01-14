@@ -23,6 +23,11 @@ void Game::add_unit_group(vec2i start, vec2i end, unsigned int count){
     m_unitgroups.push_back(UnitGroup(m_objhandler->getObjByName("tree"),m_sh,"bomb",start,end,0,count, 3000, m_sh->get_height(start.x, start.y)));
 
     msg::spawn_troup_client stc = make_message<msg::spawn_troup_client>();
+    stc.playerId = 0;
+
+    // TDOO use actual building ids, now sending from house 0 to 1
+    stc.sourceId = 0;
+    stc.destinationId = 6;
     m_messageReader->send_message(stc);
 }
 

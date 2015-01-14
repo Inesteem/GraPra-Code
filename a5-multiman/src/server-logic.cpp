@@ -1,6 +1,8 @@
 #include "server-logic.h"
 #include "messages.h"
 
+using namespace std;
+
 unsigned int GameStage::s_nextBuilding = 0;
 unsigned int GameStage::s_nextTroup = 0;
 
@@ -16,25 +18,45 @@ void GameStage::Update()
         building.second->Update();
     }
 
+    vector<unsigned int> toDelete;
+
     for(auto& troup : m_troups) {
-        troup.second->Update();
+        if(troup.second->Update()) {
+            // troup arrived
+            toDelete.push_back(troup.second->m_id);
+
+            msg::troup_arrived ta = make_message<msg::troup_arrived>();
+            ta.troupId = troup.second->m_id;
+            broadcast(&ta);
+        }
+    }
+
+    for(auto& troupToDelete : toDelete) {
+        Troup *t = m_troups[troupToDelete];
+        m_troups.erase(troupToDelete);
+        delete(t);
     }
 }
 
-void GameStage::spawnHouse(unsigned int x, unsigned int y)
+Building* GameStage::spawnHouse(unsigned int x, unsigned int y)
 {
-    Building *b = new Building(this, x,y, s_nextBuilding);
-    m_buildings[s_nextBuilding++] =  b;
+    Building *b = new Building(this, x,y, GameStage::s_nextBuilding);//GameStage::s_nextBuilding);
+    m_buildings[GameStage::s_nextBuilding++] =  b;
+    return b;
 }
 
-void GameStage::spawnTroup(unsigned int sourceBuildingID, unsigned int destinationBuildingID, unsigned int unitCount)
+Troup* GameStage::spawnTroup(unsigned int sourceBuildingID, unsigned int destinationBuildingID, unsigned int unitCount)
 {
     Building *a = m_buildings[sourceBuildingID];
     a->KillUnits(unitCount);
 
     Building *b = m_buildings[destinationBuildingID];
     Troup *t = new Troup(this, a, b, unitCount, s_nextTroup);
-    m_troups[s_nextTroup] = t;
+    m_troups[s_nextTroup++] = t;
+
+    cout << "Troup starting at (" << a->m_x << ", " << a->m_y << "), dest (" << b->m_x << ", " << b->m_y << ")" << endl;
+
+    return t;
 }
 
 
@@ -45,9 +67,26 @@ Troup::Troup(GameStage *gameStage, Building *sourceBuilding, Building *destinati
     m_y = sourceBuilding->m_y;
 }
 
-void Troup::Update()
+bool Troup::Update()
 {
+    unsigned int destX = m_destination->m_x;
+    unsigned int destY = m_destination->m_y;
 
+    bool arrivedX = false;
+    if(m_x < destX) { m_x++; }
+    else if(m_x > destX) { m_x--; }
+    else arrivedX = true;
+
+    if(m_y < destY) { m_y++; }
+    else if(m_y > destY) { m_y--; }
+    else if(arrivedX) {
+        // arrived at destination
+        cout << "Troup " << m_id << " arrived at destination." << endl;
+        return true;
+    }
+
+    cout << "Updated troup " << m_id << " to position (" << m_x << ", " << m_y << ")" << endl;
+    return false;
 }
 
 Building::Building(GameStage *gameStage, unsigned int x, unsigned int y, unsigned int id)

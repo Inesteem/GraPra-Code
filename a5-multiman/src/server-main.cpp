@@ -38,11 +38,12 @@ void initGame() {
 			vec3f color = mapData[r*x + c];
 			if(color.x > 0.9f) {
 				cout << "Building at (" << r << "," << c << ")" << endl;
-				gameStage->spawnHouse(r, c);
+                Building *b = gameStage->spawnHouse(r, c);
 
 				msg::spawn_house sh = make_message<msg::spawn_house>();
 				sh.x = r;
 				sh.y = c;
+                sh.id = b->m_id;
 				broadcast(&sh);
 			} else if(color.y > 0.9f) {
 				cout << "Tree at (" << r << "," << c << ")" << endl;
@@ -76,6 +77,8 @@ int main(int argc, char **argv)
 			
 	try
 	{
+        gameStage = new GameStage();
+
 		boost::asio::io_service io_service;
 		tcp::acceptor acceptor(io_service, tcp::endpoint(tcp::v4(), 2214));
 
@@ -84,10 +87,9 @@ int main(int argc, char **argv)
 			client_connections::socket[i] = new tcp::socket(io_service);
 			acceptor.accept(*client_connections::socket[i]);
 			cout << "got it" << endl;
-			client_connections::reader[i] = new server_message_reader(client_connections::socket[i], i);
+            client_connections::reader[i] = new server_message_reader(gameStage, client_connections::socket[i], i);
 		}
 
-        gameStage = new GameStage();
         initGame();
 
 		bool game_over = false;

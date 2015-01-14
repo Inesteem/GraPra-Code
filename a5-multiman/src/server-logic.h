@@ -24,11 +24,10 @@ public:
 class Troup;
 class Building : public GameObject
 {
-        unsigned int m_id;
         unsigned int m_unitCount;
 
         wall_time_timer m_generateUnitsTimer;
-        const static unsigned int m_unitGenerationTime = 1000;
+        const static unsigned int m_unitGenerationTime = 3000;
 public: 
     Building(GameStage *gameStage, unsigned int x, unsigned int y, unsigned int id);
 
@@ -45,7 +44,7 @@ class Troup : public GameObject
 public:
     Troup(GameStage *gameStage, Building *sourceBuilding, Building *destinationBuilding, unsigned int unitCount, unsigned int id);
 
-    void Update();
+    bool Update();
 };
 
 class GameStage
@@ -59,8 +58,8 @@ public:
 
     void init(unsigned int x, unsigned int y);
     void Update();
-    void spawnHouse(unsigned int x, unsigned int y);
-    void spawnTroup(unsigned int sourceBuildingID, unsigned int destinationBuildingID, unsigned int unitCount);
+    Building* spawnHouse(unsigned int x, unsigned int y);
+    Troup* spawnTroup(unsigned int sourceBuildingID, unsigned int destinationBuildingID, unsigned int unitCount);
 
     unordered_map<unsigned int, Building*> m_buildings;
     unordered_map<unsigned int, Troup*> m_troups;

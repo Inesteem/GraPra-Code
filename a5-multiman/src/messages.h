@@ -43,7 +43,8 @@ namespace msg {
 	} __attribute__((aligned(8)));
 
 	struct spawn_house : public message {
-		spawn_house() : message(code::spawn_house) {}		
+        spawn_house() : message(code::spawn_house) {}
+        uint8_t id;
         uint8_t x;
         uint8_t y;
 	} __attribute__((aligned(8)));
