@@ -89,9 +89,9 @@ class SlideBar {
 
 		
 		// Some Helper-Attributes
-		Label 		l_max_count;
+//		Label 		l_max_count;
 		int 		max_count;
-		Label 		l_mom_count;
+//		Label 		l_mom_count;
 		int 		mom_count;
 		mesh_ref 	mesh;
 		shader_ref 	sbar_shader;
@@ -103,9 +103,9 @@ class SlideBar {
 		
 		vec3f 		pos;
 		matrix4x4f	model;
-		vec2f 		mouse_pos;
-		bool		set_pos = false;
+
 		int 		unit_count;
+		float 		LifeLevel;
 
 		
 	public:
@@ -114,19 +114,23 @@ class SlideBar {
 
 		// Setters
 		void set_shader(const char *shader_name);
+		void set_texture(const char *texture_name);
+		void set_camera(const char *camera_name);
+		
 		void setup_display();
 
 		void update_pos(float x, float y);
+		void update_mouse_pos(float x, float y);
 		void update_unit_count(int count);
 		// gui-overlay.cpp
-		void render_gui_overlay();
-		void initialize_gui_overlay();
+		void render_slidebar();
+		void initialize_slidebar();
 		void reset_bar();
 
+		// Setters
 
 };
 
 
-extern SlideBar slidebar;
 
 #endif

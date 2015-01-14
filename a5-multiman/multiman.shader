@@ -425,6 +425,7 @@ uniform sampler2D tex;
 		if(newy < 0) newy=-newy;
 		vec2 texc = vec2(in_tc.x, newy);
 		tc = texc;
+//		tc = in_tc;
 	}
 
 }
@@ -439,9 +440,11 @@ uniform float LifeLevel;
 		void main(){
 		
 			out_col = texture2D(tex, tc );
-			if (tc.x < LifeLevel && tc.y > 0.3 && tc.y < 0.7 && tc.x > 0.04 )
-				out_col = vec4(0.2, 0.8, 0.2, 1.0); // Opaque green
-
+			out_col.w = 0.3;
+		if (tc.y < LifeLevel && tc.x > 0.3 && tc.x < 0.7 && tc.y > 0.04 )
+				out_col = vec4(0.2, 0.8, 0.2, .7); // Opaque green
+		if (out_col.x > 0.5 && out_col.y > 0.5 && out_col.z > 0.5)
+			discard;
 
 
 		}

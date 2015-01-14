@@ -24,6 +24,8 @@
 (texture-from-file "terrain_2" "terrain_2.png" 'tex2d #t)
 (texture-from-file "terrain_3" "terrain_3.png" 'tex2d #t)
 (texture-from-file "slidebar" "slidebar.png" 'tex2d #t)
+(texture-from-file "slidebar2" "slidebar_2.png" 'tex2d #t)
+(texture-from-file "test" "test.png" 'tex2d #t)
 
 
 (set-move-factor! 1)

@@ -5,7 +5,6 @@
 
 #include <iostream>
 
-SlideBar slidebar;
 
 using namespace std;
 
@@ -123,17 +122,11 @@ void Label::do_cairo_stuff(std::string displayed, vec3f color, std::string name)
 		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, texture_width(texture), texture_height(texture), GL_RGBA, GL_UNSIGNED_BYTE, data);
 		unbind_texture(texture);
 
-
-		save_texture_as_png(texture, "./test.png");
 }
 
 void Label::do_update_cairo_stuff(texture_ref &texture, std::string displayed, vec3f color, std::string name){
 
 	texture = find_texture(name.c_str());
-
-	//cairo_select_font_face(cairo, "StayPuft", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);	
-	//cairo_set_font_size(cairo, fontSize);
-	
 
 	cairo_set_font_size(cairo, fontSize);
 	cairo_select_font_face(cairo, "DejaVu Serif", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);	
@@ -161,7 +154,6 @@ void Label::make_gui_texture() {
 
 
 void Label::update_gui_texture_int(int n){
-	// update health_texture
 	std::stringstream stream;
 	stream << n;
 	std::string sn = stream.str();
@@ -171,7 +163,6 @@ void Label::update_gui_texture_int(int n){
 
 
 void Label::update_gui_texture_long(long l){
-	// update health_texture
 		std::stringstream stream;
 		int secs = (int)l/1000;
 		//secs %= 60;
@@ -183,11 +174,11 @@ void Label::update_gui_texture_long(long l){
 void Label::initialize_gui_overlay() {
 
 	mesh = make_mesh("quad", 2);
-//  vec3f pos[4] = { {-0.5,0, -0.5}, {0.5,0,-0.5}, {0.5,0,0.5}, {-0.5,0,0.5} };
-    vec3f pos[4] = { {-0.5,-0.5,0}, {0.5,-0.5,0}, {0.5,0.5,0}, {-0.5,0.5,0} };
-	
+   vec3f pos[4] = { {-0.5,-0.5,0}, {0.5,-0.5,0}, {0.5,0.5,0}, {-0.5,0.5,0} };	
 	vec2f tc[4] = { {0,1}, {1,1}, {1,0}, {0,0} };
 	unsigned int idx[6] = { 0, 1, 2, 2, 3, 0 };
+
+
 	
 	bind_mesh_to_gl(mesh);
 	add_vertex_buffer_to_mesh(mesh, "in_pos", GL_FLOAT, 4, 3, (float *) pos, GL_STATIC_DRAW);
@@ -206,9 +197,7 @@ void Label::render_gui_overlay() {
 
 	matrix4x4f view = *gl_view_matrix_of_cam(current_camera());
 	
-//	vec3f CameraRight_worldspace = {view.row_col(0,0), view.row_col(0,1), view.row_col(0,2)};
 	vec3f CameraRight_worldspace = {view.row_col(0,0), view.row_col(0,1), view.row_col(0,2)};
-//	vec3f CameraUp_worldspace = {view.row_col(1,0), view.row_col(1,1), view.row_col(1,2)};
 	vec3f CameraUp_worldspace = {view.row_col(1,0), view.row_col(1,1), view.row_col(1,2)};
 	vec2f BillboardSize = vec2f(1.0,1.0);
 
@@ -258,7 +247,6 @@ void Label::update_label_model(matrix4x4f model){
 void Label::update_label_pos(float x, float y, float z){
 	pos = vec3f(x,z, y);
 	make_unit_matrix4x4f(&model);	
-	model.row_col(0,0) = (float)texture_width(texture)*2.f / (float)texture_height(texture);
 	model.row_col(0,3) = x;
 	model.row_col(2,3) = y;
 	model.row_col(1,3) = z;
@@ -287,28 +275,22 @@ SlideBar::SlideBar(){
 	max_count = 100;
 	mom_count = 0;	
 	pos = vec3f(0,0,0);
-	texture_ref texture = find_texture("slidebar");
+	texture = find_texture("slidebar2");
+	LifeLevel = 0;
 
 
 	vec3f cam_pos = {0,0,0}, cam_dir = {0,0,-1}, cam_up = {0,1,0};
 	sbar_camera = make_orthographic_cam((char*)"gui cam", &cam_pos, &cam_dir, &cam_up, 50, 0, 50, 0, 0.01, 1000);
-
 }
 
 
-void SlideBar::setup_display(){
-	initialize_gui_overlay();
-}
+void SlideBar::initialize_slidebar(){
 
-
-void SlideBar::initialize_gui_overlay(){
-	
-	
 	mesh = make_mesh("quad", 2);
-
-    vec3f pos[4] = { {-0.5,-0.5,0}, {0.5,-0.5,0}, {0.5,0.5,0}, {-0.5,0.5,0} };
+	vec3f pos[4] = { {0,0,-10}, {1,0,-10}, {1,1,-10}, {0,1,-10} };
 	vec2f tc[4] = { {0,1}, {1,1}, {1,0}, {0,0} };
 	unsigned int idx[6] = { 0, 1, 2, 2, 3, 0 };
+
 	
 	bind_mesh_to_gl(mesh);
 	add_vertex_buffer_to_mesh(mesh, "in_pos", GL_FLOAT, 4, 3, (float *) pos, GL_STATIC_DRAW);
@@ -326,24 +308,23 @@ void SlideBar::update_unit_count(int count){
 }
 
 
-void SlideBar::render_gui_overlay(){
-
+void SlideBar::render_slidebar(){
 
 	camera_ref old_camera = current_camera();
 	use_camera(sbar_camera);
-
-	cout << "here" << endl;
-	sbar_shader = find_shader("count-shader");
 	bind_shader(sbar_shader);
+	sbar_shader = find_shader("count-shader");
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);	
+	glDepthMask(GL_FALSE);	
 
-
-	int loc;
-//	float LifeLevel = 0.8;
-	float LifeLevel = 1.0;
 	
+	int loc;
+
+
+	loc = glGetUniformLocation(gl_shader_object(sbar_shader), "model");
+	glUniformMatrix4fv(loc, 1, GL_FALSE, model.col_major);
 	
 	loc = glGetUniformLocation(gl_shader_object(sbar_shader), "proj");
 	glUniformMatrix4fv(loc, 1, GL_FALSE, projection_matrix_of_cam(current_camera())->col_major);
@@ -352,13 +333,10 @@ void SlideBar::render_gui_overlay(){
 	glUniformMatrix4fv(loc, 1, GL_FALSE, gl_view_matrix_of_cam(current_camera())->col_major);
 
 
-	loc = glGetUniformLocation(gl_shader_object(sbar_shader), "model");
-	glUniformMatrix4fv(loc, 1, GL_FALSE, model.col_major);
-
 	bind_texture(texture, 0);
 	loc = glGetUniformLocation(gl_shader_object(sbar_shader), "tex");
 	glUniform1i(loc, 0);
-
+	
 	loc = glGetUniformLocation(gl_shader_object(sbar_shader), "LifeLevel");
 	glUniform1f(loc,LifeLevel);
 
@@ -366,31 +344,80 @@ void SlideBar::render_gui_overlay(){
 	draw_mesh_as(mesh,GL_TRIANGLE_STRIP);
 	unbind_mesh_from_gl(mesh);
 
-	unbind_texture(texture);
 
 	glDisable(GL_BLEND);
 	glDepthMask(GL_TRUE);	
 	unbind_shader(sbar_shader);
+	unbind_texture(texture);
 	use_camera(old_camera);
 }
 
-void SlideBar::update_pos(float x, float y){
-	mouse_pos = vec2f(x,y);
+void SlideBar::update_mouse_pos(float x, float y){
 
-	cout << x << " " << y << " " << set_pos << endl;
-	if(set_pos)
-		return;
-	pos = vec3f(x,0,y);
-	set_pos = true;
-	cout << x << " " << y << " " << endl;
+	float LifeLevel_max = 0.955;
+	float mouse_diff_max = 187;
+	float mouse_diff = pos.y - y;
+	LifeLevel = 0;
+	if(mouse_diff != 0){
+		LifeLevel = mouse_diff/mouse_diff_max;
+		if(LifeLevel > LifeLevel_max)
+			LifeLevel = LifeLevel_max;
+	}
+	
+	
+}
+
+
+void SlideBar::update_pos(float x, float y){
+
+	pos = vec3f(1,1,0);
+
+	float angle = 90*M_PI/180;
 	
 	make_unit_matrix4x4f(&model);	
-	model.row_col(0,3) = x;
-	model.row_col(2,3) = y;	
+	model.row_col(0,0) = 0.2;
+	model.row_col(1,1) = 10.f;
+	model.row_col(0,3) = x/50;
+	model.row_col(1,3) = -y/50;	
+
+	cout << x << " " << y << endl;
+
+//	make_unit_matrix4x4f(&model);
+//	model.row_col(0,0) = 0.2;
+//	model.row_col(1,1) = 10.f;
+//	model.row_col(0,3) = 0.f;
+//	model.row_col(1,3) = 0.7f;
+
+
+	matrix4x4f scale;
+	vec3f svec = {7, 1,1};
+	make_scale_matrix4x4f(&scale,&svec);
+	multiply_matrices4x4f(&model,&model,&scale);
+
+
+	matrix4x4f rot;
+	vec3f axis = {1,0,0};
+	make_rotation_matrix4x4f(&rot, &axis,angle);
+//	multiply_matrices4x4f(&model,&model,&rot);
+//	model *= rot;
+
 	
 }
 
 void SlideBar::reset_bar(){
-	set_pos = false;
 	mom_count = 0;
+	LifeLevel = 0;
+}
+
+
+//Setters
+
+void SlideBar::set_shader(const char *shader_name){
+	sbar_shader = find_shader(shader_name);
+}
+void SlideBar::set_texture(const char *texture_name){
+	texture = find_texture(texture_name);
+}
+void SlideBar::set_camera(const char *camera_name){
+	sbar_camera = find_camera(camera_name);
 }

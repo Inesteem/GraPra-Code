@@ -21,6 +21,7 @@
 #include <libguile.h>
 #include <math.h>
 
+SlideBar *slidebar;
 
 using namespace std;
 
@@ -60,6 +61,12 @@ SCM_DEFINE(s_set_keymap, "define-keymap", 1, 0, 0, (SCM str), "") {
 
 static bool reload_pending = false;
 
+
+void mouse_move(int x, int y) {
+	if(send_troups)
+		slidebar->update_mouse_pos(x,y);
+}
+
 void mouse(int button, int state, int x, int y) {
     if(standard_mouse){
          standard_mouse_func(button, state, x, y);
@@ -70,11 +77,11 @@ void mouse(int button, int state, int x, int y) {
 	if(button == GLUT_RIGHT_BUTTON){
 		if(state == GLUT_DOWN){
 			send_troups = true;
-			slidebar.update_pos(x,y);
+			slidebar->update_pos(x,y);
 		}
 		else {
 			send_troups = false;
-			slidebar.reset_bar();
+			slidebar->reset_bar();
 		}
 	}    
 
@@ -171,7 +178,7 @@ void loop() {
 	// 
 	// update logic
 	//
-        game->update();
+    game->update();
 	render_timer.done_with("updates");
 
 	// 
@@ -196,8 +203,7 @@ void loop() {
     game->draw();
     
     if(send_troups)
-		slidebar.render_gui_overlay();
-    
+		slidebar->render_slidebar();
     
 	render_timer.done_with("draw");
 
@@ -249,6 +255,7 @@ void actual_main() {
 	register_keyboard_up_function(keyhandler_up);
 
     register_mouse_function(mouse);
+    register_mouse_motion_function(mouse_move);
 	glutIgnoreKeyRepeat(1);
 
 	use_camera(find_camera("playercam"));
@@ -278,7 +285,8 @@ void actual_main() {
 	// Dark blue background
 	glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
 
-	slidebar.setup_display();
+	slidebar=new SlideBar();
+	slidebar->initialize_slidebar();
 
 	// 
 	// pass control to the renderer. won't return.
