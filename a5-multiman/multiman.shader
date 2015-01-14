@@ -58,6 +58,43 @@
 #:inputs (list "in_pos" "in_norm")>
 
 
+#<make-shader "selection_circle_shader"
+#:vertex-shader #{
+#version 150 core
+        in vec3 in_pos;
+        in vec2 in_tc;
+        uniform mat4 proj;
+        uniform mat4 view;
+        uniform mat4 model;
+        out vec2 tc;
+        void main() {
+                gl_Position = proj * view * model * vec4(in_pos,1.);
+                tc = in_tc;
+        }
+}
+#:fragment-shader #{
+#version 150 core
+        in vec2 tc;
+        uniform vec3 color;
+        out vec4 out_col;
+        uniform sampler2D tex;
+
+        void main() {
+            vec4 tex_col = texture(tex,tc);
+
+          //if(tex_col.r >= 0.9 || tex_col.g <= 0.1 || tex_col.b >= 0.9)
+           //  discard;
+           //else
+            if(tex_col.r >= 0.9 || tex_col.g >= 0.9 || tex_col.b >= 0.9)
+                out_col = vec4(color,1.);
+            else {
+                out_col = tex_col;
+            }
+
+        }
+}
+#:inputs (list "in_pos" "in_tc")>
+
 
 #<make-shader "pos+norm+tc"
 #:vertex-shader #{

@@ -204,7 +204,7 @@ void Label::initialize_gui_overlay() {
 
 void Label::render_gui_overlay() {
 	
-	glDepthMask(GL_FALSE);
+    glDepthMask(GL_TRUE);
 		
 	camera_ref old_cam = current_camera();
 //	use_camera(find_camera("sec_cam"));

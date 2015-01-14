@@ -15,6 +15,7 @@
 #include "gameobject.h"
 #include "game.h"
 #include "messages.h"
+#include "mouseactions.h"
 
 #include <libcgl/scheme.h>
 #include <libcgl/impex.h>
@@ -66,6 +67,13 @@ void mouse(int button, int state, int x, int y) {
     if(standard_mouse){
          standard_mouse_func(button, state, x, y);
     } else {
+        if(button == GLUT_LEFT_BUTTON){
+            if(state == GLUT_DOWN){
+                vec3f wp = moac::ClickWorldPosition(x,y);
+                game->get_building_at(wp);
+            }
+
+        }
     }
  
 	//schieberegler
@@ -80,6 +88,63 @@ void mouse(int button, int state, int x, int y) {
 //	}    
 
 }
+
+
+void standard_keyboard(unsigned char key, int x, int y)
+{
+        vec3f tmp;
+        vec3f cam_right, cam_pos, cam_dir, cam_up;
+        matrix4x4f *lookat_matrix = lookat_matrix_of_cam(current_camera());
+        extract_pos_vec3f_of_matrix(&cam_pos, lookat_matrix);
+        extract_dir_vec3f_of_matrix(&cam_dir, lookat_matrix);
+        extract_up_vec3f_of_matrix(&cam_up, lookat_matrix);
+        extract_right_vec3f_of_matrix(&cam_right, lookat_matrix);
+        switch (key) {
+                case 27:
+                        quit(0);
+                case 'f':
+                        copy_vec3f(&tmp, &cam_dir);
+                        mul_vec3f_by_scalar(&tmp, &tmp, -cgl_cam_move_factor);
+                        add_components_vec3f(&cam_pos, &cam_pos, &tmp);
+                        break;
+                case 'r':
+                        copy_vec3f(&tmp, &cam_dir);
+                        mul_vec3f_by_scalar(&tmp, &tmp, cgl_cam_move_factor);
+                        add_components_vec3f(&cam_pos, &cam_pos, &tmp);
+                        break;
+                case 'a':
+                        copy_vec3f(&tmp, &cam_right);
+                        mul_vec3f_by_scalar(&tmp, &tmp, -cgl_cam_move_factor);
+                        add_components_vec3f(&cam_pos, &cam_pos, &tmp);
+                        break;
+                case 'd':
+                        copy_vec3f(&tmp, &cam_right);
+                        mul_vec3f_by_scalar(&tmp, &tmp, cgl_cam_move_factor);
+                        add_components_vec3f(&cam_pos, &cam_pos, &tmp);
+                        break;
+                case 's':
+                        copy_vec3f(&tmp, &cam_up);
+                        mul_vec3f_by_scalar(&tmp, &tmp, -cgl_cam_move_factor);
+                        add_components_vec3f(&cam_pos, &cam_pos, &tmp);
+                        break;
+                case 'w':
+                        copy_vec3f(&tmp, &cam_up);
+                        mul_vec3f_by_scalar(&tmp, &tmp, cgl_cam_move_factor);
+                        add_components_vec3f(&cam_pos, &cam_pos, &tmp);
+                        break;
+                case 'R':
+                        cgl_shader_reload_pending = true;
+                        break;
+                case 'p':
+                        printf("campos:   %f %f %f\n", cam_pos.x, cam_pos.y, cam_pos.z);
+                        printf("camdir:   %f %f %f\n", cam_dir.x, cam_dir.y, cam_dir.z);
+                        printf("camup:    %f %f %f\n", cam_up.x, cam_up.y, cam_up.z);
+                        break;
+        }
+        make_lookat_matrixf(lookat_matrix, &cam_pos, &cam_dir, &cam_up);
+        recompute_gl_matrices_of_cam(current_camera());
+}
+
 
 void keyhandler(unsigned char key, int x, int y) {
 	if (key == 'W')      wireframe = !wireframe;

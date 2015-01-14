@@ -17,12 +17,15 @@ struct Obj {
 
     Obj(string name, int id, string filename, shader_ref shader);
     Obj(string name, int id, string filename, shader_ref shader, vec3f scale);
+    Obj(string name, int id, mesh_ref mesh, texture_ref tex, shader_ref shader);
     vector<drawelement*> *drawelements;
-
+    mesh_ref mesh;
+    texture_ref tex;
     int id;
     string name;
     vec3f bb_min;
     vec3f bb_max;
+    shader_ref shader;
 
 
 };
@@ -36,6 +39,7 @@ public:
     void addObj_withScale(string name, string filename, shader_ref shader, vec3f scale);
     Obj *getObjByName(string name);
     Obj *getObjByID(int id);
+    Obj *get_selection_circle();
 private:
 
     vector<Obj> objs;
@@ -77,15 +81,18 @@ public:
 
 class Building:public GameObject{
 public:
-Label label;
-    Building(Obj *obj, string name, int x, int y, unsigned int owner, int size, float height );
+    Label label;
+    Building(Obj *obj, Obj *selection_circle, string name, int x, int y, unsigned int owner, int size, float height );
     void upgrade();
+    float dist_to(vec3f &pos);
+    void draw();
+    void draw_selection_circle();
 
-	void draw_label();
 
 private:
     unsigned int m_owner;
     int m_size;
+    Obj *selection_circle;
     
     
 };
@@ -99,8 +106,10 @@ public:
     void move_to(vec2i pos, float time_to_reach);
     void force_position(vec2i pos);
     void update_model_matrices();
+
+    bool reached_dest = false;
 private:
-    const unsigned int TIME_TO_SPAWN = 100;
+     unsigned int time_to_spawn = 100;
 
     unsigned int m_unit_count;
     unsigned int m_spawned;

@@ -71,8 +71,22 @@ void simple_heightmap::init( const std::string filename, int width, int height){
     unbind_mesh_from_gl(m_mesh);
 }
 
-float simple_heightmap::get_height(int x, int y){
-    return m_heights[y + x * m_height];
+float simple_heightmap::get_height(float x, float y){
+    vec2i pos1 ((int) x, (int) y);
+    vec2i pos2 ((int) x + 1, (int) y);
+    vec2i pos3 ((int) x, (int) y + 1 );
+    vec2i pos4 ((int) x + 1 , (int) y + 1);
+
+    float height;
+
+    height = (x - (float)((int) x))*m_heights[pos1.y + pos1.x * m_height] + (1.0f -(x - (float)((int) x)))* m_heights[pos2.y + pos2.x * m_height];
+    height += (y - (float)((int) y))*m_heights[pos1.y + pos1.x * m_height] + (1.0f -(y - (float)((int) y)))* m_heights[pos3.y + pos3.x * m_height];
+    height += (y - (float)((int) y))*m_heights[pos2.y + pos2.x * m_height] + (1.0f -(y - (float)((int) y)))* m_heights[pos4.y + pos4.x * m_height];
+    height += (x - (float)((int) x))*m_heights[pos3.y + pos3.x * m_height] + (1.0f -(x - (float)((int) x)))* m_heights[pos4.y + pos4.x * m_height];
+
+    height /= 4;
+
+    return height;
 }
 
 
