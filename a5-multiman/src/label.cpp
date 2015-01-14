@@ -33,7 +33,7 @@ Label::Label(){
 	nChars = 3;
 	fontSize = 20;
 	use_cam = false;
-	
+	BillboardSize = vec2f(1.0,1.0);
 }
 
 Label::Label(int fontSize, int nChars, const char *shader_name){
@@ -72,6 +72,10 @@ void Label::set_shader(shader_ref shader){
 void Label::set_camera(camera_ref camera){
 	use_cam = true;
 	label_camera = camera;
+}
+
+void Label::set_size(vec2f size){
+	BillboardSize = size;
 }
 
 // Intern helper functions
@@ -183,9 +187,14 @@ void Label::update_gui_texture_long(long l){
 void Label::initialize_gui_overlay() {
 
 	mesh = make_mesh("quad", 2);
-   vec3f pos[4] = { {-0.5,-0.5,0}, {0.5,-0.5,0}, {0.5,0.5,0}, {-0.5,0.5,0} };	
+    vec3f pos[4] = { {-0.5,-0.5,0}, {0.5,-0.5,0}, {0.5,0.5,0}, {-0.5,0.5,0} };	
 	vec2f tc[4] = { {0,1}, {1,1}, {1,0}, {0,0} };
 	unsigned int idx[6] = { 0, 1, 2, 2, 3, 0 };
+
+//	mesh = make_mesh("quad", 2);
+//	vec3f pos[4] = { {0,0,-10}, {1,0,-10}, {1,1,-10}, {0,1,-10} };
+//	vec2f tc[4] = { {0,1}, {1,1}, {1,0}, {0,0} };
+//	unsigned int idx[6] = { 0, 1, 2, 2, 3, 0 };
 
 
 	
@@ -201,9 +210,6 @@ void Label::render_gui_overlay() {
 	
 
     glDepthMask(GL_TRUE);
-		
-
-		
 
 	camera_ref old_camera = current_camera();
 	if(use_cam)
@@ -218,7 +224,6 @@ void Label::render_gui_overlay() {
 	
 	vec3f CameraRight_worldspace = {view.row_col(0,0), view.row_col(0,1), view.row_col(0,2)};
 	vec3f CameraUp_worldspace = {view.row_col(1,0), view.row_col(1,1), view.row_col(1,2)};
-	vec2f BillboardSize = vec2f(1.0,1.0);
 
 	loc = glGetUniformLocation(gl_shader_object(label_shader), "CameraRight_worldspace");
 	glUniform3fv(loc, 1,(float *)&CameraRight_worldspace);		
@@ -293,7 +298,7 @@ SlideBar::SlideBar(){
 	
 
 	sbar_shader = find_shader("count-shader");
-	max_count = 100;
+	max_count = 200;
 	mom_count = 0;	
 	pos = vec3f(0,0,0);
 	screen_pos = vec3f(0,0,0);
@@ -321,6 +326,11 @@ void SlideBar::initialize_slidebar(){
 	add_index_buffer_to_mesh(mesh, 6, idx, GL_STATIC_DRAW);
 	unbind_mesh_from_gl(mesh);
 	
+
+	label_mom_count.setup_display();
+	label_mom_count.set_camera(sbar_camera);
+	label_mom_count.set_size(vec2f(3,1));
+	
 }
 
 
@@ -342,12 +352,11 @@ void SlideBar::render_slidebar(){
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);	
 	glDepthMask(GL_FALSE);	
 
-	
 	int loc;
 
 
 	loc = glGetUniformLocation(gl_shader_object(sbar_shader), "model");
-	glUniformMatrix4fv(loc, 1, GL_FALSE, model.col_major);
+	glUniformMatrix4fv(loc, 1, GL_FALSE, bar_model.col_major);
 	
 	loc = glGetUniformLocation(gl_shader_object(sbar_shader), "proj");
 	glUniformMatrix4fv(loc, 1, GL_FALSE, projection_matrix_of_cam(current_camera())->col_major);
@@ -374,6 +383,8 @@ void SlideBar::render_slidebar(){
 	draw_mesh_as(mesh,GL_TRIANGLE_STRIP);
 	unbind_mesh_from_gl(mesh);
 
+	
+	label_mom_count.render_gui_overlay();
 
 	glDisable(GL_BLEND);
 	glDepthMask(GL_TRUE);	
@@ -383,26 +394,55 @@ void SlideBar::render_slidebar(){
 }
 
 void SlideBar::update_mouse_pos(float x, float y){
-
+	mom_count = 0;
 	float LifeLevel_max = 0.955;
 	float mouse_diff_max = 187;
 	float mouse_diff = screen_pos.y - y;
 	LifeLevel = 0;
-	if(mouse_diff == 0)
+	
+	if(mouse_diff == 0){
+		label_mom_count.update_gui_texture_int(mom_count);
 		return;
+	}
+	
 	int sign = 1;
 	if(down)
 		sign = -1;
 		
 	LifeLevel = mouse_diff/mouse_diff_max;
-	cout << sign << " " << LifeLevel << endl;
-	if(sign * LifeLevel > LifeLevel_max)
-		LifeLevel = sign * LifeLevel_max;
-	if(down && LifeLevel > 0)
-		LifeLevel == 0;
-	else if(!down && LifeLevel < 0)
-		LifeLevel == 0;
+	if(down){
+		
+		if(LifeLevel >= 0){
+			LifeLevel = 0;
+			label_mom_count.update_gui_texture_int(0);
+			return;
+		}
+		if(LifeLevel < -LifeLevel_max)
+			LifeLevel = -LifeLevel_max;		
 	
+		if(LifeLevel < 0){
+			mom_count = (int) (max_count * (-LifeLevel+1-LifeLevel_max));
+			cout << mom_count << endl;
+			label_mom_count.update_gui_texture_int(mom_count+1);
+		}
+	} else {
+			
+		if(LifeLevel <= 0){
+			LifeLevel = 0;	
+			label_mom_count.update_gui_texture_int(0);
+			return;
+		}
+			
+		if(LifeLevel >= LifeLevel_max)
+			LifeLevel = LifeLevel_max;
+		
+		if(LifeLevel > 0){
+			mom_count = (int) (max_count * (LifeLevel+1-LifeLevel_max));
+			label_mom_count.update_gui_texture_int(mom_count+1);
+		}
+	}
+
+
 }
 
 
@@ -417,32 +457,21 @@ void SlideBar::update_pos(float x, float y){
 	camera_ref old_camera = current_camera();
 	use_camera(sbar_camera);	
 	pos = moac::ClickWorldPosition(x, y);
-	label_mom_count.setup_display();
-	label_mom_count.set_camera(sbar_camera);
-	label_mom_count.set_shader(sbar_shader);
+	vec3f label_pos = moac::ClickWorldPosition(x+21, y+4);
 	use_camera(old_camera);
 
 	float angle = 90*M_PI/180;
 	
-	make_unit_matrix4x4f(&model);	
-	model.row_col(0,0) = 0.2;
-	model.row_col(1,1) = 10.f;
-	model.row_col(0,3) = pos.x;
-	model.row_col(1,3) = pos.y;	
-
-
-//	make_unit_matrix4x4f(&model);
-//	model.row_col(0,0) = 0.2;
-//	model.row_col(1,1) = 10.f;
-//	model.row_col(0,3) = 0.f;
-//	model.row_col(1,3) = 0.7f;
-
+	make_unit_matrix4x4f(&bar_model);	
+	bar_model.row_col(0,0) = 0.2;
+	bar_model.row_col(1,1) = 10.f;
+	bar_model.row_col(0,3) = pos.x;
+	bar_model.row_col(1,3) = pos.y;	
 
 	matrix4x4f scale;
 	vec3f svec = {7, 1,1};
 	make_scale_matrix4x4f(&scale,&svec);
-	multiply_matrices4x4f(&model,&model,&scale);
-
+	multiply_matrices4x4f(&bar_model,&bar_model,&scale);
 
 	matrix4x4f rot;
 	vec3f axis = {1,0,0};
@@ -450,6 +479,23 @@ void SlideBar::update_pos(float x, float y){
 //	multiply_matrices4x4f(&model,&model,&rot);
 //	model *= rot;
 
+	label_mom_count.update_label_pos(label_pos.x, label_pos.z, label_pos.y);
+	
+	
+
+	matrix4x4f m_label;
+	make_unit_matrix4x4f(&m_label);	
+	m_label.row_col(0,0) = 2;
+	m_label.row_col(1,1) = 100.f;
+	m_label.row_col(0,3) = pos.x;
+	m_label.row_col(1,3) = pos.y;			
+	
+	matrix4x4f s_label;
+	vec3f svec_label = {70, 1,1};
+	make_scale_matrix4x4f(&s_label,&svec_label);
+	multiply_matrices4x4f(&m_label,&m_label,&s_label);
+
+//	label_mom_count.update_label_model(m_label);	
 	
 }
 
@@ -457,6 +503,7 @@ void SlideBar::reset_bar(){
 	mom_count = 0;
 	LifeLevel = 0;
 	down = false;
+	label_mom_count.update_gui_texture_int(mom_count);
 }
 
 //Setters

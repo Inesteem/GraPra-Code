@@ -432,7 +432,6 @@ uniform sampler2D tex;
 
 		void main(){
 
-//				out_col = vec4(0.2, 0.8, 0.2, 1.0); // Opaque green
 			gl_FragDepth = 0.001;
 		
 			if(texture(tex, tc).r >= 0.5 || texture(tex, tc).g >= 0.5 || texture(tex, tc).b >= 0.5)
@@ -485,12 +484,14 @@ uniform float down;
 
 			else if(down == 0 && LifeLevel > 0){
 				if (tc.y < LifeLevel && tc.x > 0.3 && tc.x < 0.7 && tc.y > 0.04 )
-						out_col = vec4(0.2, 0.8, 0.2, .7); // Opaque green
+					//out_col = vec4(0.2, 0.8, 0.2, .7); // Opaque green
+					out_col = vec4(1-tc.y, tc.y, 0., .7); 
 			}
 			else if(down == 1 && LifeLevel < 0){
 				float temp_ll = 1+LifeLevel;
 				if (tc.y > temp_ll && tc.x > 0.3 && tc.x < 0.7 && tc.y < 0.96 )
-					out_col = vec4(0.2, 0.8, 0.2, .7); // Opaque green
+						out_col = vec4(tc.y, 1-tc.y, 0., .7); 
+			}
 		
 		}
 			
@@ -498,7 +499,6 @@ uniform float down;
 
 
 		}
-}
 
 #:inputs (list "in_pos" "in_tc")>
 

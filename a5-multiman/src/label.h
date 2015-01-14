@@ -53,6 +53,9 @@ class Label {
 		vec3f 		texture_color = {1.f, 0.f, 0.f};
 		vec3f 		pos;
 		bool		use_cam;
+
+		vec2f BillboardSize;
+		
 		
 		// Intern helper functions
 		void do_cairo_stuff(std::string display, vec3f color, std::string name);
@@ -74,6 +77,7 @@ class Label {
 		void set_shader(const char *shader_name);
 		void set_camera(camera_ref camera);
 		void set_shader(shader_ref shader);
+		void set_size(vec2f size);
 		
 		void setup_display();
 
@@ -107,7 +111,7 @@ class SlideBar {
 		
 		vec3f 		pos;
 		vec3f 		screen_pos;
-		matrix4x4f	model;
+		matrix4x4f	bar_model;
 
 		int 		unit_count;
 		float 		LifeLevel;
