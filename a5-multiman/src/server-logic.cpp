@@ -15,6 +15,6 @@ void GameStage::spawnHouse(int x, int y)
 
 void GameStage::spawnTree(int x, int y)
 {
-	Tree t(x,y);
-	trees.push_back(t);
+    //Tree t(x,y);
+    //trees.push_back(t);
 }

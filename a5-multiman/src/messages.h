@@ -19,46 +19,14 @@ namespace msg {
 			init_game = 1,
 			spawn_house,
 			spawn_tree,
-			init_done/*
-			initial_player_data_position,
-			board_info,
-			spawn_box,
-			start_game,
-			force_player_position,
-			start_move,
-			spawn_bomb,
-			bomb_explosion,
-			player_health_info,
-			keep_alive,
-			frags_update,
-			game_over,*/
-			
-
-			/*
-			key_updown,
-			key_drop,
-			player_name,*/
+            init_done,
+            spawn_troup_server,
+            spawn_troup_client,
+            next_troup_destination,
+            troup_arrived,
+            building_owner_changed
 		};
 	}
-
-/*
-	namespace key_code {
-		enum {
-			up,
-			down,
-			left,
-			right,
-		};
-	}
-
-	namespace box_type {
-		enum t {
-			none = 0,
-			stone = 1,
-			wood = 2,
-		};
-	}
-*/
 
 	struct message {
 		uint8_t message_size, message_type;
@@ -66,82 +34,6 @@ namespace msg {
 	};
 
 	// server -> client
-
-/*
-	struct connected : public message {
-		connected() : message(code::connected) {}
-		uint8_t your_id, players;
-	} __attribute__((aligned(8)));
-
-	struct initial_player_data_position : public message {
-		initial_player_data_position() : message(code::initial_player_data_position) {}
-		uint8_t player;
-		uint8_t x, y;
-	} __attribute__((aligned(8)));
-
-	struct board_info : public message {
-		board_info() : message(code::board_info) {}
-		uint8_t w, h;
-		uint16_t boxes;
-	} __attribute__((aligned(8)));
-
-	struct spawn_box : public message {
-		spawn_box() : message(code::spawn_box) {}
-		uint8_t box_type;
-		uint8_t x,y;
-	} __attribute__((aligned(8)));
-
-	struct start_game : public message {
-		start_game() : message(code::start_game) {}
-		//
-	} __attribute__((aligned(8)));
-
-	struct force_player_position : public message {
-		force_player_position() : message(code::force_player_position) {}
-		uint8_t player;
-		uint8_t x,y;
-	} __attribute__((aligned(8)));
-
-	struct start_move : public message {
-		start_move() : message(code::start_move) {}
-		uint8_t player;
-		int8_t dir_x, dir_y;	// not uint!
-		uint16_t est_duration;
-	} __attribute__((aligned(8)));
-
-	struct spawn_bomb : public message {
-		spawn_bomb() : message(code::spawn_bomb) {}
-		uint8_t x,y;
-		uint16_t id;
-		uint16_t est_duration;
-	} __attribute__((aligned(8)));
-
-	struct bomb_explosion : public message {
-		bomb_explosion() : message(code::bomb_explosion) {}
-		uint16_t id;
-		uint16_t dir_codes;
-	} __attribute__((aligned(8)));
-
-	struct player_health_info : public message {
-		player_health_info() : message(code::player_health_info) {}
-		uint8_t id;
-		uint8_t health;
-	} __attribute__((aligned(8)));
-
-	struct keep_alive : public message {
-		keep_alive() : message(code::keep_alive) {}
-	} __attribute__((aligned(8)));
-
-	struct frags_update : public message {
-		frags_update() : message(code::frags_update) {}
-		uint8_t player;
-		int8_t frags;
-	} __attribute__((aligned(8)));
-
-	struct game_over : public message {
-		game_over() : message(code::game_over) {}
-	} __attribute__((aligned(8)));
-*/
 
 	struct init_game : public message {
 		init_game() : message(code::init_game) {}
@@ -165,28 +57,27 @@ namespace msg {
 		init_done() : message(code::init_done) {}
 	} __attribute__((aligned(8)));
 
+    struct spawn_troup_server : public message {
+        spawn_troup_server() : message(code::spawn_troup_server) {}
+    } __attribute__((aligned(8)));
+
+    struct next_troup_destination : public message {
+        next_troup_destination() : message(code::next_troup_destination) {}
+    } __attribute__((aligned(8)));
+
+    struct troup_arrived : public message {
+        troup_arrived() : message(code::troup_arrived) {}
+    } __attribute__((aligned(8)));
+
+    struct building_owner_changed : public message {
+        building_owner_changed() : message(code::building_owner_changed) {}
+    } __attribute__((aligned(8)));
 
 	// client -> server
 
-/*
-
-	struct key_updown : public message {
-		key_updown() : message(code::key_updown) {}
-		uint8_t k;
-		uint8_t down; // down==1, up==0
-	} __attribute__((aligned(8)));
-
-	struct key_drop : public message {
-		key_drop() : message(code::key_drop) {}
-	} __attribute__((aligned(8)));
-
-	struct player_name : public message {
-		player_name() : message(code::player_name) {}
-		enum { max_string_length = 26 };
-		uint8_t id;	// not used for client->server, but for server->client.
-		char name[max_string_length];
-	} __attribute__((aligned(8)));
-*/
+    struct spawn_troup_client : public message {
+        spawn_troup_client() : message(code::spawn_troup_client) {}
+    } __attribute__((aligned(8)));
 }
 
 template<typename M> M make_message() {
@@ -218,14 +109,15 @@ protected:
 	void handle_message();
 	void warn(msg::message *msg);
 
-	// server -> client
 	virtual void handle_message(msg::init_game *m) { warn(m); }
 	virtual void handle_message(msg::spawn_house *m) { warn(m); }
 	virtual void handle_message(msg::spawn_tree *m) { warn(m); }
 	virtual void handle_message(msg::init_done *m) { warn(m); }
-	
-	// client -> server
-
+    virtual void handle_message(msg::spawn_troup_server *m) { warn(m); }
+    virtual void handle_message(msg::spawn_troup_client *m) { warn(m); }
+    virtual void handle_message(msg::next_troup_destination *m) { warn(m); }
+    virtual void handle_message(msg::troup_arrived *m) { warn(m); }
+    virtual void handle_message(msg::building_owner_changed *m) { warn(m); }
 };
 
 

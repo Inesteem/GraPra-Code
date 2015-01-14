@@ -29,6 +29,10 @@ public:
 	server_message_reader(message_reader::socket *socket, int player) : message_reader(), player_id(player) {
 		setSocket(socket);
 	}
+
+    virtual void handle_message(msg::spawn_troup_client *m) {
+        cout << "Spawning troup..." << endl;
+    }
 };
 
 namespace client_connections {

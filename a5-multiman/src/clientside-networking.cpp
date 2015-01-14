@@ -260,6 +260,26 @@ void client_message_reader::handle_message(msg::init_done *m)
 	cout << "Initializeing done, starting game..." << endl;
 }
 
+void handle_message(msg::spawn_troup_server *m)
+{
+    cout << "Spawning new troup..." << endl;
+}
+
+void handle_message(msg::next_troup_destination *m)
+{
+    cout << "Got new troup destination..." << endl;
+}
+
+void handle_message(msg::troup_arrived *m)
+{
+    cout << "Troup arrived at building..." << endl;
+}
+
+void handle_message(msg::building_owner_changed *m)
+{
+    cout << "Building owner changed..." << endl;
+}
+
 /*
 void client_message_reader::handle_message(msg::connected *m) {
 	cout << "you are connected. your id is " << (int)m->your_id << "/" << (int)m->players << endl;

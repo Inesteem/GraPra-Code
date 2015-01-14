@@ -30,7 +30,7 @@
 namespace moac {
 
 void getScreenpos(vec2f* in,vec2f* out);
-
+vec3f ClickWorldPosition(int screenX, int screenY);
 }
 
 #endif

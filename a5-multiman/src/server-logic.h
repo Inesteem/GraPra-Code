@@ -15,17 +15,23 @@ public:
 
 };
 
+class Troup;
 class Building : public GameObject
 {
+        unsigned int id;
 public: 
 	Building(int x, int y) : GameObject(x, y) {}
+
+    void Update();
+    void IncomingTroup(Troup troup);
 };
 
-class Tree : public GameObject
+class Troup : public GameObject
 {
 public:
-	Tree(int x, int y) : GameObject(x, y) {}
+    Troup(Building *sourceBuilding, Building *destinationBuilding, unsigned int unitCount);
 
+    void Update();
 };
 
 class GameStage
@@ -36,9 +42,10 @@ public:
 	void init(int x, int y);
 	void spawnHouse(int x, int y);
 	void spawnTree(int x, int y);
+    void spawnTroup(unsigned int sourceBuildingID, unsigned int destinationBuildingID, unsigned int unitCount);
 
 	vector<Building> buildings;
-	vector<Tree> trees;
+    vector<Troup> troup;
 };
 
 #endif

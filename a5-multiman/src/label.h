@@ -13,6 +13,7 @@
 #include "rendering.h"
 #include "drawelement.h"
 #include "objloader.h"
+#include "mouseactions.h"
 
 #include <vector>
 #include <math.h>
@@ -89,9 +90,9 @@ class SlideBar {
 
 		
 		// Some Helper-Attributes
-//		Label 		l_max_count;
+		Label 		l_max_count;
 		int 		max_count;
-//		Label 		l_mom_count;
+		Label 		l_mom_count;
 		int 		mom_count;
 		mesh_ref 	mesh;
 		shader_ref 	sbar_shader;
@@ -102,6 +103,7 @@ class SlideBar {
 		vec3f 		texture_color = {1.f, 0.f, 0.f};
 		
 		vec3f 		pos;
+		vec3f 		screen_pos;
 		matrix4x4f	model;
 
 		int 		unit_count;

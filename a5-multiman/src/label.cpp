@@ -275,6 +275,7 @@ SlideBar::SlideBar(){
 	max_count = 100;
 	mom_count = 0;	
 	pos = vec3f(0,0,0);
+	screen_pos = vec3f(0,0,0);
 	texture = find_texture("slidebar2");
 	LifeLevel = 0;
 
@@ -356,7 +357,7 @@ void SlideBar::update_mouse_pos(float x, float y){
 
 	float LifeLevel_max = 0.955;
 	float mouse_diff_max = 187;
-	float mouse_diff = pos.y - y;
+	float mouse_diff = screen_pos.y - y;
 	LifeLevel = 0;
 	if(mouse_diff != 0){
 		LifeLevel = mouse_diff/mouse_diff_max;
@@ -370,15 +371,20 @@ void SlideBar::update_mouse_pos(float x, float y){
 
 void SlideBar::update_pos(float x, float y){
 
-	pos = vec3f(1,1,0);
+	screen_pos = vec3f(x,y,0);
+	
+	camera_ref old_camera = current_camera();
+	use_camera(sbar_camera);	
+	pos = moac::ClickWorldPosition(x, y);
+	use_camera(old_camera);
 
 	float angle = 90*M_PI/180;
 	
 	make_unit_matrix4x4f(&model);	
 	model.row_col(0,0) = 0.2;
 	model.row_col(1,1) = 10.f;
-	model.row_col(0,3) = x/50;
-	model.row_col(1,3) = -y/50;	
+	model.row_col(0,3) = pos.x;
+	model.row_col(1,3) = pos.y;	
 
 	cout << x << " " << y << endl;
 
