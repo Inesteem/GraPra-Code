@@ -71,6 +71,7 @@ namespace msg {
         next_troup_destination() : message(code::next_troup_destination) {}
         uint8_t mapX;
         uint8_t mapY;
+        uint8_t troupId;
     } __attribute__((aligned(8)));
 
     struct troup_arrived : public message {

@@ -25,7 +25,7 @@ void Game::add_unit_group(vec2i start, vec2i end, unsigned int count){
     msg::spawn_troup_client stc = make_message<msg::spawn_troup_client>();
     stc.playerId = 0;
 
-    // TDOO use actual building ids, now sending from house 0 to 1
+    // TDOO use actual building ids, now sending from house 0 to 6
     stc.sourceId = 0;
     stc.destinationId = 6;
     m_messageReader->send_message(stc);

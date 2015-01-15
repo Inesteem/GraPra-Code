@@ -33,10 +33,15 @@ void initGame() {
 	ig.mapY = y;
 	broadcast(&ig);
 
+    gameStage->m_map = new bool*[y];
+
 	for(unsigned int r = 0; r < y; r++) {
+        gameStage->m_map[r] = new bool[x];
 		for(unsigned int c = 0; c < x; c++) {
-			vec3f color = mapData[r*x + c];
+            gameStage->m_map[r][c] = true;
+            vec3f color = mapData[(y-1-r)*x + c];
 			if(color.x > 0.9f) {
+                gameStage->m_map[r][c] = false;
 				cout << "Building at (" << r << "," << c << ")" << endl;
                 Building *b = gameStage->spawnHouse(r, c);
 
@@ -46,6 +51,7 @@ void initGame() {
                 sh.id = b->m_id;
 				broadcast(&sh);
 			} else if(color.y > 0.9f) {
+                gameStage->m_map[r][c] = false;
 				cout << "Tree at (" << r << "," << c << ")" << endl;
 
 				msg::spawn_tree st = make_message<msg::spawn_tree>();
@@ -55,6 +61,13 @@ void initGame() {
 			}
 		}
 	}
+
+    for(unsigned int r = 0; r < y; r++) {
+        cout << endl;
+        for(unsigned int c = 0; c < x; c++) {
+            cout << (gameStage->m_map[r][c] ? "1 " : "0 ");
+        }
+    }
 
 	msg::init_done id = make_message<msg::init_done>();
     broadcast(&id);
