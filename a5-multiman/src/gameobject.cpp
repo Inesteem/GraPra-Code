@@ -155,19 +155,18 @@ Tree::Tree(Obj *obj, string name, int x, int y, float height): GameObject(obj,na
     m_model.col_major[3 * 4 + 0] = m_pos.x*render_settings::tile_size_x;
     m_model.col_major[3 * 4 + 1] = m_center.y + m_height;
     m_model.col_major[3 * 4 + 2] = m_pos.y*render_settings::tile_size_y;
-
-
 }
 
 //BUILDINGS
 Building::Building(Obj *obj,Obj *selection_circle, string name, int x, int y, unsigned int owner,int size, float height,unsigned int id):
-    GameObject(obj, name ,find_shader("pos+norm+tc"), height),
+    GameObject(obj, name ,find_shader("pos+norm+tc"), height), id(id),
     m_owner(owner) , m_size(size), selection_circle(selection_circle)
 
 {
+
+	unit_count = 0;
     identifier = 'b';
     m_pos = vec2i(x,y);
-    this->id = id;
 
     m_model.col_major[3 * 4 + 0] = m_pos.x*render_settings::tile_size_x;
     m_model.col_major[3 * 4 + 1] = m_center.y + m_height;
@@ -175,14 +174,24 @@ Building::Building(Obj *obj,Obj *selection_circle, string name, int x, int y, un
     
     label= new Label();
     label->setup_display();
-//	label.set_camera("lcam");
-//	label.set_shader("special-text-shader");;
     label->update_label_pos(2*x, 2*y, height+2);
 
 }
 
+void Building::update_unit_count(int count){
+	label->update_gui_texture_int(count);
+	unit_count = count;
+}
+
+int Building::get_unit_count(){
+	return unit_count;
+}
+
+
 void Building::draw(){
     GameObject::draw();
+	//test
+//	label->update_gui_texture_int(id);
 	label->render_gui_overlay();
 }
 
@@ -289,6 +298,7 @@ void UnitGroup::move_to(vec2i pos, float time_to_reach){
     force_position(pos);
     /*force_position(m_end);
     m_start = m_pos;//m_end;
+
     m_end = pos;
     m_time_to_reach_end = time_to_reach;
     m_timer.restart();*/
@@ -321,17 +331,17 @@ void UnitGroup::update(){/*
 
 void UnitGroup::draw(){
     for(int i = 0; i < m_spawned; ++i){
-    for (vector<drawelement*>::iterator it = m_obj->drawelements->begin(); it != m_obj->drawelements->end(); ++it) {
-        drawelement *de = *it;
-        de->Modelmatrix(&m_modelmatrices[i]);
-        de->bind();
-        setup_dir_light(m_shader);
-        de->apply_default_matrix_uniforms();
-        de->apply_default_tex_uniforms_and_bind_textures();
-        de->draw_em();
-        de->unbind();
+		for (vector<drawelement*>::iterator it = m_obj->drawelements->begin(); it != m_obj->drawelements->end(); ++it) {
+			drawelement *de = *it;
+			de->Modelmatrix(&m_modelmatrices[i]);
+			de->bind();
+			setup_dir_light(m_shader);
+			de->apply_default_matrix_uniforms();
+			de->apply_default_tex_uniforms_and_bind_textures();
+			de->draw_em();
+			de->unbind();
 
-    }
+		}
     }
 }
 

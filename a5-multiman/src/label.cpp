@@ -46,6 +46,7 @@ Label::Label(int fontSize, int nChars, const char *shader_name){
 
 }
 
+
 // Setters
 
 void Label::set_nChars(unsigned int nChars){
@@ -335,6 +336,10 @@ void SlideBar::initialize_slidebar(){
 }
 
 
+void SlideBar::set_max_count(int count){
+	max_count = count;
+}
+
 void SlideBar::update_unit_count(int count){
 	
 	mom_count = count;
@@ -423,7 +428,10 @@ void SlideBar::update_mouse_pos(float x, float y){
 	
 		if(LifeLevel < 0){
 			mom_count = (int) (max_count * (-LifeLevel+1-LifeLevel_max));
-			label_mom_count.update_gui_texture_int(mom_count+1);
+			if(mom_count == 0)
+				label_mom_count.update_gui_texture_int(0);
+			else
+				label_mom_count.update_gui_texture_int(mom_count+1);
 		}
 	} else {
 			
@@ -438,9 +446,13 @@ void SlideBar::update_mouse_pos(float x, float y){
 		
 		if(LifeLevel > 0){
 			mom_count = (int) (max_count * (LifeLevel+1-LifeLevel_max));
-			label_mom_count.update_gui_texture_int(mom_count+1);
+			if(mom_count == 0)
+				label_mom_count.update_gui_texture_int(0);
+			else
+				label_mom_count.update_gui_texture_int(mom_count+1);
 		}
 	}
+	
 
 
 }

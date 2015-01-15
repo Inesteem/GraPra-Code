@@ -21,7 +21,7 @@ public:
     void update();
     Building* get_last_selected_building();
 	ObjHandler *get_objhandler();
-	
+	void update_building_unit_count(unsigned int id, unsigned int unit_count);
 	Building *getBuilding(unsigned int id);
 	
 	client_message_reader *m_messageReader;

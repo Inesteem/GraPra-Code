@@ -80,7 +80,7 @@ namespace moac {
 			eb_set = false;
 			return false;
 		}		
-		
+		slidebar->reset_bar();
 		eb_set = true;
 		enemys_building = building;
 		prepare_attack = true;	
@@ -110,7 +110,7 @@ namespace moac {
 	
 	void Action::start(float x, float y){
 		slidebar->update_pos(x,y);
-		
+		slidebar->set_max_count(enemys_building->get_unit_count());
 	}
 	
 	void Action::finish(){
