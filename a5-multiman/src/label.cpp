@@ -422,7 +422,6 @@ void SlideBar::update_mouse_pos(float x, float y){
 	
 		if(LifeLevel < 0){
 			mom_count = (int) (max_count * (-LifeLevel+1-LifeLevel_max));
-			cout << mom_count << endl;
 			label_mom_count.update_gui_texture_int(mom_count+1);
 		}
 	} else {
@@ -516,4 +515,8 @@ void SlideBar::set_texture(const char *texture_name){
 }
 void SlideBar::set_camera(const char *camera_name){
 	sbar_camera = find_camera(camera_name);
+}
+
+int SlideBar::get_unit_count(){
+	return mom_count;
 }

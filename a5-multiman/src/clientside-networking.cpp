@@ -83,7 +83,7 @@ void client_message_reader::handle_message(msg::init_game *m)
 void client_message_reader::handle_message(msg::spawn_house *m)
 {
     // TODO add id (m->id) to building!!
-   game->add_building("building_lot",1,m->x,m->y);
+   game->add_building("building_lot",1,m->x,m->y, m->id);
     std::cout << "Spawning house at (" << (unsigned int) m->x << "," << (unsigned int) m->y << ")" << std::endl;
 }
 

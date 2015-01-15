@@ -1,4 +1,7 @@
 #include "mouseactions.h"
+#include "label.h"
+#include "gameobject.h"
+#include "game.h"
 
 namespace moac {
 	
@@ -51,4 +54,88 @@ namespace moac {
 
         return vec3f(outX, outY, outZ);
     }
+
+	Action::Action(Game *game){
+
+		this->game = game;
+		eb_set = false;
+		ob_set = false;
+		prepare_attack = false;
+		slidebar = new SlideBar();	
+		slidebar->initialize_slidebar();			
+		
+	}
+
+
+	bool Action::handle_enemys_base(float x, float y){
+		
+        vec3f wp = ClickWorldPosition(x,y);
+        Building *building = game->get_building_at(wp);
+ 		//TODO: get own id
+        
+		//keine Auswahl, falls bereits Gebaeude ausgewaehlt, verfaellt diese Wahl
+	//	if (!ob_set || building == nullptr || building->get_owner_id() == own_id){
+		if (!ob_set || building == nullptr){
+			eb_set = false;
+			return false;
+		}		
+		
+		eb_set = true;
+		enemys_building = building;
+		prepare_attack = true;	
+		start(x,y);
+		return true;	
+	}
+	
+	bool Action::handle_base_selection(float x, float y){
+		
+        vec3f wp = ClickWorldPosition(x,y);
+        Building *building = game->get_building_at(wp);
+        
+		//TODO: get own id
+
+		//keine Auswahl, falls bereits Gebaeude ausgewaehlt, verfaellt diese Wahl
+//		if (building == nullptr || building->get_owner_id() != own_id){
+		if (building == nullptr){
+			ob_set = false;
+			return false;
+		}
+		
+		ob_set = true;
+		own_building = building;
+		
+		return true;
+	}
+	
+	void Action::start(float x, float y){
+		slidebar->update_pos(x,y);
+		
+	}
+	
+	void Action::finish(){
+		if(prepare_attack){
+			int units = slidebar->get_unit_count();
+			game->add_unit_group(own_building->get_pos(), enemys_building->get_pos(), units, own_building->get_id());
+			cout << "owner: (" << own_building->get_pos().x << " ' " << own_building->get_pos().y << ")" << endl;
+			cout << "enemy: (" << enemys_building->get_pos().x << " ' " << enemys_building->get_pos().y << ")" << endl;
+			cout << "troups: (" << units << ")" << endl;
+			slidebar->reset_bar();
+			prepare_attack = false;
+		}
+	}
+
+	void Action::draw(){
+		if(prepare_attack)
+			slidebar->render_slidebar();		
+	}
+	
+	
+	void Action::update_mouse_pos(float x, float y){
+		if(prepare_attack)
+			slidebar->update_mouse_pos(x,y);	
+	}
+	
+
 }
+
+

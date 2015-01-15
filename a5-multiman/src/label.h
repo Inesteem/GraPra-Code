@@ -126,8 +126,6 @@ class SlideBar {
 		void set_shader(const char *shader_name);
 		void set_texture(const char *texture_name);
 		void set_camera(const char *camera_name);
-		
-		void setup_display();
 
 		void update_pos(float x, float y);
 		void update_mouse_pos(float x, float y);
@@ -136,6 +134,8 @@ class SlideBar {
 		void render_slidebar();
 		void initialize_slidebar();
 		void reset_bar();
+		
+		int get_unit_count();
 
 		// Setters
 

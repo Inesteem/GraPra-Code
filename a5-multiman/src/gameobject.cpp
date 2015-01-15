@@ -159,13 +159,14 @@ Tree::Tree(Obj *obj, string name, int x, int y, float height): GameObject(obj,na
 }
 
 //BUILDINGS
-Building::Building(Obj *obj,Obj *selection_circle, string name, int x, int y, unsigned int owner,int size, float height):
+Building::Building(Obj *obj,Obj *selection_circle, string name, int x, int y, unsigned int owner,int size, float height,unsigned int id):
     GameObject(obj, name ,find_shader("pos+norm+tc"), height),
     m_owner(owner) , m_size(size), selection_circle(selection_circle)
 
 {
     identifier = 'b';
     m_pos = vec2i(x,y);
+    this->id = id;
 
     m_model.col_major[3 * 4 + 0] = m_pos.x*render_settings::tile_size_x;
     m_model.col_major[3 * 4 + 1] = m_center.y + m_height;
@@ -189,6 +190,14 @@ float Building::dist_to(vec3f &pos){
     return length_of_vec3f(&dist);
 
 }
+
+unsigned int Building::get_owner_id(){
+	return m_owner;
+}
+unsigned int Building::get_id(){
+	return id;
+}
+
 
 void Building::draw_selection_circle(){
     vec3f color(1.0f,0,0);
