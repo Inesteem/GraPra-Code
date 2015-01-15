@@ -9,6 +9,14 @@ Game::Game(ObjHandler *objhandler, simple_heightmap *sh, client_message_reader *
 void Game::add_building(string name, int size, int x, int y, unsigned int id){
     m_buildings.push_back(Building(m_objhandler->getObjByName(name), m_objhandler->get_selection_circle(),name,x,y, 0,size, m_sh->get_height(x,y), id));
 }
+void Game::update_building_unit_count(unsigned int id, unsigned int unit_count){
+    for(int i = 0; i < m_buildings.size(); i++){
+		if(m_buildings[i].get_id() == id){
+			m_buildings[i].update_unit_count(unit_count);
+			return;
+		}
+	}
+}
 
 void Game::add_tree(int x, int y){
     m_trees.push_back(Tree(m_objhandler->getObjByName("tree"),"tree",x,y,m_sh->get_height(x,y)));
@@ -38,7 +46,6 @@ void Game::add_unit_group(unsigned int sourceId, unsigned int destinationId, uns
 	vec2i start = source->get_pos();
 	vec2i end = destination->get_pos();
 	
-
     cout << "spawning enemies at: " << start.x << "," << start.y << " count: " << count << endl;
     m_unitgroups.push_back(UnitGroup(m_objhandler->getObjByName("tree"),m_sh,"bomb",start,end,0,count, 3000, m_sh->get_height(start.x, start.y), troupId));
 }

@@ -123,4 +123,5 @@ void client_message_reader::handle_message(msg::building_owner_changed *m)
 void client_message_reader::handle_message(msg::building_unit_generated *m)
 {
     cout << "New unit count " << (unsigned int) m->newUnitCount << " in building " << (unsigned int) m->buildingId << endl;
+	game->update_building_unit_count( m->buildingId, m->newUnitCount);
 }
