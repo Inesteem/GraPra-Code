@@ -18,7 +18,7 @@ void Game::update_building_unit_count(unsigned int id, unsigned int unit_count){
 	}
 }
 
-void Game::check_troup_arrived(unsigned int troupId){
+void Game::troup_arrived(unsigned int troupId){
 	//TODO:senseful stuff
 }
 
