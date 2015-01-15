@@ -340,10 +340,12 @@ void SlideBar::set_max_count(int count){
 	max_count = count;
 }
 
+void SlideBar::dec_max_count(int count){
+	max_count -= count;
+}
+//wird eigentlich nicht benoetigt
 void SlideBar::update_unit_count(int count){
-	
 	mom_count = count;
-	
 }
 
 
@@ -427,11 +429,18 @@ void SlideBar::update_mouse_pos(float x, float y){
 			LifeLevel = -LifeLevel_max;		
 	
 		if(LifeLevel < 0){
-			mom_count = (int) (max_count * (-LifeLevel+1-LifeLevel_max));
+			float loc_count = (max_count * (-LifeLevel+1-LifeLevel_max));
+			if(loc_count == 0){
+				label_mom_count.update_gui_texture_int(0);
+				return;
+			}			
+			mom_count = loc_count;
+			if(mom_count - loc_count <= 0.999)
+				mom_count++;
 			if(mom_count == 0)
 				label_mom_count.update_gui_texture_int(0);
 			else
-				label_mom_count.update_gui_texture_int(mom_count+1);
+				label_mom_count.update_gui_texture_int(mom_count);
 		}
 	} else {
 			
@@ -445,11 +454,16 @@ void SlideBar::update_mouse_pos(float x, float y){
 			LifeLevel = LifeLevel_max;
 		
 		if(LifeLevel > 0){
-			mom_count = (int) (max_count * (LifeLevel+1-LifeLevel_max));
-			if(mom_count == 0)
+			float loc_count = (max_count * (LifeLevel+1-LifeLevel_max));
+			if(loc_count == 0){
 				label_mom_count.update_gui_texture_int(0);
-			else
-				label_mom_count.update_gui_texture_int(mom_count+1);
+				return;
+			}
+			mom_count = loc_count;
+			if(mom_count - loc_count <= 0.999)
+				mom_count++;
+			cout << (max_count * (LifeLevel+1-LifeLevel_max)) << " " << mom_count << endl;
+			label_mom_count.update_gui_texture_int(mom_count);
 		}
 	}
 	

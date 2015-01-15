@@ -29,6 +29,8 @@ void GameStage::Update()
             ta.troupId = troup.second->m_id;
             broadcast(&ta);
 
+
+
             troup.second->m_destination->IncomingTroup(troup.second);
         }
     }
@@ -45,6 +47,14 @@ Building* GameStage::spawnHouse(unsigned int x, unsigned int y)
     Building *b = new Building(this, x,y, GameStage::s_nextBuilding);
     m_buildings[GameStage::s_nextBuilding++] =  b;
     return b;
+}
+
+void Building::KillUnits(unsigned int unitCount){
+		m_unitCount -= unitCount; 	
+        msg::building_unit_generated bug = make_message<msg::building_unit_generated>();
+        bug.newUnitCount = m_unitCount;
+        bug.buildingId = m_id;
+        broadcast(&bug);
 }
 
 Troup* GameStage::spawnTroup(unsigned int sourceBuildingID, unsigned int destinationBuildingID, unsigned int unitCount)
@@ -119,7 +129,7 @@ bool Troup::Update()
 Building::Building(GameStage *gameStage, unsigned int x, unsigned int y, unsigned int id)
     : GameObject(gameStage, x, y, id)
 {
-    m_unitCount = 20;
+    m_unitCount = 0;
     m_generateUnitsTimer.start();
 }
 
@@ -139,6 +149,10 @@ void Building::Update()
 void Building::IncomingTroup(Troup *troup)
 {
     m_unitCount += troup->m_unitCount;
+	msg::building_unit_generated bug = make_message<msg::building_unit_generated>();
+	bug.newUnitCount = m_unitCount;
+	bug.buildingId = m_id;
+	broadcast(&bug);    
 }
 
 Path::Path(Troup *troup, PathNode &source, PathNode &destination, unsigned int x, unsigned int y) : m_mapX(x), m_mapY(y), m_troup(troup)

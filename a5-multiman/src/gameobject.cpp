@@ -114,6 +114,7 @@ void GameObject::set_model_matrix(matrix4x4f new_model){
 }
 matrix4x4f GameObject::get_model_matrix(){
     return m_model;
+
 }
 
 void GameObject::set_height(float height){
@@ -179,8 +180,8 @@ Building::Building(Obj *obj,Obj *selection_circle, string name, int x, int y, un
 }
 
 void Building::update_unit_count(int count){
-	label->update_gui_texture_int(count);
 	unit_count = count;
+	label->update_gui_texture_int(count);
 }
 
 int Building::get_unit_count(){
@@ -189,9 +190,8 @@ int Building::get_unit_count(){
 
 
 void Building::draw(){
+	label->update_gui_texture_int(unit_count);
     GameObject::draw();
-	//test
-//	label->update_gui_texture_int(id);
 	label->render_gui_overlay();
 }
 
@@ -205,10 +205,10 @@ float Building::dist_to(vec3f &pos){
 unsigned int Building::get_owner_id(){
 	return m_owner;
 }
+
 unsigned int Building::get_id(){
 	return id;
 }
-
 
 void Building::draw_selection_circle(){
     vec3f color(1.0f,0,0);

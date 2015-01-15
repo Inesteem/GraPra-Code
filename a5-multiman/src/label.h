@@ -135,6 +135,7 @@ class SlideBar {
 		void update_mouse_pos(float x, float y);
 		void update_unit_count(int count);
 		void set_max_count(int count);
+		void dec_max_count(int count);
 		// gui-overlay.cpp
 		void render_slidebar();
 		void initialize_slidebar();

@@ -70,7 +70,7 @@ public:
 
     void Update();
     void IncomingTroup(Troup *troup);
-    void KillUnits(unsigned int unitCount) { m_unitCount -= unitCount; }
+    void KillUnits(unsigned int unitCount);
 };
 
 class Troup : public GameObject

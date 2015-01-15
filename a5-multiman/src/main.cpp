@@ -156,6 +156,12 @@ void standard_keyboard(unsigned char key, int x, int y)
 void keyhandler(unsigned char key, int x, int y) {
 	if (key == 'W')      wireframe = !wireframe;
 	else if (key == 'R') reload_pending = true;
+	else if (key == 'E'){
+		for(int i = 0; i < 4; i++){
+			Building *b = game->getBuilding(i);
+			cout << "Building " << i << " contains " << b->get_unit_count() << " units" << endl;
+		}
+	}
     else if (key == 'M') standard_mouse = !standard_mouse;
     else if (key == 'S') reload_pending = true;
 	else {

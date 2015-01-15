@@ -110,24 +110,26 @@ namespace moac {
 	
 	void Action::start(float x, float y){
 		slidebar->update_pos(x,y);
-		slidebar->set_max_count(enemys_building->get_unit_count());
+		slidebar->set_max_count(own_building->get_unit_count());
 	}
 	
 	void Action::finish(){
 		if(prepare_attack){
 			int units = slidebar->get_unit_count();
-	
-			msg::spawn_troup_client stc = make_message<msg::spawn_troup_client>();
-			// TODO use own player id
-			stc.playerId = 0;
-			stc.sourceId = own_building->get_id();
-			stc.destinationId = enemys_building->get_id();
-			stc.unitCount = units;
-			game->m_messageReader->send_message(stc);
-	
-			cout << "owner: (" << own_building->get_pos().x << " ' " << own_building->get_pos().y << ")" << endl;
-			cout << "enemy: (" << enemys_building->get_pos().x << " ' " << enemys_building->get_pos().y << ")" << endl;
-			cout << "troups: (" << units << ")" << endl;
+			if(units != 0){
+				
+				msg::spawn_troup_client stc = make_message<msg::spawn_troup_client>();
+				// TODO use own player id
+				stc.playerId = 0;
+				stc.sourceId = own_building->get_id();
+				stc.destinationId = enemys_building->get_id();
+				stc.unitCount = units;
+				game->m_messageReader->send_message(stc);
+				slidebar->dec_max_count(units);
+				cout << "owner: (" << own_building->get_pos().x << " ' " << own_building->get_pos().y << ")" << endl;
+				cout << "enemy: (" << enemys_building->get_pos().x << " ' " << enemys_building->get_pos().y << ")" << endl;
+				cout << "troups: (" << units << ")" << endl;
+			}
 			slidebar->reset_bar();
 			prepare_attack = false;
 		}

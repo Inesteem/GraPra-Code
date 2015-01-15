@@ -113,6 +113,7 @@ void client_message_reader::handle_message(msg::next_troup_destination *m)
 void client_message_reader::handle_message(msg::troup_arrived *m)
 {
     cout << "Troup arrived at building..." << endl;
+	game->check_troup_arrived(m->troupId);
 }
 
 void client_message_reader::handle_message(msg::building_owner_changed *m)

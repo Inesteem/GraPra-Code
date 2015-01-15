@@ -18,6 +18,10 @@ void Game::update_building_unit_count(unsigned int id, unsigned int unit_count){
 	}
 }
 
+void Game::check_troup_arrived(unsigned int troupId){
+	//TODO:senseful stuff
+}
+
 void Game::add_tree(int x, int y){
     m_trees.push_back(Tree(m_objhandler->getObjByName("tree"),"tree",x,y,m_sh->get_height(x,y)));
 }
