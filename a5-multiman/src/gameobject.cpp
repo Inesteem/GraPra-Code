@@ -243,10 +243,10 @@ void Building::draw_selection_circle(){
 
 //UNITGROUP
 
-UnitGroup::UnitGroup(Obj *obj, simple_heightmap *sh, string name, vec2i start, vec2i end, unsigned int owner, unsigned int unit_count, float time_to_rech_end, float height):
+UnitGroup::UnitGroup(Obj *obj, simple_heightmap *sh, string name, vec2i start, vec2i end, unsigned int owner, unsigned int unit_count, float time_to_rech_end, float height, unsigned int m_id):
     GameObject(obj,name,find_shader("pos+norm+tc"), height),
     m_owner(owner), m_start(start), m_end(end),
-    m_unit_count(unit_count), m_sh(sh),
+    m_unit_count(unit_count), m_sh(sh), m_id(m_id),
     m_time_to_reach_end(time_to_rech_end), m_spawned(0)
 {
     m_modelmatrices = vector<matrix4x4f>();
@@ -281,8 +281,8 @@ void UnitGroup::update_model_matrices(){
 }
 
 void UnitGroup::move_to(vec2i pos, float time_to_reach){
-    force_position(m_end);
-    m_start = m_end;
+    //force_position(m_end);
+    m_start = m_pos;//m_end;
     m_end = pos;
     m_time_to_reach_end = time_to_reach;
     m_timer.restart();

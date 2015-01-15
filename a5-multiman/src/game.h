@@ -13,7 +13,8 @@ public:
     Game(ObjHandler *objhandler, simple_heightmap *sh, client_message_reader *messageReader);
     void add_tree(int x, int y);
     void add_building(string name, int size, int x, int y, unsigned int id);
-    void add_unit_group(unsigned int sourceId, unsigned int destinationId, unsigned int count);
+    void add_unit_group(unsigned int sourceId, unsigned int destinationId, unsigned int count, unsigned int troupId);
+    void update_unit_group(unsigned int x, unsigned int y, unsigned int troupId);
     void init(string filename, int widht, int height);
     Building* get_building_at(vec3f pos);
     void draw();

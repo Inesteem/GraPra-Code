@@ -101,12 +101,13 @@ private:
 class UnitGroup: public GameObject{
 public:
 
-    UnitGroup(Obj *obj,simple_heightmap *sh, string name, vec2i start, vec2i end, unsigned int owner, unsigned int unit_count, float time_to_rech_end, float height);
+    UnitGroup(Obj *obj,simple_heightmap *sh, string name, vec2i start, vec2i end, unsigned int owner, unsigned int unit_count, float time_to_rech_end, float height, unsigned m_id);
     void update();
     void draw();
     void move_to(vec2i pos, float time_to_reach);
     void force_position(vec2i pos);
     void update_model_matrices();
+    unsigned int m_id;
 
     bool reached_dest = false;
 private:
