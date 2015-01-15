@@ -63,6 +63,7 @@ Troup* GameStage::spawnTroup(unsigned int sourceBuildingID, unsigned int destina
     sts.playerId = 0;
     sts.sourceId = sourceBuildingID;
     sts.troupId = t->m_id;
+    sts.unitCount = unitCount;
     broadcast(&sts);
 
     return t;
@@ -75,15 +76,11 @@ Troup::Troup(GameStage *gameStage, Building *sourceBuilding, Building *destinati
     m_x = sourceBuilding->m_x;
     m_y = sourceBuilding->m_y;
 
-    PathNode sourceNode;
-    sourceNode.mapX = sourceBuilding->m_x;
-    sourceNode.mapY = sourceBuilding->m_y;
+    PathNode sourceNode(sourceBuilding->m_x, sourceBuilding->m_y);
 
-    PathNode destinationNode;
-    destinationNode.mapX = destinationBuilding->m_x;
-    destinationNode.mapY = destinationBuilding->m_y;
+    PathNode destinationNode(destinationBuilding->m_x, destinationBuilding->m_y);
 
-    m_path = new Path(sourceNode, destinationNode);
+    m_path = new Path(sourceNode, destinationNode, gameStage->m_mapX, gameStage->m_mapY);
 
     m_stepTimer.start();
 }
@@ -144,9 +141,9 @@ void Building::IncomingTroup(Troup *troup)
     m_unitCount += troup->m_unitCount;
 }
 
-Path::Path(PathNode &source, PathNode &destination)
+Path::Path(PathNode &source, PathNode &destination, unsigned int x, unsigned int y) : m_mapX(x), m_mapY(y)
 {
-    PathNode current = source;
+    /*PathNode current = source;
 
     while(current.mapX != destination.mapX || current.mapY != destination.mapY) {
         PathNode newNode;
@@ -166,119 +163,186 @@ Path::Path(PathNode &source, PathNode &destination)
         newNode.mapY = current.mapY;
 
         m_nodes.push_back(newNode);
+    }*/
+
+    FindPathAStar(source, destination);
+}
+
+void Path::Init()
+{
+    m_open = new bool*[m_mapY];
+    m_closed = new bool*[m_mapY];
+    m_priority = new float*[m_mapY];
+    m_cost = new float*[m_mapY];
+    m_parent = new PathNode*[m_mapY];
+
+    for(unsigned int r = 0; r < m_mapY; r++) {
+        m_open[r] = new bool[m_mapX];
+        m_closed[r] = new bool[m_mapX];
+        m_priority[r] = new float[m_mapX];
+        m_cost[r] = new float[m_mapX];
+        m_parent[r] = new PathNode[m_mapX];
+
+        for(unsigned int c = 0; c < m_mapX; c++) {
+            m_open[r][c] = false;
+            m_closed[r][c] = false;
+            m_priority[r][c] = -1;
+            m_cost[r][c] = -1;
+            m_parent[r][c] = PathNode(-1, -1);
+        }
     }
 }
 
-
-/*
-
-void Path::ExpandNode(GraphNode *current, GraphNode *endPosition)
+float Path::AbsoluteDistance(PathNode a, PathNode b)
 {
-    //cout << "current cost: " << current->GetCurrentCost() << endl;
-    //cout << "edge size: " << current->GetEdges().size() << endl;
-    //cout << "id: " << current->GetId() << endl;
+    float dx = fabs(a.mapX - b.mapX);
+    float dy = fabs(b.mapX - b.mapY);
 
-    for(auto & edge : current->GetEdges()) {
-        //cout << "get neighbour" << endl;
-        GraphNode *neighbour = edge.GetDestination();
+    return sqrtf(dx*dx + dy*dy);
+}
 
-        //cout << "is closed?" << endl;
-        if(neighbour->IsClosed()) {
-            //cout << "-> Node " << neighbour->GetId() << " already closed" << endl;
+bool Path::OpenNodesExists()
+{
+    for(unsigned int r = 0; r < m_mapY; r++) {
+        for(unsigned int c = 0; c < m_mapX; c++) {
+            if(m_open[r][c]) return true;
+        }
+    }
+
+    return false;
+}
+
+PathNode Path::GetHighestPriorityOpenNode()
+{
+    float priority = 99999999999.0f;
+    PathNode ret(-1, -1);
+
+    for(unsigned int r = 0; r < m_mapY; r++) {
+        for(unsigned int c = 0; c < m_mapX; c++) {
+            if(m_open[r][c] && m_priority[r][c] < priority) {
+                priority = m_priority[r][c];
+                ret = PathNode(c, r);
+            }
+        }
+    }
+
+    return ret;
+}
+
+void Path::RetracePath(PathNode startPosition, PathNode current)
+{
+    m_nodes.clear();
+
+    /*for(unsigned int r = 0; r < m_mapY; r++) {
+        cout << endl;
+        for(unsigned int c = 0; c < m_mapX; c++) {
+            cout << "(" << m_parent[r][c].mapX << "," << m_parent[r][c].mapY << ") ";
+        }
+    }*/
+
+    m_nodes.push_back(current);
+
+    do {
+        cout << "current: "  << current.mapX << "," << current.mapY << endl;
+        current = m_parent[current.mapY][current.mapX];
+        cout << "parent: " << current.mapX << "," << current.mapY << endl;
+
+        m_nodes.push_back(current);
+        if(current.mapX == -1 && current.mapY == -1) {
+            break;
+        }
+    } while(1);
+}
+
+void Path::ExpandNode(PathNode current, PathNode endPosition)
+{
+    //cout << "current: (" << current.mapX << ", " << current.mapY << ")" << endl;
+
+    vector<PathNode> neighbours;
+    if(current.mapX > 0 && current.mapY > 0) neighbours.push_back(PathNode(current.mapX - 1, current.mapY - 1));
+
+    if(current.mapY > 0) neighbours.push_back(PathNode(current.mapX    , current.mapY - 1));
+
+    if(current.mapX < m_mapX - 1 && current.mapY > 0) neighbours.push_back(PathNode(current.mapX + 1, current.mapY - 1));
+
+    if(current.mapX > 0) neighbours.push_back(PathNode(current.mapX - 1, current.mapY));
+
+    if(current.mapX < m_mapX - 1) neighbours.push_back(PathNode(current.mapX + 1, current.mapY));
+
+    if(current.mapX > 0 && current.mapY < m_mapY - 1) neighbours.push_back(PathNode(current.mapX - 1, current.mapY + 1));
+
+    if(current.mapY < m_mapY - 1) neighbours.push_back(PathNode(current.mapX    , current.mapY + 1));
+
+    if(current.mapX < m_mapX - 1 && current.mapY < m_mapY - 1) neighbours.push_back(PathNode(current.mapX + 1, current.mapY + 1));
+
+    for(auto & neighbour : neighbours) {
+        cout << "neighbour (" << neighbour.mapX << "," << neighbour.mapY << "), parent: (" << current.mapX << ", " << current.mapY << ")"  << endl;
+
+        if(m_closed[neighbour.mapY][neighbour.mapX]) {
+            //cout << "-> Node already closed" << endl;
             continue;
         }
 
         // g Wert für den neuen Weg berechnen: g Wert des Vorgängers plus
         // die Kosten der gerade benutzten Kante
         //cout << "calculate cost" << endl;
-        float cost = current->GetCurrentCost() + edge.GetCost();
+        float cost = m_cost[current.mapY][current.mapX] + 1;
         //cout << "-> Node " << neighbour->GetId() << ", edge cost: " << edge.GetCost() << ", total cost: " << cost << endl;
         // wenn der Nachfolgeknoten bereits auf der Open List ist,
         // aber der neue Weg nicht besser ist als der alte - tue nichts
         //cout << "abort" << endl;
-        if(neighbour->IsOpen() and cost >= neighbour->GetCurrentCost()) {
+        if(m_open[neighbour.mapY][neighbour.mapX] && cost >= m_cost[neighbour.mapY][neighbour.mapX]) {
             //cout << "   Node already open, no lower cost" << endl;
             continue;
         }
         // Vorgängerzeiger setzen und g Wert merken
-        //cout << "save path info" << endl;
-        neighbour->SetPathParent(current);
-        neighbour->SetCurrentCost(cost);
+        m_parent[neighbour.mapY][neighbour.mapX] = current;
+        m_cost[neighbour.mapY][neighbour.mapX] = cost;
 
-        // f Wert des Knotens in der Open List aktualisieren
+        // f Wert des Knotens in der Open List aktualisieren    osm::id_t id;
         // bzw. Knoten mit f Wert in die Open List einfügen
 
-        //cout << "update open list" << endl;
-        float priority = cost + neighbour->DistanceToDestination(endPosition);
-        neighbour->SetPriority(priority);
-        if(!neighbour->IsOpen()) {
-            neighbour->Open();
-            m_openQueue.push(neighbour);
+        float priority = cost + AbsoluteDistance(neighbour, endPosition);
+        m_priority[neighbour.mapY][neighbour.mapX] = priority;
+        if(!m_open[neighbour.mapY][neighbour.mapX]) {
+            m_open[neighbour.mapY][neighbour.mapX] = true;
             //cout << "   inserted node with priority " << priority << " and cost " << cost << endl;
         } else {
-            m_openQueue.push(neighbour);
             //cout << "   updated node with priority " << priority << " and cost " << endl;
         }
     }
 }
 
-void Path::ResetQueue()
+
+void Path::FindPathAStar(PathNode startPosition, PathNode endPosition)
 {
-    while(!m_openQueue.empty())
-    {
-        m_openQueue.pop();
-    }
-
-    for(auto & graphNode : graphNodes) {
-        graphNode.second->Reset();
-    }
-}
-
-
-void Path::FindPathAStar(MapPosition startPosition, MapPosition endPosition)
-{
-    bool found = false;
-
     //cout << "Reset queue" << endl;
-    ResetQueue();
+
+    Init();
 
     // enqueue start node
-    //cout << "push start node" << endl;
-    startPosition.start->SetPriority(startPosition.start->DistanceToDestination(endPosition.end));
-    startPosition.start->SetCurrentCost(0.0);
-    m_openQueue.push(startPosition.start);
+    m_priority[startPosition.mapY][startPosition.mapX] = AbsoluteDistance(startPosition, endPosition);
+    m_cost[startPosition.mapY][startPosition.mapX] = 0.0f;
+    m_open[startPosition.mapY][startPosition.mapX] = true;
 
-
-    GraphNode *current;
     do {
         //getchar();
         // get node with highest priority
-        //cout << "get current node" << endl;
-        current = (GraphNode*) m_openQueue.top();
-        m_openQueue.pop();
+        PathNode current = GetHighestPriorityOpenNode(); // -> set open to false in this position
 
-        //cout << "-------------------------------------------------" << endl;
-        //cout << "Popped head (id " << current->GetId() << ", priority = " << current->GetPriority() << "), queue size = " << m_openQueue.size() << endl;
-
-        if(current == endPosition.end) {
+        if(current.mapX == endPosition.mapX && current.mapY == endPosition.mapY) {
             // found path
-            found = true;
-            break;
+            cout << "Found path!" << endl;
+            RetracePath(startPosition, current);
+            return;
         }
 
-        //cout << "close current node" << endl;
-        current->Close();
+        m_open[current.mapY][current.mapX] = false;
+        m_closed[current.mapY][current.mapX] = true;
+        ExpandNode(current,endPosition);
+    } while(OpenNodesExists());
 
-        //cout << "expand current node" << endl;
-
-        ExpandNode(current,endPosition.end);
-    } while(!m_openQueue.empty());
-
-    if(found) {
-        Path *path = retracePathFromDestination(current);
-        return path;
-    } else {
-        return 0;
-    }
+    // no path found
+    cout << "No path found." << endl;
+    RetracePath(startPosition, endPosition);
 }
-*/

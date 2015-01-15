@@ -29,5 +29,5 @@ void quit(int status)
 
 void server_message_reader::handle_message(msg::spawn_troup_client *m) {
     cout << "Spawning troup..." << endl;
-    m_gameStage->spawnTroup(m->sourceId, m->destinationId, 5);
+    m_gameStage->spawnTroup(m->sourceId, m->destinationId, m->unitCount);
 }

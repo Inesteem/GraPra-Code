@@ -28,6 +28,9 @@ void initGame() {
 	unsigned int x, y;
     vec3f *mapData = load_image3f("./render-data/images/smalllvl.png", &x, &y);
 
+    gameStage->m_mapX = x;
+    gameStage->m_mapY = y;
+
 	msg::init_game ig = make_message<msg::init_game>();
 	ig.mapX = x;
 	ig.mapY = y;
@@ -134,7 +137,7 @@ int main(int argc, char **argv)
 			}
 			if (since_last_broadcast.look() > wall_time_timer::sec(5)) {
 				//msg::keep_alive ping = make_message<msg::keep_alive>();
-				//broadcast(&ping);
+                //broadccurrentast(&ping);
 			}
         }
 	}
