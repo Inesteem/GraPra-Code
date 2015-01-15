@@ -1,4 +1,5 @@
 #include "label.h"
+#include "gameobject.h"
 
 #include <GL/glew.h>
 #include <GL/freeglut.h>
@@ -519,4 +520,13 @@ void SlideBar::set_camera(const char *camera_name){
 
 int SlideBar::get_unit_count(){
 	return mom_count;
+}
+
+
+	/*StatusBar*/
+
+
+StatusBar::StatusBar(Game *game, string name){
+	
+	
 }

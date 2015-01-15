@@ -12,6 +12,7 @@
 #include <shader.h>
 #include <mesh.h>
 #include <texture.h>
+#include "messages.h"
 
 #include <list>
 
@@ -33,6 +34,7 @@
 class Building;
 class SlideBar;
 class Game;
+class client_message_reader;
 
 namespace moac {
 

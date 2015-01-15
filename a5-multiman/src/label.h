@@ -14,6 +14,7 @@
 #include "drawelement.h"
 #include "objloader.h"
 #include "mouseactions.h"
+#include "game.h"
 
 #include <vector>
 #include <math.h>
@@ -30,6 +31,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/norm.hpp>
+
+
+class Gameobject;
 
 class Label {
 	
@@ -136,6 +140,19 @@ class SlideBar {
 		void reset_bar();
 		
 		int get_unit_count();
+
+		// Setters
+
+};
+
+
+class StatusBar {
+
+	public:
+		// Konstruktors
+		StatusBar(Game *game, string name);
+
+
 
 		// Setters
 

@@ -1,4 +1,5 @@
 #include "mouseactions.h"
+#include "clientside-networking.h"
 #include "label.h"
 #include "gameobject.h"
 #include "game.h"
@@ -115,7 +116,15 @@ namespace moac {
 	void Action::finish(){
 		if(prepare_attack){
 			int units = slidebar->get_unit_count();
-			game->add_unit_group(own_building->get_pos(), enemys_building->get_pos(), units, own_building->get_id());
+	
+			msg::spawn_troup_client stc = make_message<msg::spawn_troup_client>();
+			// TODO use own player id
+			stc.playerId = 0;
+			stc.sourceId = own_building->get_id();
+			stc.destinationId = enemys_building->get_id();
+			stc.unitCount = units;
+			game->m_messageReader->send_message(stc);
+	
 			cout << "owner: (" << own_building->get_pos().x << " ' " << own_building->get_pos().y << ")" << endl;
 			cout << "enemy: (" << enemys_building->get_pos().x << " ' " << enemys_building->get_pos().y << ")" << endl;
 			cout << "troups: (" << units << ")" << endl;

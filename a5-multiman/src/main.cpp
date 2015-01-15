@@ -156,7 +156,6 @@ void standard_keyboard(unsigned char key, int x, int y)
 void keyhandler(unsigned char key, int x, int y) {
 	if (key == 'W')      wireframe = !wireframe;
 	else if (key == 'R') reload_pending = true;
-    else if (key == 'e') game->add_unit_group(vec2i(10,10), vec2i(10+15,10 +15), 30, 0);
     else if (key == 'M') standard_mouse = !standard_mouse;
     else if (key == 'S') reload_pending = true;
 	else {
@@ -338,6 +337,7 @@ void actual_main() {
     objhandler = new ObjHandler();
         objhandler->addObj("tree", "./render-data/models/tree.obj", find_shader("pos+norm+tc"));
         objhandler->addObj("building_lot", "./render-data/models/building_lot.obj", find_shader("pos+norm+tc"));
+        objhandler->addObj("status_bar", "./render-data/models/menu.obj", find_shader("pos+norm+tc"));
       //  objhandler->addObj("bomb","./render-data/models/bbm.obj", find_shader("pos+norm+tc"));
 
     sh = new simple_heightmap();

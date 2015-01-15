@@ -18,17 +18,19 @@ void Game::init(string filename, int widht, int height){
     m_sh->init(filename, widht, height);
 }
 
-void Game::add_unit_group(vec2i start, vec2i end, unsigned int count, unsigned int id){
+ObjHandler* Game::get_objhandler(){
+	return m_objhandler;
+}
+
+void Game::add_unit_group(unsigned int sourceId, unsigned int destinationId, unsigned int count){
+	Building *source = getBuilding(sourceId);
+	Building *destination = getBuilding(destinationId);
+	vec2i start = source->get_pos();
+	vec2i end = destination->get_pos();
+	
+
     cout << "spawning enemies at: " << start.x << "," << start.y << " count: " << count << endl;
     m_unitgroups.push_back(UnitGroup(m_objhandler->getObjByName("tree"),m_sh,"bomb",start,end,0,count, 3000, m_sh->get_height(start.x, start.y)));
-
-    msg::spawn_troup_client stc = make_message<msg::spawn_troup_client>();
-    stc.playerId = 0;
-
-    // TDOO use actual building ids, now sending from house 0 to 6
-    stc.sourceId = id;
-    stc.destinationId = 6;
-    m_messageReader->send_message(stc);
 }
 
 Building* Game::get_building_at(vec3f pos){
@@ -69,9 +71,9 @@ void Game::draw(){
     for(int i = 0; i < m_unitgroups.size(); ++i){
         m_unitgroups[i].draw();
     }
-    if (m_selected != nullptr){
-        m_selected->draw_selection_circle();
-    }
+ //   if (m_selected != nullptr){
+  //      m_selected->draw_selection_circle();
+  //  }
 
 }
 
@@ -79,4 +81,16 @@ void Game::update(){
     for(int i = 0; i < m_unitgroups.size(); ++i){
         m_unitgroups[i].update();
    }
+}
+
+Building* Game::getBuilding(unsigned int id)
+{
+	for(int i = 0; i < m_buildings.size(); i++){
+		if(id == m_buildings[i].get_id()) {
+			return &m_buildings[i];
+		}
+		
+	}
+	
+	return nullptr;
 }
