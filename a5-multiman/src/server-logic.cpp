@@ -80,7 +80,7 @@ Troup::Troup(GameStage *gameStage, Building *sourceBuilding, Building *destinati
 
     PathNode destinationNode(destinationBuilding->m_x, destinationBuilding->m_y);
 
-    m_path = new Path(sourceNode, destinationNode, gameStage->m_mapX, gameStage->m_mapY);
+    m_path = new Path(this, sourceNode, destinationNode, gameStage->m_mapX, gameStage->m_mapY);
 
     m_stepTimer.start();
 }
@@ -141,9 +141,15 @@ void Building::IncomingTroup(Troup *troup)
     m_unitCount += troup->m_unitCount;
 }
 
-Path::Path(PathNode &source, PathNode &destination, unsigned int x, unsigned int y) : m_mapX(x), m_mapY(y)
+Path::Path(Troup *troup, PathNode &source, PathNode &destination, unsigned int x, unsigned int y) : m_mapX(x), m_mapY(y), m_troup(troup)
 {
-    /*PathNode current = source;
+    //FindDirectPath(source, destination);
+    FindPathAStar(source, destination);
+}
+
+void Path::FindDirectPath(PathNode &source, PathNode &destination)
+{
+    PathNode current = source;
 
     while(current.mapX != destination.mapX || current.mapY != destination.mapY) {
         PathNode newNode;
@@ -163,9 +169,7 @@ Path::Path(PathNode &source, PathNode &destination, unsigned int x, unsigned int
         newNode.mapY = current.mapY;
 
         m_nodes.push_back(newNode);
-    }*/
-
-    FindPathAStar(source, destination);
+    }
 }
 
 void Path::Init()
@@ -233,21 +237,14 @@ void Path::RetracePath(PathNode startPosition, PathNode current)
 {
     m_nodes.clear();
 
-    /*for(unsigned int r = 0; r < m_mapY; r++) {
-        cout << endl;
-        for(unsigned int c = 0; c < m_mapX; c++) {
-            cout << "(" << m_parent[r][c].mapX << "," << m_parent[r][c].mapY << ") ";
-        }
-    }*/
-
-    m_nodes.push_back(current);
+    m_nodes.insert(m_nodes.begin(), current);
 
     do {
-        cout << "current: "  << current.mapX << "," << current.mapY << endl;
+        //cout << "current: "  << current.mapX << "," << current.mapY << endl;
         current = m_parent[current.mapY][current.mapX];
-        cout << "parent: " << current.mapX << "," << current.mapY << endl;
+        //cout << "parent: " << current.mapX << "," << current.mapY << endl;
 
-        m_nodes.push_back(current);
+        m_nodes.insert(m_nodes.begin(), current);
         if(current.mapX == -1 && current.mapY == -1) {
             break;
         }
@@ -276,7 +273,13 @@ void Path::ExpandNode(PathNode current, PathNode endPosition)
     if(current.mapX < m_mapX - 1 && current.mapY < m_mapY - 1) neighbours.push_back(PathNode(current.mapX + 1, current.mapY + 1));
 
     for(auto & neighbour : neighbours) {
-        cout << "neighbour (" << neighbour.mapX << "," << neighbour.mapY << "), parent: (" << current.mapX << ", " << current.mapY << ")"  << endl;
+        if(!m_troup->m_gameStage->m_map[neighbour.mapY][neighbour.mapX]) {
+            // check if way is blocked
+            cout << "BLOCKED" << endl;
+            continue;
+        }
+
+        //cout << "neighbour (" << neighbour.mapX << "," << neighbour.mapY << "), parent: (" << current.mapX << ", " << current.mapY << ")"  << endl;
 
         if(m_closed[neighbour.mapY][neighbour.mapX]) {
             //cout << "-> Node already closed" << endl;

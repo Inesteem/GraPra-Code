@@ -260,13 +260,18 @@ UnitGroup::UnitGroup(Obj *obj, simple_heightmap *sh, string name, vec2i start, v
     m_model.col_major[3 * 4 + 1] = m_center.y + m_height;
     m_model.col_major[3 * 4 + 2] = m_pos.y*render_settings::tile_size_y;
 
-
+    matrix4x4f testUnit;
+    make_unit_matrix4x4f(&testUnit);
+    m_modelmatrices.push_back(testUnit);
+    m_spawned++;
 }
 void UnitGroup::force_position(vec2i pos){
     m_pos = pos;
     m_model.col_major[3 * 4 + 0] = m_pos.x*render_settings::tile_size_x;
     m_model.col_major[3 * 4 + 1] =  m_center.y + m_sh->get_height(m_pos.x, m_pos.y);
     m_model.col_major[3 * 4 + 2] = m_pos.y*render_settings::tile_size_y;
+
+    update_model_matrices();
 }
 
 void UnitGroup::update_model_matrices(){
@@ -281,14 +286,15 @@ void UnitGroup::update_model_matrices(){
 }
 
 void UnitGroup::move_to(vec2i pos, float time_to_reach){
-    //force_position(m_end);
+    force_position(pos);
+    /*force_position(m_end);
     m_start = m_pos;//m_end;
     m_end = pos;
     m_time_to_reach_end = time_to_reach;
-    m_timer.restart();
+    m_timer.restart();*/
 }
 
-void UnitGroup::update(){
+void UnitGroup::update(){/*
     float cur_time = m_timer.look();
 
     if(cur_time < m_time_to_reach_end){
@@ -309,7 +315,7 @@ void UnitGroup::update(){
         m_model.col_major[3 * 4 + 2] = y * render_settings::tile_size_y;
 
         update_model_matrices();
-    }
+    }*/
 
 }
 

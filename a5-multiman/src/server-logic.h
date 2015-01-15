@@ -30,6 +30,7 @@ public:
     PathNode(unsigned int x, unsigned int y) : mapX(x), mapY(y) {}
 };
 
+class Troup;
 class Path
 {
     void Init();
@@ -37,8 +38,10 @@ class Path
     PathNode GetHighestPriorityOpenNode();
     bool OpenNodesExists();
     void ExpandNode(PathNode current, PathNode endPosition);
-    void FindPathAStar(PathNode startPosition, PathNode endPosition);
     void RetracePath(PathNode startPosition, PathNode current);
+
+    void FindDirectPath(PathNode &source, PathNode &destination);
+    void FindPathAStar(PathNode startPosition, PathNode endPosition);
 
     unsigned int m_mapX, m_mapY;
 
@@ -48,14 +51,14 @@ class Path
     float **m_cost;
     PathNode **m_parent;
 
+    Troup *m_troup;
+
 public:
     list<PathNode> m_nodes;
 
-
-    Path(PathNode &source, PathNode &destination, unsigned int x, unsigned int y);
+    Path(Troup *troup, PathNode &source, PathNode &destination, unsigned int x, unsigned int y);
 };
 
-class Troup;
 class Building : public GameObject
 {
         unsigned int m_unitCount;

@@ -26,7 +26,7 @@ void Game::update_unit_group(unsigned int x, unsigned int y, unsigned int troupI
 	
     for(int i = 0; i < m_unitgroups.size(); ++i){
 		if(troupId == m_unitgroups[i].m_id){
-			m_unitgroups[i].move_to(vec2i(x, y), 3000);
+            m_unitgroups[i].move_to(vec2i(x, y), 3000);
 			return;
 		}
 	}
