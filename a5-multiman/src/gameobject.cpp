@@ -1,5 +1,6 @@
 #include "gameobject.h"
 #include "rendering.h"
+#include "label.h"
 #include <cmath>
 //wrapper for objloader
 Obj::Obj(string name, int id, string filename, shader_ref shader):id(id),name(name),shader(shader){
@@ -159,28 +160,30 @@ Tree::Tree(Obj *obj, string name, int x, int y, float height): GameObject(obj,na
 }
 
 //BUILDINGS
-Building::Building(Obj *obj,Obj *selection_circle, string name, int x, int y, unsigned int owner,int size, float height):
+Building::Building(Obj *obj,Obj *selection_circle, string name, int x, int y, unsigned int owner,int size, float height,unsigned int id):
     GameObject(obj, name ,find_shader("pos+norm+tc"), height),
     m_owner(owner) , m_size(size), selection_circle(selection_circle)
 
 {
     identifier = 'b';
     m_pos = vec2i(x,y);
+    this->id = id;
 
     m_model.col_major[3 * 4 + 0] = m_pos.x*render_settings::tile_size_x;
     m_model.col_major[3 * 4 + 1] = m_center.y + m_height;
     m_model.col_major[3 * 4 + 2] = m_pos.y*render_settings::tile_size_y;
     
-    label.setup_display();
+    label= new Label();
+    label->setup_display();
 //	label.set_camera("lcam");
 //	label.set_shader("special-text-shader");;
-    label.update_label_pos(2*x, 2*y, height+2);
+    label->update_label_pos(2*x, 2*y, height+2);
 
 }
 
 void Building::draw(){
     GameObject::draw();
-	label.render_gui_overlay();
+	label->render_gui_overlay();
 }
 
 float Building::dist_to(vec3f &pos){
@@ -189,6 +192,14 @@ float Building::dist_to(vec3f &pos){
     return length_of_vec3f(&dist);
 
 }
+
+unsigned int Building::get_owner_id(){
+	return m_owner;
+}
+unsigned int Building::get_id(){
+	return id;
+}
+
 
 void Building::draw_selection_circle(){
     vec3f color(1.0f,0,0);

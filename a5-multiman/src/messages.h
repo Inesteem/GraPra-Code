@@ -65,6 +65,7 @@ namespace msg {
         uint8_t troupId;
         uint8_t sourceId;
         uint8_t destinationId;
+        uint8_t unitCount;
     } __attribute__((aligned(8)));
 
     struct next_troup_destination : public message {
@@ -99,6 +100,7 @@ namespace msg {
         uint8_t playerId;
         uint8_t sourceId;
         uint8_t destinationId;
+        uint8_t unitCount;
     } __attribute__((aligned(8)));
 }
 

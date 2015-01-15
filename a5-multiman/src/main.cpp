@@ -23,9 +23,12 @@
 #include <libguile.h>
 #include <math.h>
 
-SlideBar *slidebar;
 
 using namespace std;
+using namespace moac;
+
+
+Action *action;
 
 #define doc(X)
 
@@ -44,7 +47,6 @@ unsigned char key_to_move_up = 'i',
 			  key_to_move_right = 'l';
 
 bool wireframe = false;
-bool send_troups = false;
 
 SCM_DEFINE(s_set_keymap, "define-keymap", 1, 0, 0, (SCM str), "") {
 	cout << "def km" << endl;
@@ -65,34 +67,32 @@ static bool reload_pending = false;
 
 
 void mouse_move(int x, int y) {
-	if(send_troups)
-		slidebar->update_mouse_pos(x,y);
+	action->update_mouse_pos(x,y);
 }
 
 void mouse(int button, int state, int x, int y) {
     if(standard_mouse){
          standard_mouse_func(button, state, x, y);
     } else {
-        if(button == GLUT_LEFT_BUTTON){
+        if(button == GLUT_LEFT_BUTTON){ //eigene Gebaeude auswaehlen
             if(state == GLUT_DOWN){
-                vec3f wp = moac::ClickWorldPosition(x,y);
-                game->get_building_at(wp);
+                action->handle_base_selection(x,y);
             }
 
         }
+		if(button == GLUT_RIGHT_BUTTON){
+			if(state == GLUT_DOWN){
+				action->handle_enemys_base(x,y);
+				
+			}
+			else {
+				action->finish();
+			}
+		}            
+        
     }
  
-	//schieberegler
-	if(button == GLUT_RIGHT_BUTTON){
-		if(state == GLUT_DOWN){
-			send_troups = true;
-			slidebar->update_pos(x,y);
-		}
-		else {
-			send_troups = false;
-			slidebar->reset_bar();
-		}
-	}    
+
 
 }
 
@@ -156,7 +156,6 @@ void standard_keyboard(unsigned char key, int x, int y)
 void keyhandler(unsigned char key, int x, int y) {
 	if (key == 'W')      wireframe = !wireframe;
 	else if (key == 'R') reload_pending = true;
-    else if (key == 'e') game->add_unit_group(vec2i(10,10), vec2i(10+15,10 +15), 30);
     else if (key == 'M') standard_mouse = !standard_mouse;
     else if (key == 'S') reload_pending = true;
 	else {
@@ -266,11 +265,11 @@ void loop() {
 
 
     //the_heightmap->draw();
-    //game->draw();
+    game->draw();
     
-    if(send_troups)
-		slidebar->render_slidebar();
-    
+	action->draw();
+	
+	
 	render_timer.done_with("draw");
 
 	// 
@@ -338,6 +337,7 @@ void actual_main() {
     objhandler = new ObjHandler();
         objhandler->addObj("tree", "./render-data/models/tree.obj", find_shader("pos+norm+tc"));
         objhandler->addObj("building_lot", "./render-data/models/building_lot.obj", find_shader("pos+norm+tc"));
+        objhandler->addObj("status_bar", "./render-data/models/menu.obj", find_shader("pos+norm+tc"));
       //  objhandler->addObj("bomb","./render-data/models/bbm.obj", find_shader("pos+norm+tc"));
 
     sh = new simple_heightmap();
@@ -354,8 +354,7 @@ void actual_main() {
 	// Dark blue background
 	glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
 
-	slidebar=new SlideBar();
-	slidebar->initialize_slidebar();
+	action = new Action(game);
 
 	// 
 	// pass control to the renderer. won't return.

@@ -2,7 +2,6 @@
 #define GAMEOBJECT_H
 
 #include "drawelement.h"
-#include "label.h"
 #include "simple_heightmap.h"
 #include "objloader.h"
 #include "wall-timer.h"
@@ -12,6 +11,7 @@
 #include <unordered_map>
 using namespace std;
 
+class Label;
 
 struct Obj {
 
@@ -81,19 +81,20 @@ public:
 
 class Building:public GameObject{
 public:
-    Label label;
-    Building(Obj *obj, Obj *selection_circle, string name, int x, int y, unsigned int owner, int size, float height );
+    Label *label;
+    Building(Obj *obj, Obj *selection_circle, string name, int x, int y, unsigned int owner, int size, float height, unsigned int id);
     void upgrade();
     float dist_to(vec3f &pos);
     void draw();
     void draw_selection_circle();
-
+	unsigned int get_owner_id();
+	unsigned int get_id();
 
 private:
     unsigned int m_owner;
     int m_size;
     Obj *selection_circle;
-    
+    unsigned int id;
     
 };
 
