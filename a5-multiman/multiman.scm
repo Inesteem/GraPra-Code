@@ -24,8 +24,9 @@
 (texture-from-file "terrain_2" "terrain_2.png" 'tex2d #t)
 (texture-from-file "terrain_3" "terrain_3.png" 'tex2d #t)
 (texture-from-file "selection_circle" "selection_circle.png" 'tex2d #t)
-(texture-from-file "slidebar" "slidebar.png" 'tex2d #t)
 (texture-from-file "slidebar2" "slidebar_2.png" 'tex2d #t)
+(texture-from-file "dorf" "exchange_2.png" 'tex2d #t)
+(texture-from-file "none" "exchange_1.png" 'tex2d #t)
 
 
 (set-move-factor! 1)

@@ -461,7 +461,6 @@ uniform sampler2D tex;
 		if(newy < 0) newy=-newy;
 		vec2 texc = vec2(in_tc.x, newy);
 		tc = texc;
-//		tc = in_tc;
 	}
 
 }
@@ -499,6 +498,45 @@ uniform float down;
 
 
 		}
+
+#:inputs (list "in_pos" "in_tc")>
+
+
+#<make-shader "menu-shader"
+#:vertex-shader #{
+#version 150 core
+
+	in vec3 in_pos;
+	in vec2 in_tc;
+	uniform mat4 proj;
+	uniform mat4 view;
+	uniform mat4 model;
+	out vec2 tc;
+	void main() {
+		gl_Position = vec4(in_pos.x, in_pos.y,in_pos.z, 1.);
+		float newy= in_tc.y -1;
+		if(newy < 0) newy=-newy;
+		vec2 texc = vec2(in_tc.x, newy);
+		tc = texc;
+//		tc = in_tc;
+	}
+
+}
+#:fragment-shader #{
+#version 150 core
+
+in vec2 tc;
+out vec4 out_col;
+uniform sampler2D tex;
+
+		void main(){
+		
+			gl_FragDepth = 0.0001;
+			out_col = texture2D(tex, tc );
+		
+		}
+
+}
 
 #:inputs (list "in_pos" "in_tc")>
 

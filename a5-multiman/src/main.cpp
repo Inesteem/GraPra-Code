@@ -16,6 +16,7 @@
 #include "game.h"
 #include "messages.h"
 #include "mouseactions.h"
+#include "label.h"
 
 #include <libcgl/scheme.h>
 #include <libcgl/impex.h>
@@ -80,7 +81,7 @@ void mouse(int button, int state, int x, int y) {
             }
 
         }
-		if(button == GLUT_RIGHT_BUTTON){
+		else if(button == GLUT_RIGHT_BUTTON){
 			if(state == GLUT_DOWN){
 				action->handle_enemys_base(x,y);
 				
@@ -88,7 +89,13 @@ void mouse(int button, int state, int x, int y) {
 			else {
 				action->finish();
 			}
-		}            
+		}
+		else if(button == 3 && state != GLUT_DOWN)
+			standard_keyboard('r', x, y);
+		           
+		else if(button == 4 && state != GLUT_DOWN)
+			standard_keyboard('f', x, y);
+		           
         
     }
  
@@ -131,11 +138,13 @@ void standard_keyboard(unsigned char key, int x, int y)
                         break;
                 case 's':
                         copy_vec3f(&tmp, &cam_up);
+                        tmp = vec3f(0,0,1);
                         mul_vec3f_by_scalar(&tmp, &tmp, -cgl_cam_move_factor);
                         add_components_vec3f(&cam_pos, &cam_pos, &tmp);
                         break;
                 case 'w':
                         copy_vec3f(&tmp, &cam_up);
+                        tmp = vec3f(0,0,1);
                         mul_vec3f_by_scalar(&tmp, &tmp, cgl_cam_move_factor);
                         add_components_vec3f(&cam_pos, &cam_pos, &tmp);
                         break;
@@ -343,12 +352,12 @@ void actual_main() {
     objhandler = new ObjHandler();
         objhandler->addObj("tree", "./render-data/models/tree.obj", find_shader("pos+norm+tc"));
         objhandler->addObj("building_lot", "./render-data/models/building_lot.obj", find_shader("pos+norm+tc"));
-        objhandler->addObj("status_bar", "./render-data/models/menu.obj", find_shader("pos+norm+tc"));
+        objhandler->addObj("status_bar", "./render-data/models/menu.obj");
       //  objhandler->addObj("bomb","./render-data/models/bbm.obj", find_shader("pos+norm+tc"));
 
     sh = new simple_heightmap();
 
-    game = new Game(objhandler,sh, messageReader);
+    game = new Game(objhandler,sh, messageReader);;
 
     messageReader = new client_message_reader(game);
        messageReader->networking_prologue();
@@ -360,7 +369,7 @@ void actual_main() {
 	// Dark blue background
 	glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
 
-	action = new Action(game);
+	action = new Action(game, objhandler);
 
 	// 
 	// pass control to the renderer. won't return.

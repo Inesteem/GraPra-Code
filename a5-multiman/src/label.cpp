@@ -544,7 +544,79 @@ int SlideBar::get_unit_count(){
 	/*StatusBar*/
 
 
-StatusBar::StatusBar(Game *game, string name){
+StatusBar::StatusBar(string name, ObjHandler *objhandler){
+	this->objhandler = objhandler;
+    Obj *obj = objhandler->getObjByName(name);
+	mesh = obj->mesh;
+//	texture = obj->tex;
+
+	texture = find_texture("none");
+/*	mesh = make_mesh("quad", 2);
+	vec3f pos[4] = { {0,0,-10}, {1,0,-10}, {1,1,-10}, {0,1,-10} };
+	vec2f tc[4] = { {0,1}, {1,1}, {1,0}, {0,0} };
+	unsigned int idx[6] = { 0, 1, 2, 2, 3, 0 };
+
 	
+	bind_mesh_to_gl(mesh);
+	add_vertex_buffer_to_mesh(mesh, "in_pos", GL_FLOAT, 4, 3, (float *) pos, GL_STATIC_DRAW);
+	add_vertex_buffer_to_mesh(mesh, "in_tc", GL_FLOAT, 4, 2, (float *) tc, GL_STATIC_DRAW);
+	add_index_buffer_to_mesh(mesh, 6, idx, GL_STATIC_DRAW);
+	unbind_mesh_from_gl(mesh);
+*/
+	vec3f cam_pos = {0,0,0}, cam_dir = {0,0,-1}, cam_up = {0,1,0};
+	camera = make_orthographic_cam((char*)"gui cam", &cam_pos, &cam_dir, &cam_up, 50, 0, 50, 0, 0.01, 1000);
+
+	shader = find_shader("menu-shader");
+
+}
 	
+
+
+void StatusBar::render_statusbar(){
+
+	camera_ref old_camera = current_camera();
+	use_camera(camera);
+	bind_shader(shader);
+
+	glDepthMask(GL_TRUE);	
+
+	int loc;
+
+
+		matrix4x4f model;
+		make_unit_matrix4x4f(&model);
+//		model.row_col(0,0) = (float)texture_width(texture)*2.f / (float)texture_height(texture);
+//		model.row_col(1,1) = 20.f;
+//		model.row_col(2,2) = 20.f;
+		model.row_col(0,3) = 37.f;
+		model.row_col(1,3) = 5.f;
+
+
+	loc = glGetUniformLocation(gl_shader_object(shader), "model");
+	glUniformMatrix4fv(loc, 1, GL_FALSE, model.col_major);
+	
+	loc = glGetUniformLocation(gl_shader_object(shader), "proj");
+	glUniformMatrix4fv(loc, 1, GL_FALSE, projection_matrix_of_cam(current_camera())->col_major);
+		
+	loc = glGetUniformLocation(gl_shader_object(shader), "view");
+	glUniformMatrix4fv(loc, 1, GL_FALSE, gl_view_matrix_of_cam(current_camera())->col_major);
+
+
+	bind_texture(texture, 0);
+	loc = glGetUniformLocation(gl_shader_object(shader), "tex");
+	glUniform1i(loc, 0);
+
+	bind_mesh_to_gl(mesh);
+	draw_mesh_as(mesh,GL_TRIANGLES);
+	unbind_mesh_from_gl(mesh);
+
+	glDisable(GL_BLEND);
+	glDepthMask(GL_TRUE);	
+	unbind_shader(shader);
+	unbind_texture(texture);
+	use_camera(old_camera);
+}
+
+void StatusBar::set_texture(char *name){
+	texture = find_texture(name);
 }

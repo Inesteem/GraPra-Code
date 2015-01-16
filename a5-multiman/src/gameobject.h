@@ -15,6 +15,7 @@ class Label;
 
 struct Obj {
 
+    Obj(string name, int id, string filename);
     Obj(string name, int id, string filename, shader_ref shader);
     Obj(string name, int id, string filename, shader_ref shader, vec3f scale);
     Obj(string name, int id, mesh_ref mesh, texture_ref tex, shader_ref shader);
@@ -36,6 +37,7 @@ public:
     ObjHandler();
     //adds .obj and tries to scale to fit map
     void addObj(string name, string filename, shader_ref shader);
+    void addObj(string name, string filename);
     //adds .obj with custom scale
     void addObj_withScale(string name, string filename, shader_ref shader, vec3f scale);
     Obj *getObjByName(string name);

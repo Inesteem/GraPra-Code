@@ -32,7 +32,9 @@
 
 
 class Building;
+class ObjHandler;
 class SlideBar;
+class StatusBar;
 class Game;
 class client_message_reader;
 
@@ -45,11 +47,12 @@ namespace moac {
 		
 		Building *own_building;
 		Building *enemys_building;
-		bool ob_set, eb_set, prepare_attack;
+		bool ob_set, eb_set, prepare_attack, render_status_bar;
 		SlideBar *slidebar;
+		StatusBar *statusbar;
 		Game *game;
 		
-		Action(Game *game);
+		Action(Game *game, ObjHandler *objhandler);
 		bool handle_base_selection(float x, float y);
 		bool handle_enemys_base(float x, float y);
 		void start(float x, float y);

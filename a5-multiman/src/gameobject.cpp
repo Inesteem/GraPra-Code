@@ -24,10 +24,38 @@ Obj::Obj(string name, int id, string filename, shader_ref shader):id(id),name(na
     add_index_buffer_to_mesh(mesh, loader.objdata.groups->triangles * 3, (unsigned int *) loader.objdata.groups->v_ids, GL_STATIC_DRAW);
     unbind_mesh_from_gl(mesh);
     tex_params_t p = default_tex_params();
-    tex = make_texture_ub((name+"_tex").c_str(), loader.objdata.groups->mtl->tex_d, GL_TEXTURE_2D, &p);
-
-
+    tex = make_texture_ub(("tex"), loader.objdata.groups->mtl->tex_d, GL_TEXTURE_2D, &p);
 }
+
+
+Obj::Obj(string name, int id, string filename):id(id),name(name){
+    ObjLoader loader(name.c_str(), filename.c_str());
+    loader.pos_and_norm_shader = shader;
+    loader.pos_norm_and_tc_shader = shader;
+    loader.default_shader = shader;
+    vec3f min, max;
+    loader.BoundingBox(min, max);
+    bb_min = vec3f(-1,-1,-1);
+    // bb_max = vec3f(render_settings::tile_size_x,(max.y-min.y)/(max.x-min.x)*render_settings::tile_size_x,(max.z-min.z)/(max.x-min.x)*render_settings::tile_size_y);
+     bb_max = vec3f(1,1,1);
+     loader.ScaleVertexDataToFit(bb_min,bb_max);
+     drawelements = new vector<drawelement*>();
+    loader.GenerateNonsharingMeshesAndDrawElements(*drawelements);
+    vec3f new_pos = vec3f(0,-1,-1);
+    loader.TranslateTo(new_pos);
+    mesh = make_mesh(name.c_str(),3);
+    bind_mesh_to_gl(mesh);
+    add_vertex_buffer_to_mesh(mesh, "in_pos", GL_FLOAT, loader.objdata.vertices, 3, (float*) loader.objdata.vertex_data , GL_STATIC_DRAW);
+    add_vertex_buffer_to_mesh(mesh, "in_norm", GL_FLOAT, loader.objdata.vertices, 3, (float *) loader.objdata.normal_data, GL_STATIC_DRAW);
+    add_vertex_buffer_to_mesh(mesh, "in_tc", GL_FLOAT, loader.objdata.vertices, 2, (float *) loader.objdata.texcoord_data, GL_STATIC_DRAW);
+    add_index_buffer_to_mesh(mesh, loader.objdata.groups->triangles * 3, (unsigned int *) loader.objdata.groups->v_ids, GL_STATIC_DRAW);
+    unbind_mesh_from_gl(mesh);
+    tex_params_t p = default_tex_params();
+    tex = make_texture_ub(("tex"), loader.objdata.groups->mtl->tex_d, GL_TEXTURE_2D, &p);
+}
+
+
+
 Obj::Obj(string name, int id, string filename, shader_ref shader,vec3f scale):id(id),name(name),shader(shader){
     ObjLoader loader(name.c_str(), filename.c_str());
     loader.TranslateToOrigin();
@@ -41,6 +69,8 @@ Obj::Obj(string name, int id, string filename, shader_ref shader,vec3f scale):id
     add_vertex_buffer_to_mesh(mesh, "in_tc", GL_FLOAT, loader.objdata.vertices, 2, (float *) loader.objdata.texcoord_data, GL_STATIC_DRAW);
     add_index_buffer_to_mesh(mesh, loader.objdata.groups->triangles * 3, (unsigned int *) loader.objdata.groups->v_ids, GL_STATIC_DRAW);
     unbind_mesh_from_gl(mesh);
+    tex_params_t p = default_tex_params();
+    tex = make_texture_ub(("tex"), loader.objdata.groups->mtl->tex_d, GL_TEXTURE_2D, &p);
 
 //    vec3f min, max;
 //    loader.BoundingBox(min, max);
@@ -69,6 +99,12 @@ void ObjHandler::addObj(string name, string filename, shader_ref shader){
 
     objs.push_back(Obj(name,objs.size(),filename, shader));
 }
+void ObjHandler::addObj(string name, string filename){
+
+    objs.push_back(Obj(name,objs.size(),filename));
+}
+
+
 
 void ObjHandler::addObj_withScale(string name, string filename, shader_ref shader, vec3f scale){
     objs.push_back(Obj(name,objs.size(),filename,shader,scale));
@@ -138,6 +174,7 @@ matrix4x4f GameObject::get_model_matrix(){
 void GameObject::set_height(float height){
     m_model.col_major[3 * 4 + 1] = m_model.col_major[3 * 4 + 1] + height;
 }
+
 
 void GameObject::draw(){
    // m_obj->drawelements->front()->Modelmatrix(&m_model);
@@ -215,8 +252,36 @@ int Building::get_unit_count(){
 
 
 void Building::draw(){
+	static float rotation = 0;
+	rotation += 0.007;
+	//TODO:==baustelle
+	if(true){
+		matrix4x4f shovel_model;
+		
+		vec3f rot_vec = vec3f(0,1,0);
+		make_rotation_matrix4x4f(&shovel_model,&rot_vec, rotation);
+		shovel_model =  m_model * shovel_model;
+		int i = 0;
+		for(vector<drawelement*>::iterator it = m_obj->drawelements->begin(); it != m_obj->drawelements->end(); ++it) {
+			drawelement *de = *it;
+			de->Modelmatrix(&m_model);
+			if(i==1)
+				de->Modelmatrix(&shovel_model);
+			de->bind();
+			setup_dir_light(m_shader);
+			de->apply_default_matrix_uniforms();
+			de->apply_default_tex_uniforms_and_bind_textures();
+
+			de->draw_em();
+			de->unbind();
+			i++;
+		}
+		
+	} else {
+		GameObject::draw();
+	}
+	
 	label->update_gui_texture_int(unit_count);
-    GameObject::draw();
 	label->render_gui_overlay();
 }
 
