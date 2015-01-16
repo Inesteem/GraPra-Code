@@ -145,7 +145,6 @@ namespace moac {
 		if(prepare_attack)
 			slidebar->update_mouse_pos(x,y);	
 	}
-	
 
 }
 

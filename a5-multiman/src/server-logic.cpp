@@ -75,6 +75,7 @@ Troup* GameStage::spawnTroup(unsigned int sourceBuildingID, unsigned int destina
     sts.troupId = t->m_id;
     sts.unitCount = unitCount;
     broadcast(&sts);
+    t->Update();
 
     return t;
 }
@@ -120,6 +121,7 @@ bool Troup::Update()
     ntd.mapX = m_x;
     ntd.mapY = m_y;
     ntd.troupId = m_id;
+    ntd.time = 500;
     broadcast(&ntd);
 
     cout << "Updated troup " << m_id << " to position (" << m_x << ", " << m_y << ")" << endl;
