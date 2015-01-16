@@ -99,7 +99,7 @@ static int first_run = 0;
 bool Troup::Update()
 {
 
-    if(m_stepTimer.look() < m_stepTime-20) {
+    if(m_stepTimer.look() < m_stepTime) {
         return false;
     }
 	cout << m_stepTimer.look() << endl;
