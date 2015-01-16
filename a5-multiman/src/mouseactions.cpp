@@ -56,14 +56,17 @@ namespace moac {
         return vec3f(outX, outY, outZ);
     }
 
-	Action::Action(Game *game){
-
+	Action::Action(Game *game, ObjHandler *objhandler){
+		
 		this->game = game;
+		this->statusbar = statusbar;
 		eb_set = false;
 		ob_set = false;
 		prepare_attack = false;
+		render_status_bar = true;
 		slidebar = new SlideBar();	
-		slidebar->initialize_slidebar();			
+		slidebar->initialize_slidebar();
+		statusbar = new StatusBar("status_bar", objhandler);			
 		
 	}
 
@@ -137,7 +140,9 @@ namespace moac {
 
 	void Action::draw(){
 		if(prepare_attack)
-			slidebar->render_slidebar();		
+			slidebar->render_slidebar();	
+        if(render_status_bar)
+            statusbar->render_statusbar();
 	}
 	
 	

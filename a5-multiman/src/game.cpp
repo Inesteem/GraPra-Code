@@ -93,9 +93,11 @@ void Game::draw(){
     for(int i = 0; i < m_unitgroups.size(); ++i){
         m_unitgroups[i].draw();
     }
+
     if (m_selected != 0){
        m_selected->draw_selection_circle();
     }
+
 
 }
 

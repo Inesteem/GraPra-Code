@@ -22,6 +22,7 @@ class simple_heightmap
 {
 public:
     simple_heightmap();
+    vec3f sample_normal(int x, int y);
     float get_height(float x, float y);
     void init(const std::string filename, int width, int height);
     void update();

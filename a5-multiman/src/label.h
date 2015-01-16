@@ -34,6 +34,8 @@
 
 
 class Gameobject;
+class Obj;
+class ObjHandler;
 
 class Label {
 	
@@ -150,10 +152,17 @@ class SlideBar {
 
 class StatusBar {
 
+	ObjHandler *objhandler;
+	shader_ref shader;
+	camera_ref camera;
+	mesh_ref mesh;
+	texture_ref texture;
+
 	public:
 		// Konstruktors
-		StatusBar(Game *game, string name);
-
+		StatusBar(string name, ObjHandler *objhandler);
+		void render_statusbar();
+		void set_texture(char *name);
 
 
 		// Setters
