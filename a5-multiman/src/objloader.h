@@ -13,9 +13,10 @@
 #include "drawelement.h"
 
 class ObjLoader {
-	obj_data objdata;
-	vec3f diffuse;
+
 public:
+    obj_data objdata;
+    vec3f diffuse;
 	ObjLoader(const std::string &objname, const std::string &filename);
 
 	void GenerateMeshesAndDrawelements(std::vector<drawelement*> &drawelements);

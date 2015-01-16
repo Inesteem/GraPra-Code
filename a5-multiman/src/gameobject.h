@@ -18,6 +18,7 @@ struct Obj {
     Obj(string name, int id, string filename, shader_ref shader);
     Obj(string name, int id, string filename, shader_ref shader, vec3f scale);
     Obj(string name, int id, mesh_ref mesh, texture_ref tex, shader_ref shader);
+
     vector<drawelement*> *drawelements;
     mesh_ref mesh;
     texture_ref tex;

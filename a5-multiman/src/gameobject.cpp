@@ -16,6 +16,14 @@ Obj::Obj(string name, int id, string filename, shader_ref shader):id(id),name(na
      loader.ScaleVertexDataToFit(bb_min,bb_max);
      drawelements = new vector<drawelement*>();
     loader.GenerateNonsharingMeshesAndDrawElements(*drawelements);
+    mesh = make_mesh(name.c_str(),3);
+    bind_mesh_to_gl(mesh);
+    add_vertex_buffer_to_mesh(mesh, "in_pos", GL_FLOAT, loader.objdata.vertices, 3, (float*) loader.objdata.vertex_data , GL_STATIC_DRAW);
+    add_vertex_buffer_to_mesh(mesh, "in_norm", GL_FLOAT, loader.objdata.vertices, 3, (float *) loader.objdata.normal_data, GL_STATIC_DRAW);
+    add_vertex_buffer_to_mesh(mesh, "in_tc", GL_FLOAT, loader.objdata.vertices, 2, (float *) loader.objdata.texcoord_data, GL_STATIC_DRAW);
+    add_index_buffer_to_mesh(mesh, loader.objdata.groups->triangles * 3, (unsigned int *) loader.objdata.groups->v_ids, GL_STATIC_DRAW);
+    unbind_mesh_from_gl(mesh);
+
 
 }
 Obj::Obj(string name, int id, string filename, shader_ref shader,vec3f scale):id(id),name(name),shader(shader){
@@ -24,6 +32,14 @@ Obj::Obj(string name, int id, string filename, shader_ref shader,vec3f scale):id
     loader.pos_and_norm_shader = shader;
     loader.pos_norm_and_tc_shader = shader;
     loader.default_shader = shader;
+    mesh = make_mesh(name.c_str(),3);
+    bind_mesh_to_gl(mesh);
+    add_vertex_buffer_to_mesh(mesh, "in_pos", GL_FLOAT, loader.objdata.vertices, 3, (float*) loader.objdata.vertex_data , GL_STATIC_DRAW);
+    add_vertex_buffer_to_mesh(mesh, "in_norm", GL_FLOAT, loader.objdata.vertices, 3, (float *) loader.objdata.normal_data, GL_STATIC_DRAW);
+    add_vertex_buffer_to_mesh(mesh, "in_tc", GL_FLOAT, loader.objdata.vertices, 2, (float *) loader.objdata.texcoord_data, GL_STATIC_DRAW);
+    add_index_buffer_to_mesh(mesh, loader.objdata.groups->triangles * 3, (unsigned int *) loader.objdata.groups->v_ids, GL_STATIC_DRAW);
+    unbind_mesh_from_gl(mesh);
+
 //    vec3f min, max;
 //    loader.BoundingBox(min, max);
 //    bb_min = vec3f(0,0,0);
