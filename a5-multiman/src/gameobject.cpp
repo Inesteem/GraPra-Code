@@ -23,6 +23,8 @@ Obj::Obj(string name, int id, string filename, shader_ref shader):id(id),name(na
     add_vertex_buffer_to_mesh(mesh, "in_tc", GL_FLOAT, loader.objdata.vertices, 2, (float *) loader.objdata.texcoord_data, GL_STATIC_DRAW);
     add_index_buffer_to_mesh(mesh, loader.objdata.groups->triangles * 3, (unsigned int *) loader.objdata.groups->v_ids, GL_STATIC_DRAW);
     unbind_mesh_from_gl(mesh);
+    tex_params_t p = default_tex_params();
+    tex = make_texture_ub((name+"_tex").c_str(), loader.objdata.groups->mtl->tex_d, GL_TEXTURE_2D, &p);
 
 
 }
@@ -107,7 +109,7 @@ Obj *ObjHandler::get_selection_circle(){
    // add_vertex_buffer_to_mesh(m_mesh, "in_normal", GL_FLOAT, m_width*m_height, 3,nullptr, GL_STATIC_DRAW );
     add_index_buffer_to_mesh(mesh, index.size(), (unsigned int *) index.data(), GL_STATIC_DRAW);
     unbind_mesh_from_gl(mesh);
-    cout << "pushed" << endl;
+
     objs.push_back(Obj(name,objs.size(),mesh,find_texture("selection_circle"),find_shader("selection_circle_shader")));
 
     return get_selection_circle();
@@ -312,9 +314,9 @@ void UnitGroup::update_model_matrices(){
     for(int i = 0; i < m_modelmatrices.size(); ++i){
 
 
-        m_modelmatrices[i].col_major[3 * 4 + 0] = m_model.col_major[3 * 4 + 0];// + 2*cos(2*M_PI * ((float) i/(float)m_spawned));
-        m_modelmatrices[i].col_major[3 * 4 + 1] = m_model.col_major[3 * 4 + 1];
-        m_modelmatrices[i].col_major[3 * 4 + 2] = m_model.col_major[3 * 4 + 2];// + 2*sin(2*M_PI * ((float) i/(float)m_spawned));
+        m_modelmatrices[i].col_major[3 * 4 + 0] = m_model.col_major[3 * 4 + 0] + 2*cos(2*M_PI * ((float) i/(float)m_spawned));
+        m_modelmatrices[i].col_major[3 * 4 + 1] = m_model.col_major[3 * 4 + 1] + m_sh->get_height(m_model.col_major[3 * 4 + 0] + 2*cos(2*M_PI * ((float) i/(float)m_spawned)), m_model.col_major[3 * 4 + 2] + 2*sin(2*M_PI * ((float) i/(float)m_spawned)) );
+        m_modelmatrices[i].col_major[3 * 4 + 2] = m_model.col_major[3 * 4 + 2] + 2*sin(2*M_PI * ((float) i/(float)m_spawned));
     }
 }
 
