@@ -24,6 +24,7 @@ void simple_heightmap::init( const std::string filename, int width, int height){
     }
 
     vector<vec3f> pos = vector<vec3f>(m_width*m_height);
+    vector<vec3f> norm = vector<vec3f>(m_width*m_height);
 
     m_heights = vector<float>(m_width*m_height);
     for(int i = 0; i < m_height; ++i){
@@ -34,10 +35,17 @@ void simple_heightmap::init( const std::string filename, int width, int height){
 
 
         }
-
-
     }
-    m_shader = find_shader("heightmap_shader");
+    
+    for(int i = 0; i < m_height-1; ++i){
+        for(int j = 0; j < m_width; ++j){
+			norm.push_back(sample_normal(i,j));
+		}
+	}
+    
+    
+  //  m_shader = find_shader("heightmap_shader");
+    m_shader = find_shader("terrain");
     make_unit_matrix4x4f(&m_model);
     std::vector<unsigned int> index;
     for(int i = 0; i < m_height-1; ++i){
@@ -57,13 +65,14 @@ void simple_heightmap::init( const std::string filename, int width, int height){
 
     bind_mesh_to_gl(m_mesh);
     add_vertex_buffer_to_mesh(m_mesh, "in_pos", GL_FLOAT, m_width*m_height, 3, (float*) pos.data() , GL_STATIC_DRAW);
-   // add_vertex_buffer_to_mesh(m_mesh, "in_data", GL_INT, m_width*m_height, 1, nullptr , GL_STATIC_DRAW);
-   // add_vertex_buffer_to_mesh(m_mesh, "in_normal", GL_FLOAT, m_width*m_height, 3,nullptr, GL_STATIC_DRAW );
+  //  add_vertex_buffer_to_mesh(m_mesh, "in_tc", GL_INT, m_width*m_height, 1, nullptr , GL_STATIC_DRAW);
+    add_vertex_buffer_to_mesh(m_mesh, "in_norm", GL_FLOAT, m_width*m_height, 3,(float*) norm.data(), GL_STATIC_DRAW );
     add_index_buffer_to_mesh(m_mesh, index.size(), (unsigned int *) index.data(), GL_STATIC_DRAW);
     unbind_mesh_from_gl(m_mesh);
 }
 
 float simple_heightmap::get_height(float x, float y){
+	if(x < 0 || y < 0 || x > m_width || y > m_height) return 0;
     vec2i pos1 ((int) x, (int) y);
     vec2i pos2 ((int) x + 1, (int) y);
     vec2i pos3 ((int) x, (int) y + 1 );
@@ -86,8 +95,6 @@ float simple_heightmap::get_height(float x, float y){
 void simple_heightmap::draw(){
 
     bind_shader(m_shader);
-
-
 
     int loc = glGetUniformLocation(gl_shader_object(m_shader), "proj");
     glUniformMatrix4fv(loc, 1, GL_FALSE, projection_matrix_of_cam(current_camera())->col_major);
@@ -112,6 +119,17 @@ void simple_heightmap::draw(){
     glUniform1i(loc, 3);
 
 
+	loc = glGetUniformLocation(gl_shader_object(m_shader), "map_height");
+	glUniform1f(loc, render_settings::height_factor);
+
+	vec3f cam_pos;
+	extract_pos_vec3f_of_matrix(&cam_pos, lookat_matrix_of_cam(current_camera()));
+	loc = glGetUniformLocation(gl_shader_object(m_shader), "eye_pos");
+	glUniform3f(loc, cam_pos.x, cam_pos.y, cam_pos.z);
+
+	setup_dir_light(m_shader);
+
+
     bind_mesh_to_gl(m_mesh);
 
     draw_mesh_as(m_mesh,GL_TRIANGLE_STRIP);
@@ -132,5 +150,44 @@ void simple_heightmap::draw(){
 }
 
 
+
+vec3f simple_heightmap::sample_normal(int x, int y){
+	//cross_vec3f(out, v1, v2)
+	float cur_height = get_height(x, y);
+	vec3f v1 = vec3f(1*render_settings::tile_size_x, 	get_height(x+1, y)-cur_height, 	0);
+	vec3f v2 = vec3f(1,  	get_height(x+1, y+1)-cur_height,1);
+	vec3f v3 = vec3f(0,  	get_height(x, y+1)-cur_height, 	1);
+	vec3f v4 = vec3f(-1,  	get_height(x-1, y+1)-cur_height,1);
+	vec3f v5 = vec3f(-1,  	get_height(x-1, y)-cur_height, 	0);
+	vec3f v6 = vec3f(-1,  	get_height(x-1, y-1)-cur_height,-1);
+	vec3f v7 = vec3f(0,  	get_height(x, y-1)-cur_height, 	-1);
+	vec3f v8 = vec3f(1,  	get_height(x+1, y-1)-cur_height,-1);
+
+	// 4 3 2
+	// 5 x 1
+	// 6 7 8
+	normalize_vec3f(&v1);
+	normalize_vec3f(&v2);
+	normalize_vec3f(&v3);
+	normalize_vec3f(&v4);
+	normalize_vec3f(&v5);
+	normalize_vec3f(&v6);
+	normalize_vec3f(&v7);
+	normalize_vec3f(&v8);
+	vec3f n1, n2, n3, n4, n5, n6, n7, n8;
+	cross_vec3f(&n1, &v1, &v2);
+	cross_vec3f(&n2, &v2, &v3);
+	cross_vec3f(&n3, &v3, &v4);
+	cross_vec3f(&n4, &v4, &v5);
+	cross_vec3f(&n5, &v5, &v6);
+	cross_vec3f(&n6, &v6, &v7);
+	cross_vec3f(&n7, &v7, &v8);
+	cross_vec3f(&n8, &v8, &v1);
+	vec3f n = (n1 + n2 + n3 + n4 + n5 + n6 + n7 + n8);
+	n = n/8.;
+	n.y = n.y/8.;
+	normalize_vec3f(&n);
+	return -n;
+}
 
 

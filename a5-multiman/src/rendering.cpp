@@ -21,6 +21,8 @@ void setup_dir_light(shader_ref shader) {
 	glUniform3f(loc, light_dir.x, light_dir.y, light_dir.z);
 	loc = glGetUniformLocation(gl_shader_object(shader), "light_col");
 	glUniform3f(loc, 0.6f, 0.7f, 0.8f);
+	loc = glGetUniformLocation(gl_shader_object(shader), "light_col_water");
+	glUniform3f(loc, 0.4f, 0.4f, 0.4f);
 }
 
 float random_float() {

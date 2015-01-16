@@ -18,6 +18,11 @@
 #include "mouseactions.h"
 #include "label.h"
 
+#include <framebuffer.h>
+#include <texture.h>
+#include <cstdio>
+
+
 #include <libcgl/scheme.h>
 #include <libcgl/impex.h>
 
@@ -27,6 +32,15 @@
 
 using namespace std;
 using namespace moac;
+
+void init_framebuffer();
+void init_matrices();
+
+framebuffer_ref the_fbuf;
+texture_ref shadowmap;
+texture_ref color;
+
+matrix4x4f *T;
 
 
 Action *action;
@@ -48,6 +62,7 @@ unsigned char key_to_move_up = 'i',
 			  key_to_move_right = 'l';
 
 bool wireframe = false;
+bool screenshot = false;
 
 SCM_DEFINE(s_set_keymap, "define-keymap", 1, 0, 0, (SCM str), "") {
 	cout << "def km" << endl;
@@ -173,6 +188,10 @@ void keyhandler(unsigned char key, int x, int y) {
 	}
     else if (key == 'M') standard_mouse = !standard_mouse;
     else if (key == 'S') reload_pending = true;
+    else if (key == 'T') screenshot = true;
+	else if (key == 'P') use_camera(find_camera("playercam"));
+	else if (key == 'L') use_camera(find_camera("lightcam"));    
+    
 	else {
 		navi_key = key;
 		standard_keyboard(key,x,y);
@@ -264,6 +283,45 @@ void loop() {
 	// 
 	// pre render pass
 	//
+		
+	//shadowmapping
+	
+	//glViewport(0,0,2048,2048);	
+	//glColorMask(0,0,0,0);
+	
+	//Cam_Setup
+	camera_ref actual_cam = current_camera();
+	use_camera(find_camera("lightcam"));
+
+	static int i = 1;
+
+	if(i == 1){
+		vec3f pos = {-22.877605,38.488937,52.607487};
+		vec3f dir = {  0.811107, -0.486664, -0.324443};
+		vec3f up = { 0.584898,0.674882,0.449921};
+		change_lookat_of_cam(find_camera("lightcam"),&pos, &dir,&up);	
+		recompute_gl_matrices_of_cam(find_camera("lightcam"));    
+		i = 0;
+	}		
+
+	bind_framebuffer(the_fbuf);
+	glClear(GL_DEPTH_BUFFER_BIT);
+    glClearDepth(1);
+    
+    game->draw();
+	
+	unbind_framebuffer(the_fbuf);	
+	
+	if(screenshot){
+		save_texture_as_png(shadowmap, "./screenshot.png");
+		save_texture_as_png(color, "./screenshot_42.png");
+		screenshot = false;
+		std::cout << "Took a shot!" << std::endl;
+	}
+
+	init_matrices();	
+			
+	//shadowmapping end
 	
 	render_timer.done_with("pre-pass");
 
@@ -271,7 +329,8 @@ void loop() {
 	// actual render
 	//
 
-	glClearColor(1,1,1,1);
+	glClearColor(0,0,0,1);
+	
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     if (wireframe)
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -279,11 +338,21 @@ void loop() {
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 
-    //the_heightmap->draw();
-    game->draw();
-    
-	action->draw();
+	//shadowmapping
+	shader_ref shader = find_shader("terrain");
+	bind_shader(shader);
+
+	bind_texture(shadowmap, 4);	
+	int loc = glGetUniformLocation(gl_shader_object(shader), "shadowmap");
+	glUniform1i(loc, 4);			
 	
+	glColorMask(1,1,1,1);
+	use_camera(actual_cam);
+	glViewport(0,0,1024,1024);	
+	//shadowmapping end	
+
+    game->draw();
+	action->draw();	
 	
 	render_timer.done_with("draw");
 
@@ -293,6 +362,7 @@ void loop() {
 
 	check_for_gl_errors("display");
 	swap_buffers();
+	unbind_texture(shadowmap);
 
 	render_timer.done_with("swap");
 // 	render_timer.print_summary();
@@ -370,11 +440,21 @@ void actual_main() {
 	glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
 
 	action = new Action(game, objhandler);
+	init_framebuffer();
 
 	// 
 	// pass control to the renderer. won't return.
 	//
     enter_glut_main_loop();
+    
+	vec3f pos = {32,10,32};
+	vec3f dir = { 1.f, -0.6f, -0.4f };
+	vec3f godir = dir * 20;
+	pos = pos-godir; 
+	vec3f up = {1,0,0};
+	change_lookat_of_cam(find_camera("lightcam"),&pos, &dir,&up);	
+	recompute_gl_matrices_of_cam(find_camera("lightcam"));    
+    
 }
 
 
@@ -390,4 +470,57 @@ int main(int argc, char **argv)
 	return 0;
 }
 
+
+	
+void init_framebuffer(){
+	tex_params_t params;
+
+	params.min =GL_LINEAR; //GL_NEAREST GL_LINEAR
+	params.mag =GL_LINEAR;
+	params.wrap_s =GL_CLAMP_TO_EDGE; //GL_REPEAT GL_CLAMP
+	params.wrap_t =GL_CLAMP_TO_EDGE;
+	params.mipmapping = false;
+	//render_settings::screenres_x, render_settings::screenres_y
+	the_fbuf = make_framebuffer("greybuf2048", 1024, 1024);
+	shadowmap = make_empty_texture("greymap2048", 1024, 1024, GL_TEXTURE_2D, GL_DEPTH_COMPONENT, GL_FLOAT, GL_DEPTH_COMPONENT, &params);//_32F
+	color = make_empty_texture("greymap2048_c", 1024, 1024, GL_TEXTURE_2D, GL_RGBA, GL_FLOAT, GL_RGBA, &params);
+
+	
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE,GL_COMPARE_REF_TO_TEXTURE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);	
+	bind_framebuffer(the_fbuf);
+	
+	attach_texture_as_depthbuffer(the_fbuf, "greybuf", shadowmap);
+	attach_texture_as_colorbuffer(the_fbuf, "greybuf", color);
+	
+	draw_buffers_done(the_fbuf);
+	check_framebuffer_setup(the_fbuf);
+	unbind_framebuffer(the_fbuf);
+
+}
+
+void init_matrices(){
+	
+	if(T == NULL)
+		T = new matrix4x4f();
+
+	camera_ref cam =  find_camera("lightcam");		
+	matrix4x4f PL = *(projection_matrix_of_cam(cam));
+	matrix4x4f VL = *(gl_view_matrix_of_cam(cam));
+
+	matrix4x4f S;
+	vec3f scale = {0.5,0.5,0.5};
+	make_scale_matrix4x4f(&S, &scale);
+	S.row_col(0,3) = 0.5;
+	S.row_col(1,3) = 0.5;
+	S.row_col(2,3) = 0.5;
+	
+	shader_ref shader = find_shader("terrain");
+	bind_shader(shader);
+	
+	int loc = glGetUniformLocation(gl_shader_object(shader), "T");
+	glUniformMatrix4fv(loc, 1, GL_FALSE, T->col_major);
+	
+	unbind_shader(shader);
+}
 

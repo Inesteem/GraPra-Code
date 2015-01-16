@@ -287,7 +287,6 @@
 #version 150 core
 	in vec3 in_pos;
 	in vec3 in_norm;
-	in vec2 in_tc;
 
 	uniform mat4 proj;
 	uniform mat4 view;
@@ -298,10 +297,8 @@
 	out vec2 tc;
 	void main() {
 		pos_wc = vec4(in_pos, 1.0);
-		//norm_wc = transpose(inverse(mat3x3(model))) * in_norm;
-		//norm_wc = (model_normal * vec4(in_norm,0)).xyz;
 		norm_wc = in_norm;
-		tc = in_tc;
+		tc = vec2(in_pos.x, in_pos.y);
 		gl_Position = proj * view * pos_wc;
 	}
 }
@@ -389,7 +386,8 @@
 			spec = light_col * 0.4 * pow(max(0, dot(r, normalize(eye_pos - pos_wc.xyz))), 10);
 		}
 		vec3 diff = color * light_col * max(0, dot(normalize(norm_wc), normalize(-light_dir)));
-		color = visibility * 0.5 * color + visibility * diff + visibility * spec;
+	//	color = visibility * 0.5 * color + visibility * diff + visibility * spec;
+		color = 0.5 * color + diff + spec;
 		out_col = vec4(color, 1.0);
 	}
 }
