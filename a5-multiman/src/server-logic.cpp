@@ -99,11 +99,12 @@ static int first_run = 0;
 bool Troup::Update()
 {
 
-    if(m_stepTimer.look() < wall_time_timer::msec(m_stepTime)) {
+    if(m_stepTimer.look() < m_stepTime-20) {
         return false;
     }
-
+	cout << m_stepTimer.look() << endl;
     m_stepTimer.restart();
+	cout << m_stepTimer.look() << endl;
 
     PathNode nextDestination = m_path->m_nodes.front();
     m_path->m_nodes.pop_front();
@@ -128,7 +129,7 @@ bool Troup::Update()
     ntd.mapX = m_x;
     ntd.mapY = m_y;
     ntd.troupId = m_id;
-    ntd.time = 500;
+    ntd.time = m_stepTime;
     broadcast(&ntd);
 
     cout << "Updated troup " << m_id << " to position (" << m_x << ", " << m_y << ")" << endl;

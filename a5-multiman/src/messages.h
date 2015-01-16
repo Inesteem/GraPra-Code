@@ -73,7 +73,7 @@ namespace msg {
         uint8_t mapX;
         uint8_t mapY;
         uint8_t troupId;
-        uint8_t time;
+        uint16_t time;
     } __attribute__((aligned(8)));
 
     struct troup_arrived : public message {

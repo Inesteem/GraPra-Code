@@ -303,9 +303,10 @@ void UnitGroup::update_model_matrices(){
 }
 
 void UnitGroup::move_to(vec2i pos, float time_to_reach){
-    force_position(m_end);
+  //  force_position(m_end);
    // force_position(m_end);
-    m_start = m_end;//m_end;
+	vec2f pos_1 = vec2f(m_model.col_major[3 * 4 + 0], m_model.col_major[3 * 4 + 2]);
+    m_start = m_end;
 
     m_end = pos;
     m_time_to_reach_end = time_to_reach;
@@ -326,14 +327,14 @@ void UnitGroup::update(){
             m_modelmatrices.push_back(tmp);
             m_spawn_timer.restart();
         }
-        cout << "start: " << m_start.x << "," << m_start.y << endl;
-        cout << "pos: " << m_pos.x << "," << m_pos.y << endl;
-        cout << "end: " << m_end.x << "," << m_end.y << endl;
-       // m_pos.x = m_start.x + cur_time*(m_end.x-m_start.x)/m_time_to_reach_end;
-      //  m_pos.y = m_start.y + cur_time*(m_end.y-m_start.y)/m_time_to_reach_end;
+    //    cout << "start: " << m_start.x << "," << m_start.y << endl;
+   //     cout << "pos: " << m_pos.x << "," << m_pos.y << endl;
+  //      cout << "end: " << m_end.x << "," << m_end.y << endl;
+        m_pos.x = m_start.x + cur_time*(m_end.x-m_start.x)/m_time_to_reach_end;
+        m_pos.y = m_start.y + cur_time*(m_end.y-m_start.y)/m_time_to_reach_end;
         float x = (float) m_start.x + cur_time*((float)m_end.x-(float)m_start.x)/m_time_to_reach_end;
         float y = (float) m_start.y + cur_time*((float)m_end.y-(float)m_start.y)/m_time_to_reach_end;
-        cout << x << " " << y << endl;
+  //      cout << x << " " << y << endl;
         m_model.col_major[3 * 4 + 0] = x * render_settings::tile_size_x;
         m_model.col_major[3 * 4 + 1] = m_center.y + m_sh->get_height(x, y);
         m_model.col_major[3 * 4 + 2] = y * render_settings::tile_size_y;
