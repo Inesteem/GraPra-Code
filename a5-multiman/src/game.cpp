@@ -35,6 +35,7 @@ ObjHandler* Game::get_objhandler(){
 }
 
 void Game::update_unit_group(unsigned int x, unsigned int y, unsigned int troupId, unsigned int time){
+	cout << time << endl;
 	
     for(int i = 0; i < m_unitgroups.size(); ++i){
 		if(troupId == m_unitgroups[i].m_id){
@@ -51,7 +52,7 @@ void Game::add_unit_group(unsigned int sourceId, unsigned int destinationId, uns
     vec2i end = source->get_pos();
 	
     cout << "spawning enemies at: " << start.x << "," << start.y << " count: " << count << endl;
-    m_unitgroups.push_back(UnitGroup(m_objhandler->getObjByName("tree"),m_sh,"bomb",start,end,0,count, 3000, m_sh->get_height(start.x, start.y), troupId));
+    m_unitgroups.push_back(UnitGroup(m_objhandler->getObjByName("tree"),m_sh,"bomb",start,end,0,count, 10000, m_sh->get_height(start.x, start.y), troupId));
 }
 
 Building* Game::get_building_at(vec3f pos){

@@ -64,7 +64,7 @@ class Building : public GameObject
         unsigned int m_unitCount;
 
         wall_time_timer m_generateUnitsTimer;
-        const static unsigned int m_unitGenerationTime = 10000;
+        const static unsigned int m_unitGenerationTime = 1000;
 public: 
     Building(GameStage *gameStage, unsigned int x, unsigned int y, unsigned int id);
 
@@ -75,7 +75,7 @@ public:
 
 class Troup : public GameObject
 {
-    unsigned int m_stepTime = 500;
+    unsigned int m_stepTime = 1000;
     wall_time_timer m_stepTimer;
 public:
     unsigned int m_unitCount;
