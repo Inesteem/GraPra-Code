@@ -32,7 +32,7 @@ public:
 private:
    ObjHandler *m_objhandler;
    simple_heightmap *m_sh;
-   Building *m_selected;
+   Building *m_selected = nullptr;
    vector<Tree> m_trees;
    vector<Building> m_buildings;
    vector<UnitGroup> m_unitgroups;

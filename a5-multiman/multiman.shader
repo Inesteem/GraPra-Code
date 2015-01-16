@@ -69,9 +69,11 @@
         out vec2 tc;
         void main() {
                 gl_Position = proj * view * model * vec4(in_pos,1.);
+
                 tc = in_tc;
         }
 }
+
 #:fragment-shader #{
 #version 150 core
         in vec2 tc;
@@ -82,14 +84,15 @@
         void main() {
             vec4 tex_col = texture(tex,tc);
 
-          //if(tex_col.r >= 0.9 || tex_col.g <= 0.1 || tex_col.b >= 0.9)
-           //  discard;
-           //else
-            if(tex_col.r >= 0.9 || tex_col.g >= 0.9 || tex_col.b >= 0.9)
+
+          if(tex_col.r >= 0.5 && tex_col.g >= 0.5 && tex_col.b >= 0.5)
                 out_col = vec4(color,1.);
-            else {
+            else if(!(tex_col.r >= 0.9 || tex_col.g <= 0.1 || tex_col.b >= 0.9))  {
                 out_col = tex_col;
-            }
+          } else {
+
+                 discard;
+          }
 
         }
 }
@@ -170,28 +173,164 @@
 
 #<make-shader "heightmap_shader"
 #:vertex-shader #{
-#version 150 core
+#version 400 core
         in vec3 in_pos;
         uniform mat4 proj;
         uniform mat4 view;
         uniform mat4 model;
         out vec3 out_pos;
         void main() {
-                gl_Position = proj * view * model * vec4(in_pos,1.);
+                gl_Position =  vec4(in_pos,1.);
                 out_pos = in_pos;
         }
 }
+#:tess-control-shader #{
+#version 400 core
+
+
+        layout(vertices = 3) out;
+        in vec3 out_pos[];
+        out vec3 tcPosition[];
+        uniform vec3 CamPos;
+        uniform mat4 view;
+        #define ID gl_InvocationID
+        vec3 ndc(vec3 world){
+                vec4 v =  view * vec4(world,1);
+                v /= v.w;
+                return v.xyz;
+        }
+
+        //determine if is vertex is on the screen.  This is used to do culling.  My assumption is that if all vertices are off the screen then the patch should be discarded.
+        //Unfortunately this isn't true if you stand close to a patch and look at its center.  The extra stuff you see is an attempt to prevent culling of a patch if it is close to the eye.
+        bool offScreen(vec3 vertex){//vertex should be ndc
+                vertex = ndc(vertex);
+                float z = vertex.z * .5 + .5;
+
+                float w = 1 + (1-z) * 100;
+                return vertex.z < -1 || vertex.z > 1 || any(lessThan(vertex.xy, vec2(-w)) || greaterThan(vertex.xy, vec2(w)));
+        }
+
+        void main()
+        {
+            tcPosition[ID] = out_pos[ID];
+            vec3 pos = out_pos[ID];
+            float dis = distance(pos,CamPos);
+            if(offScreen(tcPosition[ID])){
+                gl_TessLevelInner[0] = 0;
+                gl_TessLevelOuter[0] = 0;
+                gl_TessLevelOuter[1] = 0;
+                gl_TessLevelOuter[2] = 0;
+            }
+            if (dis < 20) {
+                gl_TessLevelInner[0] = 16;
+                gl_TessLevelOuter[0] = 16;
+                gl_TessLevelOuter[1] = 16;
+                gl_TessLevelOuter[2] = 16;
+            } else if( dis < 50) {
+                gl_TessLevelInner[0] = 8;
+                gl_TessLevelOuter[0] = 8;
+                gl_TessLevelOuter[1] = 8;
+                gl_TessLevelOuter[2] = 8;
+            }else if( dis < 70) {
+                gl_TessLevelInner[0] = 4;
+                gl_TessLevelOuter[0] = 4;
+                gl_TessLevelOuter[1] = 4;
+                gl_TessLevelOuter[2] = 4;
+            } else {
+                gl_TessLevelInner[0] = 1;
+                gl_TessLevelOuter[0] = 1;
+                gl_TessLevelOuter[1] = 1;
+                gl_TessLevelOuter[2] = 1;
+            }
+
+        }
+}
+#:tess-eval-shader #{
+#version 400 core
+
+
+        layout(triangles, fractional_even_spacing, ccw) in;
+        in vec3 tcPosition[];
+        out vec3 out_pos;
+        out vec3 tePatchDistance;
+        uniform mat4 proj;
+        uniform mat4 model;
+        uniform mat4 view;
+
+        void main()
+        {
+            vec3 p0 = gl_TessCoord.x * tcPosition[0];
+            vec3 p1 = gl_TessCoord.y * tcPosition[1];
+            vec3 p2 = gl_TessCoord.z * tcPosition[2];
+            tePatchDistance = gl_TessCoord;
+
+            out_pos = p0 + p1 + p2;
+            out_pos.y = (1-gl_TessCoord.x)*p0.y  + (1-gl_TessCoord.y)*p1.y + (1-gl_TessCoord.z)*p2.y;
+            gl_Position = proj * view * model * vec4(out_pos, 1);
+        }
+
+
+}
+#:geometry-shader #{
+#version 400 core
+
+
+        uniform mat4 model;
+        uniform mat4 view;
+        layout(triangles) in;
+        layout(triangle_strip, max_vertices = 3) out;
+        in vec3 out_pos[3];
+        in vec3 tePatchDistance[3];
+        smooth out vec3 gFacetNormal;
+        out vec3 gPatchDistance;
+        out vec3 gTriDistance;
+        out vec3 pos;
+
+        void main()
+        {
+            mat3 tmp1 = mat3(model);
+            mat3 tmp2 = mat3(view);
+            mat3 normal = tmp2 * tmp1;
+            normal = transpose(inverse(normal));
+            vec3 A = out_pos[2] - out_pos[0];
+            vec3 B = out_pos[1] - out_pos[0];
+            gFacetNormal = normal * normalize(cross(A, B));
+
+
+            gPatchDistance = tePatchDistance[0];
+            gTriDistance = vec3(1, 0, 0);
+            gl_Position = gl_in[0].gl_Position;
+            pos = out_pos[0]; EmitVertex();
+
+            gPatchDistance = tePatchDistance[1];
+            gTriDistance = vec3(0, 1, 0);
+            gl_Position = gl_in[1].gl_Position;
+            pos = out_pos[1]; EmitVertex();
+
+            gPatchDistance = tePatchDistance[2];
+            gTriDistance = vec3(0, 0, 1);
+            gl_Position = gl_in[2].gl_Position;
+            pos = out_pos[2]; EmitVertex();
+
+            EndPrimitive();
+        }
+}
+
 #:fragment-shader #{
-#version 150 core
+#version 400 core
 
-        in vec3 out_pos;
-
+        in vec3 pos;
+        in vec3 tePatchDistance;
+        in vec3 gFacetNormal;
+        in vec3 gPatchDistance;
+        in vec3 gTriDistance;
         uniform sampler2D grass;
         uniform sampler2D stone;
         uniform sampler2D water;
         uniform sampler2D snow;
 
-
+        uniform vec3 light_dir;
+        uniform vec3 light_col;
         out vec4 out_col;
 
         void main() {
@@ -202,27 +341,35 @@
                      float border_rock = 0.75 * 10;
                      float border_rock_snow = 0.85 * 10;
 
-                     vec4 color_water = vec4(texture(water, vec2(out_pos.x,out_pos.z)).rgb, 1.0);
-                     vec4 color_grass = vec4(texture(grass, vec2(out_pos.x,out_pos.z)).rgb, 1.0);
-                     vec4 color_rock = vec4(texture(stone,vec2(out_pos.x,out_pos.z)).rgb, 1.0);
-                     vec4 color_snow = vec4(texture(snow, vec2(out_pos.x,out_pos.z)).rgb, 1.0);
+                     vec4 color_water = vec4(texture(water, vec2(pos.x,pos.z)).rgb, 1.0);
+                     vec4 color_grass = vec4(texture(grass, vec2(pos.x,pos.z)).rgb, 1.0);
+                     vec4 color_rock = vec4(texture(stone,vec2(pos.x,pos.z)).rgb, 1.0);
+                     vec4 color_snow = vec4(texture(snow, vec2(pos.x,pos.z)).rgb, 1.0);
 
 
-                     if (out_pos.y <= border_water) {
+                     if (pos.y <= border_water) {
                              out_col = color_water;
-                     } else if (out_pos.y <= border_water_grass) {
-                             out_col = mix(color_water, color_grass, smoothstep(border_water, border_water_grass, out_pos.y));
-                     } else if (out_pos.y <= border_grass) {
+                     } else if (pos.y <= border_water_grass) {
+                             out_col = mix(color_water, color_grass, smoothstep(border_water, border_water_grass, pos.y));
+                     } else if (pos.y <= border_grass) {
                              out_col = color_grass;
-                     } else if (out_pos.y <= border_grass_rock) {
-                             out_col = mix(color_grass, color_rock, smoothstep(border_grass, border_grass_rock, out_pos.y));
-                     } else if (out_pos.y <= border_rock) {
+                     } else if (pos.y <= border_grass_rock) {
+                             out_col = mix(color_grass, color_rock, smoothstep(border_grass, border_grass_rock, pos.y));
+                     } else if (pos.y <= border_rock) {
                              out_col = color_rock;
-                     } else if (out_pos.y <= border_rock_snow) {
-                             out_col = mix(color_rock, color_snow, smoothstep(border_rock, border_rock_snow, out_pos.y));
+                     } else if (pos.y <= border_rock_snow) {
+                             out_col = mix(color_rock, color_snow, smoothstep(border_rock, border_rock_snow, pos.y));
                      } else {
                              out_col = color_snow;
                      }
+
+                     vec3 N = normalize(gFacetNormal);
+                     vec3 L = light_dir;
+                     float df = abs(dot(N, L));
+
+
+                     //out_col += (1-df)*vec4(light_col,1);
+
 
 
         }

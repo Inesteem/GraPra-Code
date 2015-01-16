@@ -38,6 +38,7 @@ public:
     void addObj(string name, string filename, shader_ref shader);
     //adds .obj with custom scale
     void addObj_withScale(string name, string filename, shader_ref shader, vec3f scale);
+    void addMeshObj(string name, mesh_ref mesh, shader_ref shader, texture_ref tex);
     Obj *getObjByName(string name);
     Obj *getObjByID(int id);
     Obj *get_selection_circle();
@@ -57,7 +58,7 @@ public:
     void set_model_matrix(matrix4x4f new_model);
     matrix4x4f get_model_matrix();
     void set_height(float height);
-    vec2i get_pos(){
+    vec2f get_pos(){
         return m_pos;
     }
 
@@ -67,7 +68,7 @@ protected:
     char identifier;
     Obj *m_obj;
     matrix4x4f m_model;
-    vec2i m_pos;
+    vec2f m_pos;
     shader_ref m_shader;
     vec3f m_center;
     vector<texture_ref> textures;
@@ -91,6 +92,7 @@ public:
 	unsigned int get_id();
 	void update_unit_count(int count);
 	int get_unit_count();
+    void change_owner(unsigned int owner);
 
 private:
     unsigned int m_owner;
@@ -105,11 +107,11 @@ private:
 class UnitGroup: public GameObject{
 public:
 
-    UnitGroup(Obj *obj,simple_heightmap *sh, string name, vec2i start, vec2i end, unsigned int owner, unsigned int unit_count, float time_to_rech_end, float height, unsigned m_id);
+    UnitGroup(Obj *obj,simple_heightmap *sh, string name, vec2f start, vec2f end, unsigned int owner, unsigned int unit_count, float time_to_rech_end, float height, unsigned m_id);
     void update();
     void draw();
-    void move_to(vec2i pos, float time_to_reach);
-    void force_position(vec2i pos);
+    void move_to(vec2f pos, float time_to_reach);
+    void force_position(vec2f pos);
 
     unsigned int m_id;
     unsigned int m_unit_count;
@@ -126,7 +128,7 @@ private:
     simple_heightmap *m_sh;
     wall_time_timer m_timer;
     wall_time_timer m_spawn_timer;
-    vec2i m_start,m_end;
+    vec2f m_start,m_end;
     vec2f m_view_dir;
     float m_time_to_reach_end;
     vector<matrix4x4f> m_modelmatrices;

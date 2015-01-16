@@ -7,7 +7,7 @@ Game::Game(ObjHandler *objhandler, simple_heightmap *sh, client_message_reader *
 }
 
 void Game::add_building(string name, int size, int x, int y, unsigned int id){
-    m_buildings.push_back(Building(m_objhandler->getObjByName(name), m_objhandler->get_selection_circle(),name,x,y, 0,size, m_sh->get_height(x,y), id));
+    m_buildings.push_back(Building(m_objhandler->getObjByName(name), m_objhandler->getObjByName("selection_circle"),name,x,y, 0,size, m_sh->get_height(x,y), id));
 }
 void Game::update_building_unit_count(unsigned int id, unsigned int unit_count){
     for(int i = 0; i < m_buildings.size(); i++){
@@ -39,7 +39,7 @@ void Game::update_unit_group(unsigned int x, unsigned int y, unsigned int troupI
 	
     for(int i = 0; i < m_unitgroups.size(); ++i){
 		if(troupId == m_unitgroups[i].m_id){
-            m_unitgroups[i].move_to(vec2i(x, y), time);
+            m_unitgroups[i].move_to(vec2f(x, y), time);
 			return;
 		}
 	}
@@ -48,8 +48,8 @@ void Game::update_unit_group(unsigned int x, unsigned int y, unsigned int troupI
 void Game::add_unit_group(unsigned int sourceId, unsigned int destinationId, unsigned int count, unsigned int troupId){
 	Building *source = getBuilding(sourceId);
 	Building *destination = getBuilding(destinationId);
-	vec2i start = source->get_pos();
-    vec2i end = source->get_pos();
+    vec2f start = source->get_pos();
+    vec2f end = source->get_pos();
 	
     cout << "spawning enemies at: " << start.x << "," << start.y << " count: " << count << endl;
     m_unitgroups.push_back(UnitGroup(m_objhandler->getObjByName("tree"),m_sh,"bomb",start,end,0,count, 10000, m_sh->get_height(start.x, start.y), troupId));
@@ -93,9 +93,9 @@ void Game::draw(){
     for(int i = 0; i < m_unitgroups.size(); ++i){
         m_unitgroups[i].draw();
     }
- //   if (m_selected != nullptr){
-  //      m_selected->draw_selection_circle();
-  //  }
+    if (m_selected != 0){
+       m_selected->draw_selection_circle();
+    }
 
 }
 

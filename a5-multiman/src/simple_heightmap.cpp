@@ -40,20 +40,33 @@ void simple_heightmap::init( const std::string filename, int width, int height){
     m_shader = find_shader("heightmap_shader");
     make_unit_matrix4x4f(&m_model);
     std::vector<unsigned int> index;
+//    for(int i = 0; i < m_height-1; ++i){
+//        for(int j = 0; j < m_width; ++j){
+//            if(i%2 == 0){
+//            index.push_back(i + j*m_height);
+//            index.push_back((i+1)  + j*m_height);
+//            } else {
+//                index.push_back((i+1) + (m_width -j -1) * m_height);
+//                index.push_back(i+ (m_width-j-1)*m_height)  ;
+
+//            }
+
+//        }
+//    }
+
     for(int i = 0; i < m_height-1; ++i){
-        for(int j = 0; j < m_width; ++j){
-            if(i%2 == 0){
+        for(int j = 0; j < m_width-1; ++j){
+
             index.push_back(i + j*m_height);
             index.push_back((i+1)  + j*m_height);
-            } else {
-                index.push_back((i+1) + (m_width -j -1) * m_height);
-                index.push_back(i+ (m_width-j-1)*m_height)  ;
+            index.push_back(i+1 + (j+1)*m_height);
 
-            }
+            index.push_back(i+1 + (j+1)*m_height);
+            index.push_back(i + (j+1)*m_height);
+            index.push_back(i + (j)*m_height);
 
         }
     }
-
 
     bind_mesh_to_gl(m_mesh);
     add_vertex_buffer_to_mesh(m_mesh, "in_pos", GL_FLOAT, m_width*m_height, 3, (float*) pos.data() , GL_STATIC_DRAW);
@@ -64,6 +77,7 @@ void simple_heightmap::init( const std::string filename, int width, int height){
 }
 
 float simple_heightmap::get_height(float x, float y){
+    if (x < 0 || y < 0 || x > m_width || y > m_height ) return 0;
     vec2i pos1 ((int) x, (int) y);
     vec2i pos2 ((int) x + 1, (int) y);
     vec2i pos3 ((int) x, (int) y + 1 );
@@ -111,10 +125,18 @@ void simple_heightmap::draw(){
     loc = glGetUniformLocation(gl_shader_object(m_shader), "snow");
     glUniform1i(loc, 3);
 
+    loc = glGetUniformLocation(gl_shader_object(m_shader), "CamPos");
+    glUniform3f(loc,gl_view_matrix_of_cam(current_camera())->col_major[3 *4 + 0],
+                gl_view_matrix_of_cam(current_camera())->col_major[3 *4 + 1],
+                gl_view_matrix_of_cam(current_camera())->col_major[3 *4 + 2]);
 
+    loc = glGetUniformLocation(gl_shader_object(m_shader), "light_dir");
+    glUniform3f(loc, 0.7, 1.2,0.3);
+    loc = glGetUniformLocation(gl_shader_object(m_shader), "light_col");
+    glUniform3f(loc, 1,1,1);
     bind_mesh_to_gl(m_mesh);
-
-    draw_mesh_as(m_mesh,GL_TRIANGLE_STRIP);
+    glPatchParameteri(GL_PATCH_VERTICES, 3);
+    draw_mesh_as(m_mesh,GL_PATCHES);
 
     unbind_mesh_from_gl(m_mesh);
     unbind_shader(m_shader);

@@ -344,6 +344,19 @@ void actual_main() {
         objhandler->addObj("tree", "./render-data/models/tree.obj", find_shader("pos+norm+tc"));
         objhandler->addObj("building_lot", "./render-data/models/building_lot.obj", find_shader("pos+norm+tc"));
         objhandler->addObj("status_bar", "./render-data/models/menu.obj", find_shader("pos+norm+tc"));
+
+
+        mesh_ref mesh = make_mesh("selection_circle",2);
+        vector<vec3f> pos = { vec3f(0,0,0) , vec3f(1,0,0), vec3f(1,0,1) , vec3f(0,0,1) };
+        vector<vec2f> tc = { vec2f(0,0), vec2f(0,1), vec2f(1,1), vec2f(1,0) } ;
+        vector<unsigned int> index =  { 0 ,1 ,2 , 2 ,3 ,0 };
+        bind_mesh_to_gl(mesh);
+        add_vertex_buffer_to_mesh(mesh, "in_pos", GL_FLOAT, 4, 3, (float*) pos.data() , GL_STATIC_DRAW);
+        add_vertex_buffer_to_mesh(mesh, "in_tc", GL_FLOAT, 4, 2, (float*) tc.data() , GL_STATIC_DRAW);
+       // add_vertex_buffer_to_mesh(m_mesh, "in_normal", GL_FLOAT, m_width*m_height, 3,nullptr, GL_STATIC_DRAW );
+        add_index_buffer_to_mesh(mesh, index.size(), (unsigned int *) index.data(), GL_STATIC_DRAW);
+        unbind_mesh_from_gl(mesh);
+        objhandler->addMeshObj("selection_circle",mesh,find_shader("selection_circle_shader"),find_texture("selection_circle.png") );
       //  objhandler->addObj("bomb","./render-data/models/bbm.obj", find_shader("pos+norm+tc"));
 
     sh = new simple_heightmap();

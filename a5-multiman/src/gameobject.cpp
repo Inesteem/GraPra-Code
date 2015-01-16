@@ -6,6 +6,7 @@
 Obj::Obj(string name, int id, string filename, shader_ref shader):id(id),name(name),shader(shader){
     ObjLoader loader(name.c_str(), filename.c_str());
     loader.TranslateToOrigin();
+
     loader.pos_and_norm_shader = shader;
     loader.pos_norm_and_tc_shader = shader;
     loader.default_shader = shader;
@@ -72,6 +73,10 @@ void ObjHandler::addObj(string name, string filename, shader_ref shader){
 
 void ObjHandler::addObj_withScale(string name, string filename, shader_ref shader, vec3f scale){
     objs.push_back(Obj(name,objs.size(),filename,shader,scale));
+}
+
+void ObjHandler::addMeshObj(string name, mesh_ref mesh, shader_ref shader, texture_ref tex){
+    objs.push_back(Obj(name, objs.size(), mesh, tex, shader));
 }
 
 Obj* ObjHandler::getObjByID(int id){
@@ -169,7 +174,7 @@ void GameObject::draw(){
 //TREE
 Tree::Tree(Obj *obj, string name, int x, int y, float height): GameObject(obj,name, find_shader("pos+norm+tc"), height){
     identifier = 't';
-    m_pos = vec2i(x,y);
+    m_pos = vec2f(x,y);
 
     m_model.col_major[3 * 4 + 0] = m_pos.x*render_settings::tile_size_x;
     m_model.col_major[3 * 4 + 1] = m_center.y + m_height;
@@ -190,9 +195,10 @@ Building::Building(Obj *obj,Obj *selection_circle, string name, int x, int y, un
 
 {
 
+    selection_circle->mesh;
 	unit_count = 0;
     identifier = 'b';
-    m_pos = vec2i(x,y);
+    m_pos = vec2f(x,y);
 
     m_model.col_major[3 * 4 + 0] = m_pos.x*render_settings::tile_size_x;
     m_model.col_major[3 * 4 + 1] = m_center.y + m_height;
@@ -236,34 +242,38 @@ unsigned int Building::get_id(){
 }
 
 void Building::draw_selection_circle(){
+
     vec3f color(1.0f,0,0);
-    bind_shader(selection_circle->shader);
+    bind_shader(find_shader("selection_circle_shader"));
 
     matrix4x4f tmp;
     make_unit_matrix4x4f(&tmp);
 
     tmp = tmp*m_model;
 
-    tmp.col_major[3 * 4 + 1] +=  0.5f;
 
-    tmp.col_major[0 * 4 + 0] =  m_model.col_major[0 * 4 + 0] * 2*m_size;
-    tmp.col_major[1 * 4 + 1] = m_model.col_major[1 * 4 + 1] * 2*m_size;
-    tmp.col_major[2 * 4 + 2] = m_model.col_major[2 * 4 + 2] * 2*m_size;
 
-    int loc = glGetUniformLocation(gl_shader_object(selection_circle->shader), "proj");
+    tmp.col_major[0 * 4 + 0] =  m_model.col_major[0 * 4 + 0] * (render_settings::tile_size_x+2) * m_size;
+    tmp.col_major[1 * 4 + 1] =  m_model.col_major[1 * 4 + 1] * (render_settings::tile_size_x+2) * m_size;
+    tmp.col_major[2 * 4 + 2] =  m_model.col_major[2 * 4 + 2] * (render_settings::tile_size_y+2) * m_size;
+    tmp.col_major[3 * 4 + 0] =  m_pos.x * render_settings::tile_size_x - ((render_settings::tile_size_x+2) * m_size )/2.0f * m_center.x;
+    tmp.col_major[3 * 4 + 1] +=  0.0f;
+    tmp.col_major[3 * 4 + 2] =  m_pos.y * render_settings::tile_size_y - ((render_settings::tile_size_y+2) * m_size )/2.0f *  m_center.z;
+
+    int loc = glGetUniformLocation(gl_shader_object(find_shader("selection_circle_shader")), "proj");
     glUniformMatrix4fv(loc, 1, GL_FALSE, projection_matrix_of_cam(current_camera())->col_major);
 
-    loc = glGetUniformLocation(gl_shader_object(selection_circle->shader), "view");
+    loc = glGetUniformLocation(gl_shader_object(find_shader("selection_circle_shader")), "view");
     glUniformMatrix4fv(loc, 1, GL_FALSE, gl_view_matrix_of_cam(current_camera())->col_major);
 
-    loc = glGetUniformLocation(gl_shader_object(selection_circle->shader), "model");
+    loc = glGetUniformLocation(gl_shader_object(find_shader("selection_circle_shader")), "model");
     glUniformMatrix4fv(loc, 1, GL_FALSE, tmp.col_major);
 
-    loc = glGetUniformLocation(gl_shader_object(selection_circle->shader), "color");
+    loc = glGetUniformLocation(gl_shader_object(find_shader("selection_circle_shader")), "color");
     glUniform3fv(loc,1,(float *) &color);
 
-    bind_texture(selection_circle->tex, 0);
-    loc = glGetUniformLocation(gl_shader_object(selection_circle->shader), "tex");
+    bind_texture(find_texture("selection_circle"), 0);
+    loc = glGetUniformLocation(gl_shader_object(find_shader("selection_circle_shader")), "tex");
     glUniform1i(loc, 0);
 
     bind_mesh_to_gl(selection_circle->mesh);
@@ -271,13 +281,17 @@ void Building::draw_selection_circle(){
     draw_mesh(selection_circle->mesh);
 
     unbind_mesh_from_gl(selection_circle->mesh);
-    unbind_shader(selection_circle->shader);
+    unbind_shader(find_shader("selection_circle_shader"));
 
+}
+
+void Building::change_owner(unsigned int owner){
+    m_owner = owner;
 }
 
 //UNITGROUP
 
-UnitGroup::UnitGroup(Obj *obj, simple_heightmap *sh, string name, vec2i start, vec2i end, unsigned int owner, unsigned int unit_count, float time_to_rech_end, float height, unsigned int m_id):
+UnitGroup::UnitGroup(Obj *obj, simple_heightmap *sh, string name, vec2f start, vec2f end, unsigned int owner, unsigned int unit_count, float time_to_rech_end, float height, unsigned int m_id):
     GameObject(obj,name,find_shader("pos+norm+tc"), height),
     m_owner(owner), m_start(start), m_end(end),
     m_unit_count(unit_count), m_sh(sh), m_id(m_id),
@@ -299,7 +313,7 @@ UnitGroup::UnitGroup(Obj *obj, simple_heightmap *sh, string name, vec2i start, v
     m_modelmatrices.push_back(testUnit);
     m_spawned++;
 }
-void UnitGroup::force_position(vec2i pos){
+void UnitGroup::force_position(vec2f pos){
     m_pos = pos;
 
     m_model.col_major[3 * 4 + 0] = m_pos.x*render_settings::tile_size_x;
@@ -315,12 +329,12 @@ void UnitGroup::update_model_matrices(){
 
 
         m_modelmatrices[i].col_major[3 * 4 + 0] = m_model.col_major[3 * 4 + 0] + 2*cos(2*M_PI * ((float) i/(float)m_spawned));
-        m_modelmatrices[i].col_major[3 * 4 + 1] = m_model.col_major[3 * 4 + 1] + m_sh->get_height(m_model.col_major[3 * 4 + 0] + 2*cos(2*M_PI * ((float) i/(float)m_spawned)), m_model.col_major[3 * 4 + 2] + 2*sin(2*M_PI * ((float) i/(float)m_spawned)) );
+        m_modelmatrices[i].col_major[3 * 4 + 1] = m_center.y + m_sh->get_height(m_model.col_major[3 * 4 + 0] + 2*cos(2*M_PI * ((float) i/(float)m_spawned)), m_model.col_major[3 * 4 + 2] + 2*sin(2*M_PI * ((float) i/(float)m_spawned)) );
         m_modelmatrices[i].col_major[3 * 4 + 2] = m_model.col_major[3 * 4 + 2] + 2*sin(2*M_PI * ((float) i/(float)m_spawned));
     }
 }
 
-void UnitGroup::move_to(vec2i pos, float time_to_reach){
+void UnitGroup::move_to(vec2f pos, float time_to_reach){
   //  force_position(m_end);
    // force_position(m_end);
 	vec2f pos_1 = vec2f(m_model.col_major[3 * 4 + 0], m_model.col_major[3 * 4 + 2]);
