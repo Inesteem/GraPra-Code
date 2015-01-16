@@ -351,6 +351,7 @@ void SlideBar::update_unit_count(int count){
 
 void SlideBar::render_slidebar(){
 
+	label_mom_count.update_gui_texture_int(mom_count);
 	camera_ref old_camera = current_camera();
 	use_camera(sbar_camera);
 	bind_shader(sbar_shader);
@@ -408,10 +409,8 @@ void SlideBar::update_mouse_pos(float x, float y){
 	float mouse_diff = screen_pos.y - y;
 	LifeLevel = 0;
 	
-	if(mouse_diff == 0){
-		label_mom_count.update_gui_texture_int(mom_count);
+	if(mouse_diff == 0 || max_count == 0)
 		return;
-	}
 	
 	int sign = 1;
 	if(down)
@@ -421,8 +420,8 @@ void SlideBar::update_mouse_pos(float x, float y){
 	if(down){
 		
 		if(LifeLevel >= 0){
-			LifeLevel = 0;
-			label_mom_count.update_gui_texture_int(0);
+			LifeLevel = 0;	
+			mom_count = 0;
 			return;
 		}
 		if(LifeLevel < -LifeLevel_max)
@@ -430,23 +429,19 @@ void SlideBar::update_mouse_pos(float x, float y){
 	
 		if(LifeLevel < 0){
 			float loc_count = (max_count * (-LifeLevel+1-LifeLevel_max));
-			if(loc_count == 0){
-				label_mom_count.update_gui_texture_int(0);
+			if(loc_count == 0){		
+				mom_count = 0;
 				return;
 			}			
 			mom_count = loc_count;
 			if(mom_count - loc_count <= 0.999)
 				mom_count++;
-			if(mom_count == 0)
-				label_mom_count.update_gui_texture_int(0);
-			else
-				label_mom_count.update_gui_texture_int(mom_count);
 		}
 	} else {
 			
 		if(LifeLevel <= 0){
 			LifeLevel = 0;	
-			label_mom_count.update_gui_texture_int(0);
+			mom_count = 0;
 			return;
 		}
 			
@@ -455,15 +450,13 @@ void SlideBar::update_mouse_pos(float x, float y){
 		
 		if(LifeLevel > 0){
 			float loc_count = (max_count * (LifeLevel+1-LifeLevel_max));
-			if(loc_count == 0){
-				label_mom_count.update_gui_texture_int(0);
+			if(loc_count == 0){	
+				mom_count = 0;
 				return;
 			}
 			mom_count = loc_count;
 			if(mom_count - loc_count <= 0.999)
 				mom_count++;
-			cout << (max_count * (LifeLevel+1-LifeLevel_max)) << " " << mom_count << endl;
-			label_mom_count.update_gui_texture_int(mom_count);
 		}
 	}
 	
@@ -529,7 +522,6 @@ void SlideBar::reset_bar(){
 	mom_count = 0;
 	LifeLevel = 0;
 	down = false;
-	label_mom_count.update_gui_texture_int(mom_count);
 }
 
 //Setters

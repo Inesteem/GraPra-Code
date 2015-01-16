@@ -5,6 +5,8 @@
 #include "gameobject.h"
 #include "wall-timer.h"
 
+
+
 class client_message_reader;
 
 class Game
@@ -34,6 +36,7 @@ private:
    vector<Tree> m_trees;
    vector<Building> m_buildings;
    vector<UnitGroup> m_unitgroups;
+   
 };
 
 #endif // GAME_H
