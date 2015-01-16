@@ -10,6 +10,7 @@ using namespace std;
 namespace render_settings {
 	int screenres_x = 1000, screenres_y = 1000;
     float tile_size_x = 2, tile_size_y = 2;
+    float height_factor = 10;
 };
 
 void setup_dir_light(shader_ref shader) {

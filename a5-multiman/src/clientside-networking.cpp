@@ -107,7 +107,7 @@ void client_message_reader::handle_message(msg::spawn_troup_server *m) {
 void client_message_reader::handle_message(msg::next_troup_destination *m)
 {
     cout << "Got new troup destination: (" << (unsigned int) m->mapX << " , " << (unsigned int) m->mapY << ")" << endl;
-    game->update_unit_group(m->mapX, m->mapY, m->troupId);
+    game->update_unit_group(m->mapX, m->mapY, m->troupId, m->time);
 }
 
 void client_message_reader::handle_message(msg::troup_arrived *m)

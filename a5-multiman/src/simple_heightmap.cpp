@@ -29,17 +29,9 @@ void simple_heightmap::init( const std::string filename, int width, int height){
     for(int i = 0; i < m_height; ++i){
         for(int j = 0; j < m_width; ++j){
             pos[i + j * m_height] = vec3f(j*render_settings::tile_size_x-render_settings::tile_size_x/2,0,i*render_settings::tile_size_y-render_settings::tile_size_y/2);
-            pos[i + j *m_height].y = colors[i + j *m_height].x * 10;
-            m_heights[i + j *m_height] = colors[i + j *m_height].x * 10;
-//            if(colors[i + j *m_height].y > 0.8){
-//                m_gamefield[i] = 't';
-//                m_gameobjects.push_back(Tree(objhandler->getObjByName("tree"),"tree",i,j));
-//            }
-//            if(colors[i + j *m_height].x > 0.8) {
-//                m_gamefield[i] = 'b';
-//                m_gameobjects.push_back(Building(objhandler->getObjByName("building_lot"),"building_lot",i,j,0));
+            pos[i + j *m_height].y = colors[i + j *m_height].x * render_settings::height_factor;
+            m_heights[i + j *m_height] = colors[i + j *m_height].x * render_settings::height_factor;
 
-//            }
 
         }
 

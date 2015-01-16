@@ -156,6 +156,13 @@ Tree::Tree(Obj *obj, string name, int x, int y, float height): GameObject(obj,na
     m_model.col_major[3 * 4 + 0] = m_pos.x*render_settings::tile_size_x;
     m_model.col_major[3 * 4 + 1] = m_center.y + m_height;
     m_model.col_major[3 * 4 + 2] = m_pos.y*render_settings::tile_size_y;
+
+    matrix4x4f tmp;
+    make_unit_matrix4x4f(&tmp);
+    vec3f axis = vec3f(0,1,0);
+    make_rotation_matrix4x4f(&tmp,&axis,2*random_float());
+
+    m_model = m_model*tmp;
 }
 
 //BUILDINGS
@@ -276,6 +283,7 @@ UnitGroup::UnitGroup(Obj *obj, simple_heightmap *sh, string name, vec2i start, v
 }
 void UnitGroup::force_position(vec2i pos){
     m_pos = pos;
+
     m_model.col_major[3 * 4 + 0] = m_pos.x*render_settings::tile_size_x;
     m_model.col_major[3 * 4 + 1] =  m_center.y + m_sh->get_height(m_pos.x, m_pos.y);
     m_model.col_major[3 * 4 + 2] = m_pos.y*render_settings::tile_size_y;
@@ -288,23 +296,25 @@ void UnitGroup::update_model_matrices(){
     for(int i = 0; i < m_modelmatrices.size(); ++i){
 
 
-        m_modelmatrices[i].col_major[3 * 4 + 0] = m_model.col_major[3 * 4 + 0] + 2*cos(2*M_PI * ((float) i/(float)m_spawned));
+        m_modelmatrices[i].col_major[3 * 4 + 0] = m_model.col_major[3 * 4 + 0];// + 2*cos(2*M_PI * ((float) i/(float)m_spawned));
         m_modelmatrices[i].col_major[3 * 4 + 1] = m_model.col_major[3 * 4 + 1];
-        m_modelmatrices[i].col_major[3 * 4 + 2] = m_model.col_major[3 * 4 + 2] + 2*sin(2*M_PI * ((float) i/(float)m_spawned));
+        m_modelmatrices[i].col_major[3 * 4 + 2] = m_model.col_major[3 * 4 + 2];// + 2*sin(2*M_PI * ((float) i/(float)m_spawned));
     }
 }
 
 void UnitGroup::move_to(vec2i pos, float time_to_reach){
-    force_position(pos);
-    /*force_position(m_end);
-    m_start = m_pos;//m_end;
+    force_position(m_end);
+   // force_position(m_end);
+    m_start = m_end;//m_end;
 
     m_end = pos;
     m_time_to_reach_end = time_to_reach;
-    m_timer.restart();*/
+    m_timer.restart();
+
+    update_model_matrices();
 }
 
-void UnitGroup::update(){/*
+void UnitGroup::update(){
     float cur_time = m_timer.look();
 
     if(cur_time < m_time_to_reach_end){
@@ -316,16 +326,20 @@ void UnitGroup::update(){/*
             m_modelmatrices.push_back(tmp);
             m_spawn_timer.restart();
         }
-        m_pos.x = m_start.x + cur_time*(m_end.x-m_start.x)/m_time_to_reach_end;
-        m_pos.y = m_start.y + cur_time*(m_end.y-m_start.y)/m_time_to_reach_end;
+        cout << "start: " << m_start.x << "," << m_start.y << endl;
+        cout << "pos: " << m_pos.x << "," << m_pos.y << endl;
+        cout << "end: " << m_end.x << "," << m_end.y << endl;
+       // m_pos.x = m_start.x + cur_time*(m_end.x-m_start.x)/m_time_to_reach_end;
+      //  m_pos.y = m_start.y + cur_time*(m_end.y-m_start.y)/m_time_to_reach_end;
         float x = (float) m_start.x + cur_time*((float)m_end.x-(float)m_start.x)/m_time_to_reach_end;
-        float y = (float) m_start.x + cur_time*((float)m_end.x-(float)m_start.x)/m_time_to_reach_end;
+        float y = (float) m_start.y + cur_time*((float)m_end.y-(float)m_start.y)/m_time_to_reach_end;
+        cout << x << " " << y << endl;
         m_model.col_major[3 * 4 + 0] = x * render_settings::tile_size_x;
         m_model.col_major[3 * 4 + 1] = m_center.y + m_sh->get_height(x, y);
         m_model.col_major[3 * 4 + 2] = y * render_settings::tile_size_y;
 
         update_model_matrices();
-    }*/
+    }
 
 }
 

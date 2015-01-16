@@ -109,12 +109,13 @@ public:
     void draw();
     void move_to(vec2i pos, float time_to_reach);
     void force_position(vec2i pos);
-    void update_model_matrices();
+
     unsigned int m_id;
     unsigned int m_unit_count;
 
     bool reached_dest = false;
 private:
+     void update_model_matrices();
      unsigned int time_to_spawn = 100;
 
     unsigned int m_spawned;

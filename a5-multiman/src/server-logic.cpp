@@ -94,9 +94,10 @@ Troup::Troup(GameStage *gameStage, Building *sourceBuilding, Building *destinati
 
     m_stepTimer.start();
 }
-
+static int first_run = 0;
 bool Troup::Update()
 {
+
     if(m_stepTimer.look() < wall_time_timer::msec(m_stepTime)) {
         return false;
     }
@@ -108,14 +109,20 @@ bool Troup::Update()
 
     m_x = nextDestination.mapX;
     m_y = nextDestination.mapY;
-
+//    if((m_x < 0 || m_x > 32) && (m_y < 0 || m_y > 32)){
+//        exit(-1); //TODO
+//    }
     if(m_path->m_nodes.empty()) {
+
         // arrived at destination
         cout << "Troup " << m_id << " arrived at destination." << endl;
         delete m_path;
         return true;
     }
-
+    if( first_run == 0 ){
+        first_run = 1;
+        return false;
+    }
     msg::next_troup_destination ntd = make_message<msg::next_troup_destination>();
     ntd.mapX = m_x;
     ntd.mapY = m_y;
