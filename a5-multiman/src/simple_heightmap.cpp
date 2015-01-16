@@ -154,14 +154,14 @@ void simple_heightmap::draw(){
 vec3f simple_heightmap::sample_normal(int x, int y){
 	//cross_vec3f(out, v1, v2)
 	float cur_height = get_height(x, y);
-	vec3f v1 = vec3f(1*render_settings::tile_size_x, 	get_height(x+1, y)-cur_height, 	0);
-	vec3f v2 = vec3f(1,  	get_height(x+1, y+1)-cur_height,1);
+	vec3f v1 = vec3f(render_settings::tile_size_x, 	get_height(x+1, y)-cur_height, 	0);
+	vec3f v2 = vec3f(render_settings::tile_size_x,  	get_height(x+1, y+1)-cur_height,render_settings::tile_size_y);
 	vec3f v3 = vec3f(0,  	get_height(x, y+1)-cur_height, 	1);
-	vec3f v4 = vec3f(-1,  	get_height(x-1, y+1)-cur_height,1);
-	vec3f v5 = vec3f(-1,  	get_height(x-1, y)-cur_height, 	0);
-	vec3f v6 = vec3f(-1,  	get_height(x-1, y-1)-cur_height,-1);
+	vec3f v4 = vec3f(-render_settings::tile_size_x,  	get_height(x-1, y+1)-cur_height,render_settings::tile_size_y);
+	vec3f v5 = vec3f(-render_settings::tile_size_x,  	get_height(x-1, y)-cur_height, 	0);
+	vec3f v6 = vec3f(-render_settings::tile_size_x,  	get_height(x-1, y-1)-cur_height,-render_settings::tile_size_y);
 	vec3f v7 = vec3f(0,  	get_height(x, y-1)-cur_height, 	-1);
-	vec3f v8 = vec3f(1,  	get_height(x+1, y-1)-cur_height,-1);
+	vec3f v8 = vec3f(render_settings::tile_size_x,  	get_height(x+1, y-1)-cur_height,-render_settings::tile_size_y);
 
 	// 4 3 2
 	// 5 x 1
