@@ -77,7 +77,7 @@ client_message_reader::client_message_reader(Game *game) : message_reader(), gam
 void client_message_reader::handle_message(msg::init_game *m)
 {
     std::cout << "Initilizing map with, x = " << (unsigned int) m->mapX << ", y = " << (unsigned int) m->mapY << std::endl;
-    game->init("./render-data/images/smalllvl_height.png",m->mapX,m->mapY);
+    game->init("./render-data/images/smalllvl_height.png",m->mapX,m->mapY, m->id);
 }
 
 void client_message_reader::handle_message(msg::spawn_house *m)
@@ -118,7 +118,9 @@ void client_message_reader::handle_message(msg::troup_arrived *m)
 
 void client_message_reader::handle_message(msg::building_owner_changed *m)
 {
+
     cout << "Building owner changed..." << endl;
+    game->change_building_owner(m->buildingId,m->newOwner);
 }
 
 void client_message_reader::handle_message(msg::building_unit_generated *m)

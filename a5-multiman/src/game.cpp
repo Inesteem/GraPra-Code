@@ -7,8 +7,18 @@ Game::Game(ObjHandler *objhandler, simple_heightmap *sh, client_message_reader *
 }
 
 void Game::add_building(string name, int size, int x, int y, unsigned int id){
-    m_buildings.push_back(Building(m_objhandler->getObjByName(name), m_objhandler->getObjByName("selection_circle"),name,x,y, 0,size, m_sh->get_height(x,y), id));
+    m_buildings.push_back(Building(m_objhandler->getObjByName(name), m_objhandler->getObjByName("selection_circle"),name,x,y, -1 ,size, m_sh->get_height(x,y), id));
 }
+
+void Game::change_building_owner(int building_id, int new_owner){
+    for(int i = 0; i < m_buildings.size(); i++){
+        if(m_buildings[i].get_id() == building_id){
+            m_buildings[i].change_owner(new_owner);
+            return;
+        }
+    }
+}
+
 void Game::update_building_unit_count(unsigned int id, unsigned int unit_count){
     for(int i = 0; i < m_buildings.size(); i++){
 		if(m_buildings[i].get_id() == id){
@@ -19,14 +29,27 @@ void Game::update_building_unit_count(unsigned int id, unsigned int unit_count){
 }
 
 void Game::troup_arrived(unsigned int troupId){
-	//TODO:senseful stuff
+    auto it = m_unitgroups.begin();
+    while (it != m_unitgroups.end()){
+
+        if(troupId == it->m_id){
+            it = m_unitgroups.erase(it);
+
+        }  else {
+            ++it;
+        }
+
+
+    }
+
 }
 
 void Game::add_tree(int x, int y){
     m_trees.push_back(Tree(m_objhandler->getObjByName("tree"),"tree",x,y,m_sh->get_height(x,y)));
 }
 
-void Game::init(string filename, int widht, int height){
+void Game::init(string filename, int widht, int height, int id){
+    m_player_id = id;
     m_sh->init(filename, widht, height);
 }
 
