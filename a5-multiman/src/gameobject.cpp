@@ -287,8 +287,9 @@ void Building::draw(){
 	rotation += 0.007;
 	if(rotation == std::numeric_limits<float>::max()-2)
 		rotation = 0;
-	//TODO:==baustelle
-	if(state <= 0){
+
+//    if(m_owner == -1){
+		if(state <=0){
 		matrix4x4f shovel_model;
 		
 		vec3f rot_vec = vec3f(0,1,0);
@@ -376,8 +377,9 @@ unsigned int Building::get_id(){
 }
 
 void Building::draw_selection_circle(){
-
-    vec3f color(1.0f,0,0);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    vec3f color = get_player_color(m_owner);
     bind_shader(find_shader("selection_circle_shader"));
 
     matrix4x4f tmp;
@@ -417,6 +419,8 @@ void Building::draw_selection_circle(){
     unbind_mesh_from_gl(selection_circle->mesh);
     unbind_shader(find_shader("selection_circle_shader"));
 
+    unbind_texture(find_texture("selection_circle"));
+    glDisable(GL_BLEND);
 }
 
 void Building::change_owner(unsigned int owner){
@@ -432,6 +436,10 @@ UnitGroup::UnitGroup(Obj *obj, simple_heightmap *sh, string name, vec2f start, v
     m_time_to_reach_end(time_to_rech_end), m_spawned(0)
 {
     m_modelmatrices = vector<matrix4x4f>();
+    m_cur_heights = vector<float>();
+    m_dest_heights = vector<float>();
+    m_up_speed = vector<float>();
+    m_row_size = vector<unsigned int>();
     m_pos = start;
     identifier = 'u';
     vec3f tmp = obj->bb_min + obj->bb_max;
@@ -442,10 +450,10 @@ UnitGroup::UnitGroup(Obj *obj, simple_heightmap *sh, string name, vec2f start, v
     m_model.col_major[3 * 4 + 1] = m_center.y + m_height;
     m_model.col_major[3 * 4 + 2] = m_pos.y*render_settings::tile_size_y;
 
-    matrix4x4f testUnit;
-    make_unit_matrix4x4f(&testUnit);
-    m_modelmatrices.push_back(testUnit);
-    m_spawned++;
+//    matrix4x4f testUnit;
+//    make_unit_matrix4x4f(&testUnit);
+//    m_modelmatrices.push_back(testUnit);
+//    m_spawned++;
 }
 void UnitGroup::force_position(vec2f pos){
     m_pos = pos;
@@ -457,14 +465,28 @@ void UnitGroup::force_position(vec2f pos){
     update_model_matrices();
 }
 
+int get_coooooords(int index, int size){
+    int k = size +1;
+    return k/2 + index;
+}
+
 void UnitGroup::update_model_matrices(){
 
-    for(int i = 0; i < m_modelmatrices.size(); ++i){
-
-
-        m_modelmatrices[i].col_major[3 * 4 + 0] = m_model.col_major[3 * 4 + 0] + 2*cos(2*M_PI * ((float) i/(float)m_spawned));
-        m_modelmatrices[i].col_major[3 * 4 + 1] = m_center.y + m_sh->get_height(m_model.col_major[3 * 4 + 0] + 2*cos(2*M_PI * ((float) i/(float)m_spawned)), m_model.col_major[3 * 4 + 2] + 2*sin(2*M_PI * ((float) i/(float)m_spawned)) );
-        m_modelmatrices[i].col_major[3 * 4 + 2] = m_model.col_major[3 * 4 + 2] + 2*sin(2*M_PI * ((float) i/(float)m_spawned));
+//    cout << m_modelmatrices.size() << endl;
+//    cout << m_cur_heights.size() << endl;
+    unsigned int row_size = 0;
+    for(unsigned int i = 0;  i < m_row_size.size(); ++i){
+//       cout << "array size" <<m_row_size.size() << endl;
+        for(int j = 0; j < m_row_size[i]; ++j){
+//            cout << "row size "<<row_size << endl;
+//            cout << "model size" << m_modelmatrices.size() << endl;
+            vec2f ortho = vec2f(m_view_dir.y, -m_view_dir.x);
+            normalize_vec2f(&ortho);
+            m_modelmatrices.at(row_size ).col_major[3 * 4 + 0] = m_model.col_major[3 * 4 + 0] + get_coooooords(j,m_row_size[i])* ortho.x  - i *m_view_dir.x;
+            m_modelmatrices.at(row_size ).col_major[3 * 4 + 1] = m_center.y + m_cur_heights.at(i);// m_sh->get_height(m_pos.x + cos(2*M_PI * ((float) i/(float)m_spawned)), m_pos.y + sin(2*M_PI * ((float) i/(float)m_spawned)) );
+            m_modelmatrices.at(row_size ).col_major[3 * 4 + 2] = m_model.col_major[3 * 4 + 2] + get_coooooords(j,m_row_size[i])* ortho.y  - i *m_view_dir.y;
+            row_size += 1;
+        }
     }
 }
 
@@ -475,6 +497,7 @@ void UnitGroup::move_to(vec2f pos, float time_to_reach){
     m_start = m_end;
 
     m_end = pos;
+    m_view_dir = m_end - m_start;
     m_time_to_reach_end = time_to_reach;
     m_timer.restart();
 
@@ -487,10 +510,8 @@ void UnitGroup::update(){
     if(cur_time < m_time_to_reach_end){
 
         if(m_spawned < m_unit_count && m_spawn_timer.look() > time_to_spawn){
-            m_spawned++;
-            matrix4x4f tmp;
-            make_unit_matrix4x4f(&tmp);
-            m_modelmatrices.push_back(tmp);
+            spawn_unit_row(std::min((unsigned int) 5,m_unit_count-m_spawned));
+            m_rows++;
             m_spawn_timer.restart();
         }
     //    cout << "start: " << m_start.x << "," << m_start.y << endl;
@@ -500,13 +521,27 @@ void UnitGroup::update(){
         m_pos.y = m_start.y + cur_time*(m_end.y-m_start.y)/m_time_to_reach_end;
         float x = (float) m_start.x + cur_time*((float)m_end.x-(float)m_start.x)/m_time_to_reach_end;
         float y = (float) m_start.y + cur_time*((float)m_end.y-(float)m_start.y)/m_time_to_reach_end;
-  //      cout << x << " " << y << endl;
+
+//        cout << x << " " << y << endl;
         m_model.col_major[3 * 4 + 0] = x * render_settings::tile_size_x;
         m_model.col_major[3 * 4 + 1] = m_center.y + m_sh->get_height(x, y);
         m_model.col_major[3 * 4 + 2] = y * render_settings::tile_size_y;
-
+        update_dest_heights();
+        update_cur_heights();
         update_model_matrices();
     }
+
+}
+void UnitGroup::update_cur_heights(){
+    float time = m_timer.look();
+    float end = m_sh->get_height(m_end.x,m_end.y);
+    float start = m_sh->get_height(m_start.x,m_start.y);
+    for(int i = 0; i < m_cur_heights.size(); ++i){
+        m_cur_heights[i] = start + time * (end - start)/m_time_to_reach_end;
+    }
+}
+
+void UnitGroup::update_dest_heights(){
 
 }
 
@@ -523,6 +558,21 @@ void UnitGroup::draw(){
 			de->unbind();
 
 		}
+    }
+}
+void UnitGroup::spawn_unit_row(unsigned int size){
+    m_row_size.push_back(size);
+    for(int i = 0; i < size; ++i){
+//        cout << size << endl;
+        m_spawned++;
+
+        matrix4x4f tmp;
+        make_unit_matrix4x4f(&tmp);
+        m_modelmatrices.push_back(tmp);
+        float t = 1.0f;
+        m_cur_heights.push_back(t);
+        m_dest_heights.push_back(t);
+        m_up_speed.push_back(t);
     }
 }
 
