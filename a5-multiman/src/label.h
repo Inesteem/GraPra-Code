@@ -157,6 +157,7 @@ class StatusBar {
 	camera_ref camera;
 	mesh_ref mesh;
 	texture_ref texture;
+	Obj *obj;
 
 	public:
 		// Konstruktors

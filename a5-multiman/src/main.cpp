@@ -437,8 +437,7 @@ void actual_main() {
         unbind_mesh_from_gl(mesh);
         objhandler->addMeshObj("selection_circle",mesh,find_shader("selection_circle_shader"),find_texture("selection_circle.png") );
 
-        objhandler->addObj("status_bar", "./render-data/models/menu.obj");
-
+        objhandler->addObj("status_bar", "./render-data/models/menu.obj", find_shader("menu-shader"), vec3f(-1,-1,-1), vec3f(1,1,1));
       //  objhandler->addObj("bomb","./render-data/models/bbm.obj", find_shader("pos+norm+tc"));
 
     sh = new simple_heightmap();

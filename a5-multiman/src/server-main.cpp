@@ -34,6 +34,7 @@ void initGame() {
 	msg::init_game ig = make_message<msg::init_game>();
 	ig.mapX = x;
 	ig.mapY = y;
+	ig.id = 0;
 	broadcast(&ig);
 
     gameStage->m_map = new bool*[y];
@@ -53,6 +54,21 @@ void initGame() {
 				sh.y = c;
                 sh.id = b->m_id;
 				broadcast(&sh);
+				
+				msg::new_houseowner nho = make_message<msg::building_owner_changed>();
+				nho.buildingId = b->m_id;
+				nho.oldOwner = -1;
+				//TODO
+                nho.newOwner = 0;
+				broadcast(&nho);				
+			
+    struct building_owner_changed : public message {
+        building_owner_changed() : message(code::building_owner_changed) {}
+        uint8_t buildingId;
+        uint8_t oldOwner;
+        uint8_t newOwner;			
+				
+				
 			} else if(color.y > 0.9f) {
                 gameStage->m_map[r][c] = false;
 				cout << "Tree at (" << r << "," << c << ")" << endl;

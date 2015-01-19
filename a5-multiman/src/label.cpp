@@ -546,11 +546,11 @@ int SlideBar::get_unit_count(){
 
 StatusBar::StatusBar(string name, ObjHandler *objhandler){
 	this->objhandler = objhandler;
-    Obj *obj = objhandler->getObjByName(name);
+    obj = objhandler->getObjByName(name);
 	mesh = obj->mesh;
-//	texture = obj->tex;
+	texture = obj->tex;
 
-    texture = find_texture("terrain_hm");
+//    texture = find_texture("terrain_hm");
 /*	mesh = make_mesh("quad", 2);
 	vec3f pos[4] = { {0,0,-10}, {1,0,-10}, {1,1,-10}, {0,1,-10} };
 	vec2f tc[4] = { {0,1}, {1,1}, {1,0}, {0,0} };
@@ -580,27 +580,23 @@ void StatusBar::render_statusbar(){
 
 	glDepthMask(GL_TRUE);	
 
+	int i = 0;
+	for(vector<drawelement*>::iterator it = obj->drawelements->begin(); it != obj->drawelements->end(); ++it) {
+		drawelement *de = *it;
+		de->bind();
+		de->apply_default_tex_uniforms_and_bind_textures();
+		de->draw_em();
+		de->unbind();
+		
+	}
+/*
 	int loc;
 
 
 		matrix4x4f model;
 		make_unit_matrix4x4f(&model);
-//		model.row_col(0,0) = (float)texture_width(texture)*2.f / (float)texture_height(texture);
-//		model.row_col(1,1) = 20.f;
-//		model.row_col(2,2) = 20.f;
 		model.row_col(0,3) = 37.f;
 		model.row_col(1,3) = 5.f;
-
-
-	loc = glGetUniformLocation(gl_shader_object(shader), "model");
-	glUniformMatrix4fv(loc, 1, GL_FALSE, model.col_major);
-	
-	loc = glGetUniformLocation(gl_shader_object(shader), "proj");
-	glUniformMatrix4fv(loc, 1, GL_FALSE, projection_matrix_of_cam(current_camera())->col_major);
-		
-	loc = glGetUniformLocation(gl_shader_object(shader), "view");
-	glUniformMatrix4fv(loc, 1, GL_FALSE, gl_view_matrix_of_cam(current_camera())->col_major);
-
 
 	bind_texture(texture, 0);
 	loc = glGetUniformLocation(gl_shader_object(shader), "tex");
@@ -608,13 +604,16 @@ void StatusBar::render_statusbar(){
 
 	bind_mesh_to_gl(mesh);
 	draw_mesh_as(mesh,GL_TRIANGLES);
-	unbind_mesh_from_gl(mesh);
-
+	unbind_mesh_from_gl(mesh); 
+*/
 	glDisable(GL_BLEND);
 	glDepthMask(GL_TRUE);	
 	unbind_shader(shader);
-	unbind_texture(texture);
+//	unbind_texture(texture);
 	use_camera(old_camera);
+
+
+
 }
 
 void StatusBar::set_texture(char *name){

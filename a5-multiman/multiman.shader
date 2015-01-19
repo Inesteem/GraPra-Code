@@ -662,8 +662,8 @@ uniform float down;
 		float newy= in_tc.y -1;
 		if(newy < 0) newy=-newy;
 		vec2 texc = vec2(in_tc.x, newy);
-		tc = texc;
-//		tc = in_tc;
+	//	tc = texc;
+		tc = in_tc;
 	}
 
 }

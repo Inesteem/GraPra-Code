@@ -15,9 +15,9 @@ class Label;
 
 struct Obj {
 
-    Obj(string name, int id, string filename);
     Obj(string name, int id, string filename, shader_ref shader);
     Obj(string name, int id, string filename, shader_ref shader, vec3f scale);
+    Obj(string name, int id, string filename, shader_ref shader, vec3f bb_min, vec3f bb_max);
     Obj(string name, int id, mesh_ref mesh, texture_ref tex, shader_ref shader);
 
     vector<drawelement*> *drawelements;
@@ -37,7 +37,7 @@ public:
     ObjHandler();
     //adds .obj and tries to scale to fit map
     void addObj(string name, string filename, shader_ref shader);
-    void addObj(string name, string filename);
+    void addObj(string name, string filename, shader_ref shader, vec3f bb_min, vec3f bb_max);
     //adds .obj with custom scale
     void addObj_withScale(string name, string filename, shader_ref shader, vec3f scale);
     void addMeshObj(string name, mesh_ref mesh, shader_ref shader, texture_ref tex);
