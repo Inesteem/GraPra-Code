@@ -16,20 +16,27 @@ public:
     void add_tree(int x, int y);
     void add_building(string name, int size, int x, int y, unsigned int id);
     void add_unit_group(unsigned int sourceId, unsigned int destinationId, unsigned int count, unsigned int troupId);
+
+    void change_building_owner(int building_id, int new_owner);
     void update_unit_group(unsigned int x, unsigned int y, unsigned int troupId, unsigned int time);
-    void init(string filename, int widht, int height);
+
+    void init(string filename, int widht, int height, int id);
     Building* get_building_at(vec3f pos);
+
     void draw();
     void update();
+
     Building* get_last_selected_building();
 	ObjHandler *get_objhandler();
-	void update_building_unit_count(unsigned int id, unsigned int unit_count);
+
+    void update_building_unit_count(unsigned int id, unsigned int unit_count);
 	void troup_arrived(unsigned int troupId);
-	Building *getBuilding(unsigned int id);
+    Building *getBuilding(unsigned int id);
 	
 	client_message_reader *m_messageReader;
-
+    int m_player_id;
 private:
+
    ObjHandler *m_objhandler;
    simple_heightmap *m_sh;
    Building *m_selected = nullptr;

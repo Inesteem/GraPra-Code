@@ -448,6 +448,7 @@ void actual_main() {
     messageReader = new client_message_reader(game);
        messageReader->networking_prologue();
 
+
 	// set different cursors
 
 	glutSetCursor(GLUT_CURSOR_INFO);

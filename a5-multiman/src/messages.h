@@ -40,6 +40,7 @@ namespace msg {
 		init_game() : message(code::init_game) {}
         uint8_t mapX;
         uint8_t mapY;
+        uint8_t id;
 	} __attribute__((aligned(8)));
 
 	struct spawn_house : public message {

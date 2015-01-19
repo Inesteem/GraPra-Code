@@ -214,7 +214,7 @@
         {
             tcPosition[ID] = out_pos[ID];
             vec3 pos = out_pos[ID];
-            float dis = distance(pos,CamPos);
+            float dis = length(view*vec4(pos,1));
             if(offScreen(tcPosition[ID])){
                 gl_TessLevelInner[0] = 0;
                 gl_TessLevelOuter[0] = 0;
@@ -265,7 +265,7 @@
             tePatchDistance = gl_TessCoord;
 
             out_pos = p0 + p1 + p2;
-            out_pos.y = (1-gl_TessCoord.x)*p0.y  + (1-gl_TessCoord.y)*p1.y + (1-gl_TessCoord.z)*p2.y;
+//            out_pos.y = (1-gl_TessCoord.x)*p0.y  + (1-gl_TessCoord.y)*p1.y + (1-gl_TessCoord.z)*p2.y;
             gl_Position = proj * view * model * vec4(out_pos, 1);
         }
 
@@ -302,11 +302,17 @@
             gl_Position = gl_in[0].gl_Position;
             pos = out_pos[0]; EmitVertex();
 
+            A = out_pos[0] - out_pos[1];
+            B = out_pos[2] - out_pos[1];
+            gFacetNormal = normal * normalize(cross(A, B));
             gPatchDistance = tePatchDistance[1];
             gTriDistance = vec3(0, 1, 0);
             gl_Position = gl_in[1].gl_Position;
             pos = out_pos[1]; EmitVertex();
 
+            A = out_pos[1] - out_pos[2];
+            B = out_pos[0] - out_pos[2];
+            gFacetNormal = normal * normalize(cross(A, B));
             gPatchDistance = tePatchDistance[2];
             gTriDistance = vec3(0, 0, 1);
             gl_Position = gl_in[2].gl_Position;
@@ -368,7 +374,7 @@
                      float df = abs(dot(N, L));
 
 
-                     //out_col += (1-df)*vec4(light_col,1);
+                     out_col *= (df)*vec4(light_col,1);
 
 
 
