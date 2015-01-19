@@ -86,7 +86,7 @@
 
 
           if(tex_col.r >= 0.5 && tex_col.g >= 0.5 && tex_col.b >= 0.5)
-                out_col = vec4(color,1.);
+                out_col = vec4(color,0.7);
             else if(!(tex_col.r >= 0.9 || tex_col.g <= 0.1 || tex_col.b >= 0.9))  {
                 out_col = tex_col;
           } else {

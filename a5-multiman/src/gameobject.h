@@ -120,12 +120,18 @@ public:
 
     bool reached_dest = false;
 private:
+     void spawn_unit_row(unsigned int size);
+     void remove_unit_row();
      void update_model_matrices();
+     void update_cur_heights();
+     void update_dest_heights();
      unsigned int time_to_spawn = 100;
 
     unsigned int m_spawned;
     unsigned int m_owner;
-
+    unsigned int m_rows = 0;
+    vector<unsigned int> m_row_size;
+    bool m_reached = false;
 
     simple_heightmap *m_sh;
     wall_time_timer m_timer;
@@ -134,8 +140,12 @@ private:
     vec2f m_view_dir;
     float m_time_to_reach_end;
     vector<matrix4x4f> m_modelmatrices;
-
+    vector<float> m_dest_heights;
+    vector<float> m_cur_heights;
+    vector<float> m_up_speed;
 
 };
+
+
 
 #endif // GAMEOBJECT_H
