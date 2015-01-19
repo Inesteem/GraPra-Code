@@ -14,7 +14,7 @@ public:
     client_message_reader(Game *game);
 
 	void send_message(msg::message &msg);
-	void networking_prologue();
+    void networking_prologue(char *hostName);
 
 protected:
 	virtual void handle_message(msg::init_game *m);

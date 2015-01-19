@@ -22,7 +22,7 @@ void client_message_reader::send_message(msg::message &msg) {
 	}
 }
 
-void client_message_reader::networking_prologue() {
+void client_message_reader::networking_prologue(char *hostName) {
 	using boost::asio::ip::tcp;
 	
 	try {
@@ -30,7 +30,7 @@ void client_message_reader::networking_prologue() {
 
 		cout << "connecting..." << endl;
 		tcp::resolver resolver(io_service);
-		tcp::resolver::query query(/*cmdline.server_host*/ "localhost", "2214");
+        tcp::resolver::query query(/*cmdline.server_host*/ /*"localhost"*/ hostName, "2214");
 		tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
 		tcp::resolver::iterator end;
 		
@@ -52,7 +52,7 @@ void client_message_reader::networking_prologue() {
 			
 			reader->read_and_handle();
 			if (reader->prologue_over()) {
-				//wall_time_timer timer;
+                //wall_time_timer timer;
 				//while (timer.look() < 1337) { drawStartScreen(true); }
 				
 				break;

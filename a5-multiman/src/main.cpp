@@ -390,7 +390,7 @@ extern "C" {
 
 
 
-
+char *hostName;
 
 void actual_main() {
 	register_scheme_functions_for_key_handling();
@@ -448,7 +448,7 @@ void actual_main() {
     game = new Game(objhandler,sh, messageReader);;
 
     messageReader = new client_message_reader(game);
-       messageReader->networking_prologue();
+       messageReader->networking_prologue(hostName);
 
 
 	// set different cursors
@@ -472,7 +472,15 @@ void actual_main() {
 
 int main(int argc, char **argv)
 {
-	parse_cmdline(argc, argv);
+    //parse_cmdline(argc, argv);
+
+    if(argc != 2) {
+        cout << "Usage: ./multiman <host name>" << endl;
+        exit(0);
+    }
+
+    hostName = argv[1];
+
 	render_settings::screenres_x = cmdline.res_x;
 	render_settings::screenres_y = cmdline.res_y;
 	append_image_path("./render-data/images/");

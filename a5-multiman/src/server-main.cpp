@@ -44,15 +44,15 @@ void initGame() {
         gameStage->m_map[r] = new bool[x];
 		for(unsigned int c = 0; c < x; c++) {
             gameStage->m_map[r][c] = true;
-            vec3f color = mapData[(y-1-r)*x + c];
+            vec3f color = mapData[(y - 1 - r) * x + c];
 			if(color.x > 0.9f) {
                 gameStage->m_map[r][c] = false;
 				cout << "Building at (" << r << "," << c << ")" << endl;
-                Building *b = gameStage->spawnHouse(r, c);
+                Building *b = gameStage->spawnHouse(c, r);
 
 				msg::spawn_house sh = make_message<msg::spawn_house>();
-				sh.x = r;
-				sh.y = c;
+                sh.x = c;
+                sh.y = r;
                 sh.id = b->m_id;
 				broadcast(&sh);
 				
@@ -70,17 +70,17 @@ void initGame() {
 				cout << "Tree at (" << r << "," << c << ")" << endl;
 
 				msg::spawn_tree st = make_message<msg::spawn_tree>();
-				st.x = r;
-				st.y = c;
+                st.x = c;
+                st.y = r;
                 broadcast(&st);
 			}
 		}
-	}
+    }
 
     for(unsigned int r = 0; r < y; r++) {
         cout << endl;
         for(unsigned int c = 0; c < x; c++) {
-            cout << (gameStage->m_map[r][c] ? "1 " : "0 ");
+            cout << (gameStage->m_map[r][c] ? "  " : "T ");
         }
     }
 
@@ -98,8 +98,22 @@ int main(int argc, char **argv)
 	using namespace boost::asio::ip;
 
 	//parse_cmdline(argc, argv);
+
+    if(argc != 2) {
+        cout << "Usage: ./multiman_server <num players>" << endl;
+        exit(0);
+    }
+
+    int numPlayers = atoi(argv[1]);
+
+    if(numPlayers < 1) {
+        cout << "Usage: ./multiman_server <num players>" << endl;
+        exit(0);
+    }
+
+    cout << "Number of players: " << numPlayers << endl;
 	
-	client_connections::sockets = 1;//cmdline.players;
+    client_connections::sockets = numPlayers;
 	client_connections::socket = new tcp::socket*[client_connections::sockets];
 	client_connections::reader = new server_message_reader*[client_connections::sockets];
 			
@@ -116,6 +130,8 @@ int main(int argc, char **argv)
 			acceptor.accept(*client_connections::socket[i]);
 			cout << "got it" << endl;
             client_connections::reader[i] = new server_message_reader(gameStage, client_connections::socket[i], i);
+
+            // TODO send message to single client with player id
 		}
 
         initGame();

@@ -43,6 +43,8 @@ class Path
     void FindDirectPath(PathNode &source, PathNode &destination);
     void FindPathAStar(PathNode startPosition, PathNode endPosition);
 
+    void DumpPath(string file);
+
     unsigned int m_mapX, m_mapY;
 
     bool **m_open;
