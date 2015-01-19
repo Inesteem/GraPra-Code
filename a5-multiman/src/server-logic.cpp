@@ -1,3 +1,7 @@
+#define update_1 10
+#define update_2 100
+
+
 #include "server-logic.h"
 #include "messages.h"
 
@@ -79,7 +83,23 @@ Troup* GameStage::spawnTroup(unsigned int sourceBuildingID, unsigned int destina
 
     return t;
 }
+void GameStage::upgrade_building(unsigned int buildingId, unsigned int state){
 
+	
+	msg::building_upgrade bu = make_message<msg::building_upgrade>();
+	bu.buildingId = buildingId;
+	bu.state = state;
+	broadcast(&bu);		
+	
+	int units = 0;
+	
+	if(state == 1)
+		units = update_1;
+	else if(state == 2)
+		units = update_2;
+	
+	m_buildings[buildingId]->KillUnits(units);
+}
 
 Troup::Troup(GameStage *gameStage, Building *sourceBuilding, Building *destinationBuilding, unsigned int unitCount, unsigned int id)
     : GameObject(gameStage, 0, 0, id), m_unitCount(unitCount), m_source(sourceBuilding), m_destination(destinationBuilding)

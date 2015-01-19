@@ -104,7 +104,7 @@ public:
     void Update();
     Building* spawnHouse(unsigned int x, unsigned int y);
     Troup* spawnTroup(unsigned int sourceBuildingID, unsigned int destinationBuildingID, unsigned int unitCount);
-
+    void upgrade_building(unsigned int buildingId, unsigned int state);
     unordered_map<unsigned int, Building*> m_buildings;
     unordered_map<unsigned int, Troup*> m_troups;
 };

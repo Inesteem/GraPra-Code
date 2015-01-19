@@ -7,7 +7,7 @@ Game::Game(ObjHandler *objhandler, simple_heightmap *sh, client_message_reader *
 }
 
 void Game::add_building(string name, int size, int x, int y, unsigned int id){
-    m_buildings.push_back(Building(m_objhandler->getObjByName(name), m_objhandler->getObjByName("selection_circle"),name,x,y, -1 ,size, m_sh->get_height(x,y), id));
+    m_buildings.push_back(Building(m_objhandler->getObjByName(name), m_objhandler->getObjByName("selection_circle"),m_objhandler->getObjByName("upgrade_arrow"), name,x,y, -1 ,size, m_sh->get_height(x,y), id));
 }
 
 void Game::change_building_owner(int building_id, int new_owner){
@@ -78,6 +78,21 @@ void Game::add_unit_group(unsigned int sourceId, unsigned int destinationId, uns
     m_unitgroups.push_back(UnitGroup(m_objhandler->getObjByName("tree"),m_sh,"bomb",start,end,0,count, 10000, m_sh->get_height(start.x, start.y), troupId));
 }
 
+void Game::upgrade_building(unsigned int buildingId, unsigned int state){
+    for(int i = 0; i < m_buildings.size(); i++){
+		if(m_buildings[i].get_id() == buildingId){
+			//TODO: const names
+			switch(state){
+				case 1 : m_buildings[i].upgrade(m_objhandler->getObjByName("tree"),state); break;
+				default : m_buildings[i].upgrade(m_objhandler->getObjByName("building_lot"), state);
+			}
+			return;
+		}
+	}	
+	
+}
+
+
 Building* Game::get_building_at(vec3f pos){
     int k = 0;
     float dist = m_buildings[0].dist_to(pos);
@@ -90,17 +105,44 @@ Building* Game::get_building_at(vec3f pos){
     }
 
     if( dist < 3.0f) {
-        m_selected = &m_buildings[k];
  //       cout << "Selected building: " << m_selected->get_pos().x << "," << m_selected->get_pos().y << endl;
         return &m_buildings[k];
     }
-    m_selected = nullptr;
     return nullptr;
 }
+
+Building* Game::check_for_upgrade(vec3f pos){
+    int k = 0;
+    float dist = m_buildings[0].dist_to_upgrade_arrow(pos);
+    for(int i = 0; i < m_buildings.size(); ++i){
+        if(dist > m_buildings[i].dist_to_upgrade_arrow(pos)){
+            dist = m_buildings[i].dist_to_upgrade_arrow(pos);
+            k = i;
+        }
+    }
+
+    if( dist < 3.0f) {
+		cout << "here" << endl;
+        if(m_selected == &m_buildings[k] && m_buildings[k].check_for_upgrade(true))
+			return &m_buildings[k];
+    }
+    return nullptr;
+}
+
+
+
+
 
 Building* Game::get_last_selected_building(){
     return m_selected;
 }
+
+
+void Game::set_selected(Building *building){
+	m_selected = building;
+	
+}
+
 
 void Game::draw(){
     m_sh->draw();
@@ -117,7 +159,7 @@ void Game::draw(){
         m_unitgroups[i].draw();
     }
 
-    if (m_selected != 0){
+    if (m_selected != 0 && m_selected != nullptr){
        m_selected->draw_selection_circle();
     }
 

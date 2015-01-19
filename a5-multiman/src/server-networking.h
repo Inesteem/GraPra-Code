@@ -20,6 +20,7 @@ public:
     }
 
     void handle_message(msg::spawn_troup_client *m);
+    void handle_message(msg::building_upgrade_client *m);
 };
 
 namespace client_connections {

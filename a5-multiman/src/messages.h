@@ -25,7 +25,9 @@ namespace msg {
             next_troup_destination,
             troup_arrived,
             building_owner_changed,
-            building_unit_generated
+            building_unit_generated,
+            building_upgrade,
+            building_upgrade_client
 		};
 	}
 
@@ -89,6 +91,12 @@ namespace msg {
         uint8_t newOwner;
     } __attribute__((aligned(8)));
 
+    struct building_upgrade : public message {
+        building_upgrade() : message(code::building_upgrade) {}
+        uint8_t buildingId;
+        uint8_t state;
+    } __attribute__((aligned(8)));
+
     struct building_unit_generated : public message {
         building_unit_generated() : message(code::building_unit_generated) {}
         uint8_t buildingId;
@@ -103,6 +111,12 @@ namespace msg {
         uint8_t sourceId;
         uint8_t destinationId;
         uint8_t unitCount;
+    } __attribute__((aligned(8)));
+    
+    struct building_upgrade_client : public message {
+        building_upgrade_client() : message(code::building_upgrade_client) {}
+        uint8_t buildingId;
+        uint8_t state;
     } __attribute__((aligned(8)));
 }
 
@@ -145,6 +159,8 @@ protected:
     virtual void handle_message(msg::troup_arrived *m) { warn(m); }
     virtual void handle_message(msg::building_owner_changed *m) { warn(m); }
     virtual void handle_message(msg::building_unit_generated *m) { warn(m); }
+    virtual void handle_message(msg::building_upgrade *m) { warn(m); }
+    virtual void handle_message(msg::building_upgrade_client *m) { warn(m); }
 };
 
 

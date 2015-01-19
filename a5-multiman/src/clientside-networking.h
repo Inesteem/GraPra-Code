@@ -26,6 +26,7 @@ protected:
     virtual void handle_message(msg::troup_arrived *m);
     virtual void handle_message(msg::building_owner_changed *m);
     virtual void handle_message(msg::building_unit_generated *m);
+    virtual void handle_message(msg::building_upgrade *m);
 };
 
 

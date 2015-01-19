@@ -104,6 +104,7 @@ void client_message_reader::handle_message(msg::spawn_troup_server *m) {
     game->add_unit_group(m->sourceId, m->destinationId, m->unitCount, m->troupId);
 }
 
+
 void client_message_reader::handle_message(msg::next_troup_destination *m)
 {
     cout << "Got new troup destination: (" << (unsigned int) m->mapX << " , " << (unsigned int) m->mapY << ")" << endl;
@@ -128,3 +129,10 @@ void client_message_reader::handle_message(msg::building_unit_generated *m)
 //    cout << "New unit count " << (unsigned int) m->newUnitCount << " in building " << (unsigned int) m->buildingId << endl;
 	game->update_building_unit_count( m->buildingId, m->newUnitCount);
 }
+
+void client_message_reader::handle_message(msg::building_upgrade *m) {
+
+    cout << "Upgraded Building " << m->buildingId << endl;
+    game->upgrade_building(m->buildingId, m->state);
+}
+

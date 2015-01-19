@@ -85,24 +85,31 @@ public:
 
 class Building:public GameObject{
 public:
-    Building(Obj *obj, Obj *selection_circle, string name, int x, int y, unsigned int owner, int size, float height, unsigned int id);
-    void upgrade();
+    Building(Obj *obj, Obj *selection_circle, Obj *upgrade_arrow, string name, int x, int y, unsigned int owner, int size, float height, unsigned int id);
+    void upgrade(Obj *obj, int state);
     float dist_to(vec3f &pos);
+    float dist_to_upgrade_arrow(vec3f &pos);
     void draw();
     void draw_selection_circle();
 	unsigned int get_owner_id();
 	unsigned int get_id();
 	void update_unit_count(int count);
 	int get_unit_count();
+	int get_state();
     void change_owner(unsigned int owner);
+    bool check_for_upgrade(bool up);
 
 private:
     unsigned int m_owner;
     unsigned int unit_count;
     int m_size;
+    int state;
     Obj *selection_circle;
-    unsigned int id;
+    Obj *upgrade_arrow;
+    matrix4x4f arrow_model;
     Label *label;
+    
+    unsigned int id;
     
 };
 

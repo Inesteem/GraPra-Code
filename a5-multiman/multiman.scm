@@ -27,6 +27,7 @@
 (texture-from-file "slidebar2" "slidebar_2.png" 'tex2d #t)
 (texture-from-file "dorf" "exchange_2.png" 'tex2d #t)
 (texture-from-file "none" "exchange_1.png" 'tex2d #t)
+(texture-from-file "pfeil" "pfeil.png" 'tex2d #t)
 
 
 (set-move-factor! 1)

@@ -84,6 +84,7 @@ class Label {
 		void set_camera(camera_ref camera);
 		void set_shader(shader_ref shader);
 		void set_size(vec2f size);
+		void set_texture(const char *name);
 		
 		void setup_display();
 

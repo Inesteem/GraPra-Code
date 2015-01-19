@@ -80,6 +80,10 @@ void Label::set_size(vec2f size){
 	BillboardSize = size;
 }
 
+void Label::set_texture(const char *name){
+	texture = find_texture(name);
+}
+
 // Intern helper functions
 
 cairo_t* Label::create_cairo_context(int width, int height, int channels, cairo_surface_t **surf, unsigned char **buffer) {

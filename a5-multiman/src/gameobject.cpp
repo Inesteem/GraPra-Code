@@ -1,6 +1,11 @@
+#define update_1 10
+#define update_2 100
+
+
 #include "gameobject.h"
 #include "rendering.h"
 #include "label.h"
+#include "limits"
 #include <cmath>
 //wrapper for objloader
 Obj::Obj(string name, int id, string filename, shader_ref shader):id(id),name(name),shader(shader){
@@ -227,9 +232,9 @@ Tree::Tree(Obj *obj, string name, int x, int y, float height): GameObject(obj,na
 }
 
 //BUILDINGS
-Building::Building(Obj *obj,Obj *selection_circle, string name, int x, int y, unsigned int owner,int size, float height,unsigned int id):
+Building::Building(Obj *obj,Obj *selection_circle,Obj *upgrade_arrow, string name, int x, int y, unsigned int owner,int size, float height,unsigned int id):
     GameObject(obj, name ,find_shader("pos+norm+tc"), height), id(id),
-    m_owner(owner) , m_size(size), selection_circle(selection_circle)
+    m_owner(owner) , m_size(size), selection_circle(selection_circle), upgrade_arrow(upgrade_arrow)
 
 {
 
@@ -241,10 +246,19 @@ Building::Building(Obj *obj,Obj *selection_circle, string name, int x, int y, un
     m_model.col_major[3 * 4 + 0] = m_pos.x*render_settings::tile_size_x;
     m_model.col_major[3 * 4 + 1] = m_center.y + m_height;
     m_model.col_major[3 * 4 + 2] = m_pos.y*render_settings::tile_size_y;
+ 
+    arrow_model.col_major[3 * 4 + 0] = m_pos.x*render_settings::tile_size_x;
+    arrow_model.col_major[3 * 4 + 1] = m_center.y + m_height+5;
+    arrow_model.col_major[3 * 4 + 2] = m_pos.y*render_settings::tile_size_y;
+    
+
     
     label= new Label();
     label->setup_display();
     label->update_label_pos(2*x, 2*y, height+2);
+ 
+    
+    state = 0;
 
 }
 
@@ -257,12 +271,24 @@ int Building::get_unit_count(){
 	return unit_count;
 }
 
+int Building::get_state(){
+	return state;
+}
+
+
+void Building::upgrade(Obj *obj, int state){
+	m_obj = obj;
+	this->state = state;
+}
+
 
 void Building::draw(){
 	static float rotation = 0;
 	rotation += 0.007;
+	if(rotation == std::numeric_limits<float>::max()-2)
+		rotation = 0;
 	//TODO:==baustelle
-	if(true){
+	if(state <= 0){
 		matrix4x4f shovel_model;
 		
 		vec3f rot_vec = vec3f(0,1,0);
@@ -290,6 +316,27 @@ void Building::draw(){
 	
 	label->update_gui_texture_int(unit_count);
 	label->render_gui_overlay();
+	
+	if(check_for_upgrade(true)){
+		matrix4x4f arrow_model_2;
+		vec3f rot_vec = vec3f(0,1,0);
+		make_rotation_matrix4x4f(&arrow_model_2,&rot_vec, rotation);
+		arrow_model_2 =  arrow_model * arrow_model_2;		
+		for (vector<drawelement*>::iterator it = upgrade_arrow->drawelements->begin(); it != upgrade_arrow->drawelements->end(); ++it) {
+		
+			drawelement *de = *it;
+			de->Modelmatrix(&arrow_model);
+			de->bind();
+			setup_dir_light(m_shader);
+			de->apply_default_matrix_uniforms();
+			de->apply_default_tex_uniforms_and_bind_textures();
+			de->draw_em();
+			de->unbind();
+		}		
+		
+	}
+		
+		
 }
 
 float Building::dist_to(vec3f &pos){
@@ -297,6 +344,27 @@ float Building::dist_to(vec3f &pos){
     vec3f dist = npos - pos;
     return length_of_vec3f(&dist);
 
+}
+float Building::dist_to_upgrade_arrow(vec3f &pos){
+    vec3f npos = vec3f(arrow_model.col_major[3 * 4 + 0], arrow_model.col_major[3 * 4 + 1], arrow_model.col_major[3 * 4 + 2]+5);
+
+    vec3f dist = npos - pos;
+    return length_of_vec3f(&dist);
+
+}
+
+bool Building::check_for_upgrade(bool up){
+	if(!up)
+		return true;
+	
+	if(state == 0 && unit_count >= update_1)
+		return true;
+	
+//	else if(state == 1 && unit_count >= update_2)
+//		return true;
+		
+	return false;
+		
 }
 
 unsigned int Building::get_owner_id(){
