@@ -83,7 +83,7 @@ void Game::upgrade_building(unsigned int buildingId, unsigned int state){
 		if(m_buildings[i].get_id() == buildingId){
 			//TODO: const names
 			switch(state){
-				case 1 : m_buildings[i].upgrade(m_objhandler->getObjByName("tree"),state); break;
+				case 1 : m_buildings[i].upgrade(m_objhandler->getObjByName("house_pacman"),state); break;
 				default : m_buildings[i].upgrade(m_objhandler->getObjByName("building_lot"), state);
 			}
 			return;
@@ -110,27 +110,6 @@ Building* Game::get_building_at(vec3f pos){
     }
     return nullptr;
 }
-
-Building* Game::check_for_upgrade(vec3f pos){
-    int k = 0;
-    float dist = m_buildings[0].dist_to_upgrade_arrow(pos);
-    for(int i = 0; i < m_buildings.size(); ++i){
-        if(dist > m_buildings[i].dist_to_upgrade_arrow(pos)){
-            dist = m_buildings[i].dist_to_upgrade_arrow(pos);
-            k = i;
-        }
-    }
-
-    if( dist < 3.0f) {
-		cout << "here" << endl;
-        if(m_selected == &m_buildings[k] && m_buildings[k].check_for_upgrade(true))
-			return &m_buildings[k];
-    }
-    return nullptr;
-}
-
-
-
 
 
 Building* Game::get_last_selected_building(){

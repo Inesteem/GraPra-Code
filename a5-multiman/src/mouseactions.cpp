@@ -70,6 +70,22 @@ namespace moac {
 		
 	}
 
+	void Action::upgrade_building(){
+        
+        if(ob_set && own_building->check_for_upgrade(true)){
+				
+			msg::building_upgrade_client buc = make_message<msg::building_upgrade_client>();
+			// TODO use own player id
+			buc.buildingId = own_building->get_id();
+			buc.state = own_building->get_state()+1;
+			game->m_messageReader->send_message(buc);
+			cout << "UPDATE" << endl;
+				
+	      
+		}
+		
+	}
+
 
 	bool Action::handle_enemys_base(float x, float y){
 		
@@ -92,25 +108,11 @@ namespace moac {
 		return true;	
 	}
 	
+	
 	bool Action::handle_base_selection(float x, float y){
 		
 		
         vec3f wp = ClickWorldPosition(x,y);
-        
-        if(ob_set){
-			Building *upgrading_building = game->check_for_upgrade(wp);
-			if (upgrading_building != nullptr){
-				
-				msg::building_upgrade_client buc = make_message<msg::building_upgrade_client>();
-				// TODO use own player id
-				buc.buildingId = upgrading_building->get_id();
-				buc.state = upgrading_building->get_state()+1;
-				game->m_messageReader->send_message(buc);
-				cout << "UPDATE" << endl;
-				
-				return true;
-			}       
-		}
         
         Building *building = game->get_building_at(wp);
         

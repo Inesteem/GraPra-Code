@@ -25,7 +25,6 @@ public:
 
     void init(string filename, int widht, int height, int id);
     Building* get_building_at(vec3f pos);
-    Building* check_for_upgrade(vec3f pos);
 
     void draw();
     void update();

@@ -88,7 +88,6 @@ public:
     Building(Obj *obj, Obj *selection_circle, Obj *upgrade_arrow, string name, int x, int y, unsigned int owner, int size, float height, unsigned int id);
     void upgrade(Obj *obj, int state);
     float dist_to(vec3f &pos);
-    float dist_to_upgrade_arrow(vec3f &pos);
     void draw();
     void draw_selection_circle();
 	unsigned int get_owner_id();

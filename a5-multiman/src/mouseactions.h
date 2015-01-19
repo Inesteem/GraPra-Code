@@ -59,6 +59,7 @@ namespace moac {
 		void finish();
 		void update_mouse_pos(float x, float y);
 		void draw();
+		void upgrade_building();
 	
 	};	
 	

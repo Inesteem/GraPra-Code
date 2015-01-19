@@ -246,9 +246,10 @@ Building::Building(Obj *obj,Obj *selection_circle,Obj *upgrade_arrow, string nam
     m_model.col_major[3 * 4 + 0] = m_pos.x*render_settings::tile_size_x;
     m_model.col_major[3 * 4 + 1] = m_center.y + m_height;
     m_model.col_major[3 * 4 + 2] = m_pos.y*render_settings::tile_size_y;
- 
+    
+    make_unit_matrix4x4f(&arrow_model);
     arrow_model.col_major[3 * 4 + 0] = m_pos.x*render_settings::tile_size_x;
-    arrow_model.col_major[3 * 4 + 1] = m_center.y + m_height+5;
+    arrow_model.col_major[3 * 4 + 1] = m_center.y + height+5;
     arrow_model.col_major[3 * 4 + 2] = m_pos.y*render_settings::tile_size_y;
     
 
@@ -321,12 +322,13 @@ void Building::draw(){
 	if(check_for_upgrade(true)){
 		matrix4x4f arrow_model_2;
 		vec3f rot_vec = vec3f(0,1,0);
-		make_rotation_matrix4x4f(&arrow_model_2,&rot_vec, rotation);
+		make_rotation_matrix4x4f(&arrow_model_2,&rot_vec, rotation/2);
 		arrow_model_2 =  arrow_model * arrow_model_2;		
+		    arrow_model_2.col_major[3 * 4 + 1] += sin( rotation/2 );
 		for (vector<drawelement*>::iterator it = upgrade_arrow->drawelements->begin(); it != upgrade_arrow->drawelements->end(); ++it) {
 		
 			drawelement *de = *it;
-			de->Modelmatrix(&arrow_model);
+			de->Modelmatrix(&arrow_model_2);
 			de->bind();
 			setup_dir_light(m_shader);
 			de->apply_default_matrix_uniforms();
@@ -342,13 +344,6 @@ void Building::draw(){
 
 float Building::dist_to(vec3f &pos){
     vec3f npos = vec3f(m_model.col_major[3 * 4 + 0], m_model.col_major[3 * 4 + 1], m_model.col_major[3 * 4 + 2]);
-    vec3f dist = npos - pos;
-    return length_of_vec3f(&dist);
-
-}
-float Building::dist_to_upgrade_arrow(vec3f &pos){
-    vec3f npos = vec3f(arrow_model.col_major[3 * 4 + 0], arrow_model.col_major[3 * 4 + 1], arrow_model.col_major[3 * 4 + 2]+5);
-
     vec3f dist = npos - pos;
     return length_of_vec3f(&dist);
 
