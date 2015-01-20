@@ -141,6 +141,46 @@
 #:inputs (list "in_pos" "in_norm" "in_tc")>
 
 
+#<make-shader "test"
+#:vertex-shader #{
+#version 150 core
+	in vec3 in_pos;
+	in vec3 in_norm;
+	in vec2 in_tc;
+	uniform mat4 proj;
+	uniform mat4 view;
+	uniform mat4 model;
+	uniform mat4 model_normal;
+	out vec4 pos_wc;
+	out vec3 norm_wc;
+	out vec2 tc;
+	void main() {
+		pos_wc = model * vec4(in_pos, 1.0);
+// 		norm_wc = transpose(inverse(mat3x3(model))) * in_norm;
+		norm_wc = (model_normal * vec4(in_norm,0)).xyz;
+		tc = in_tc;
+		gl_Position = proj * view * pos_wc;
+	}
+}
+#:fragment-shader #{
+#version 150 core
+	out vec4 out_col;
+	uniform sampler2D diffuse_tex;
+	uniform vec3 light_dir;
+	uniform vec3 light_col;
+	uniform vec3 eye_pos;
+	in vec4 pos_wc;
+	in vec3 norm_wc;
+	in vec2 tc;
+	void main() {
+		out_col = vec4(texture(diffuse_tex, tc.st).rgb,1);
+
+	}
+}
+#:inputs (list "in_pos" "in_norm" "in_tc")>
+
+
+
 #<make-shader "text-shader"
 #:vertex-shader #{
 #version 150 core
@@ -658,36 +698,98 @@ uniform float down;
 #version 150 core
 
 	in vec3 in_pos;
+	in vec3 in_norm;
 	in vec2 in_tc;
 	uniform mat4 proj;
 	uniform mat4 view;
 	uniform mat4 model;
+	uniform mat4 model_normal;
+	out vec4 pos_wc;
+	out vec3 norm_wc;
 	out vec2 tc;
 	void main() {
 		gl_Position = vec4(in_pos.x, in_pos.y,in_pos.z, 1.);
 		float newy= in_tc.y -1;
 		if(newy < 0) newy=-newy;
 		vec2 texc = vec2(in_tc.x, newy);
-	//	tc = texc;
-		tc = in_tc;
+		tc = texc;
+		norm_wc = (model_normal * vec4(in_norm,0)).xyz;
+	//	tc = in_tc;
 	}
 
 }
 #:fragment-shader #{
 #version 150 core
 
-in vec2 tc;
-out vec4 out_col;
-uniform sampler2D tex;
-
+	out vec4 out_col;
+	uniform sampler2D diffuse_tex;
+	uniform vec3 light_dir;
+	uniform vec3 light_col;
+	uniform vec3 eye_pos;
+	in vec4 pos_wc;
+	in vec3 norm_wc;
+	in vec2 tc;
 		void main(){
 		
 			gl_FragDepth = 0.0001;
-			out_col = texture2D(tex, tc );
+			out_col = vec4(texture2D(diffuse_tex, tc ).x,texture2D(diffuse_tex, tc ).y, texture2D(diffuse_tex, tc ).z ,1);
+		//	out_col = vec4(tc.x,tc.y, 0 ,1);
 		
 		}
 
 }
 
 #:inputs (list "in_pos" "in_tc")>
+
+#<make-shader "alpha-color-shader"
+#:vertex-shader #{
+#version 150 core
+	in vec3 in_pos;
+	in vec3 in_norm;
+	in vec2 in_tc;
+	uniform mat4 proj;
+	uniform mat4 view;
+	uniform mat4 model;
+	uniform mat4 model_normal;
+	out vec4 pos_wc;
+	out vec3 norm_wc;
+	out vec2 tc;
+	void main() {
+		pos_wc = model * vec4(in_pos, 1.0);
+		norm_wc = (model_normal * vec4(in_norm,0)).xyz;
+		tc = in_tc;
+		gl_Position = proj * view * pos_wc;
+	}
+}
+#:fragment-shader #{
+#version 150 core
+	out vec4 out_col;
+	uniform sampler2D diffuse_tex;
+	uniform sampler2D alpha_tex;
+	uniform vec3 light_dir;
+	uniform vec3 light_col;
+	uniform vec3 eye_pos;
+	uniform vec4 color;
+	uniform float use_alpha;
+	in vec4 pos_wc;
+	in vec3 norm_wc;
+	in vec2 tc;
+	void main() {
+		out_col = color;
+		if(color.x == 0 && color.y == 0 && color.z == 0){
+			out_col = vec4(0.,0.,0.,1.);
+			vec3 col = texture(diffuse_tex, tc.st).rgb;
+			vec3 col_a = texture(alpha_tex, tc.st).rgb;
+			float alpha =  (col_a.r + col_a.g + col_a.b)/3;
+
+			float n_dot_l = max(0, dot(norm_wc, -light_dir));
+			out_col += vec4(col * light_col * n_dot_l, 0.);
+			if(use_alpha == 1)
+				out_col.a = alpha; 
+		} 
+	}
+}
+#:inputs (list "in_pos" "in_norm" "in_tc")>
+
+
 

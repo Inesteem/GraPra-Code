@@ -24,13 +24,13 @@ void apply_camera_uniforms(shader_ref shader, camera_ref cam);
 
 class drawelement {
 	protected:
-		std::string name;
 		shader_ref shader;
 		int id;
 		static int next_id;
 		matrix4x4f modelmatrix;
 		matrix4x4f normalmatrix;
 	public:
+		std::string name;
 		std::list<mesh_ref> meshes;
 		typedef std::list<std::pair<std::string, texture_ref> > texlist_t;
 		texlist_t textures;

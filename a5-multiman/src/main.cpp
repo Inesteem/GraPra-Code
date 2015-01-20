@@ -423,8 +423,10 @@ void actual_main() {
     objhandler = new ObjHandler();
         objhandler->addObj("tree", "./render-data/models/tree.obj", find_shader("pos+norm+tc"));
         objhandler->addObj("building_lot", "./render-data/models/building_lot.obj", find_shader("pos+norm+tc"));
-        objhandler->addObj_withScale("upgrade_arrow", "./render-data/models/cube.obj", find_shader("pos+norm+tc"), vec3f(0.99,0.99,0.99));
-        objhandler->addObj("house_pacman", "./render-data/models/house_pacman.obj", find_shader("pos+norm+tc"));
+  //      objhandler->addObj_withScale("upgrade_arrow", "./render-data/models/cube.obj", find_shader("pos+norm+tc"), vec3f(0.99,0.99,0.99));
+        objhandler->addObj("upgrade_arrow", "./render-data/models/cube.obj", find_shader("pos+norm+tc"));
+        objhandler->addObj("house_pacman", "./render-data/models/siedlung.obj", find_shader("alpha-color-shader"));
+ //      objhandler->addObj("house_pacman", "./render-data/models/house_pacman.obj", find_shader("pos+norm+tc"));
 
 
 
@@ -441,6 +443,8 @@ void actual_main() {
         objhandler->addMeshObj("selection_circle",mesh,find_shader("selection_circle_shader"),find_texture("selection_circle.png") );
 
         objhandler->addObj("status_bar", "./render-data/models/menu.obj", find_shader("menu-shader"), vec3f(-1,-1,-1), vec3f(1,1,1));
+  //      objhandler->addObj("status_bar", "./render-data/models/menu.obj", find_shader("menu-shader"));
+ //       objhandler->addObj("tree", "./render-data/models/menu.obj", find_shader("pos+norm+tc"));
       //  objhandler->addObj("bomb","./render-data/models/bbm.obj", find_shader("pos+norm+tc"));
 
     sh = new simple_heightmap();

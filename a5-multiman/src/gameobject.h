@@ -90,6 +90,7 @@ public:
     float dist_to(vec3f &pos);
     void draw();
     void draw_selection_circle();
+    void draw_state_1();
 	unsigned int get_owner_id();
 	unsigned int get_id();
 	void update_unit_count(int count);
