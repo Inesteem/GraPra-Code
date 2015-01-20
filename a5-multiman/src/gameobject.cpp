@@ -22,6 +22,8 @@ Obj::Obj(string name, int id, string filename, shader_ref shader):id(id),name(na
      loader.ScaleVertexDataToFit(bb_min,bb_max);
      drawelements = new vector<drawelement*>();
     loader.GenerateNonsharingMeshesAndDrawElements(*drawelements);
+ 
+ 
     mesh = make_mesh(name.c_str(),3);
     bind_mesh_to_gl(mesh);
     add_vertex_buffer_to_mesh(mesh, "in_pos", GL_FLOAT, loader.objdata.vertices, 3, (float*) loader.objdata.vertex_data , GL_STATIC_DRAW);
@@ -45,7 +47,7 @@ Obj::Obj(string name, int id, string filename, shader_ref shader, vec3f bb_min, 
     vec3f new_pos = vec3f(0,-1,-1);
     loader.TranslateTo(new_pos);
     drawelements = new vector<drawelement*>();
-    loader.GenerateMeshesAndDrawelements(*drawelements);
+    loader.GenerateNonsharingMeshesAndDrawElements(*drawelements);
 
 	//unuseful?
 
@@ -312,6 +314,9 @@ void Building::draw(){
 			i++;
 		}
 		
+	} else if (state == 1) {
+		draw_state_1();
+		
 	} else {
 		GameObject::draw();
 	}
@@ -341,6 +346,60 @@ void Building::draw(){
 
     draw_selection_circle(3);
 }
+
+void Building::draw_state_1(){
+	shader_ref shader_t = find_shader("alpha-color-shader");
+	bind_shader(shader_t);
+
+	glEnable(GL_BLEND);
+	int i = 0;
+	for (vector<drawelement*>::iterator it = m_obj->drawelements->begin(); it != m_obj->drawelements->end(); ++it) {
+		drawelement *de = *it;
+		de->Modelmatrix(&m_model);
+		setup_dir_light(shader_t);
+		de->apply_default_matrix_uniforms(shader_t);
+		de->apply_default_tex_uniforms_and_bind_textures(shader_t);
+//		mesh_ref mesh_1 = *de->meshes.begin();
+//		cout << mesh_name(mesh_1) << endl;
+//		cout << de->name << endl;
+		int loc;
+		
+		texture_ref tex_alpha = find_texture("alpha_mask_1");
+		
+		bind_texture(tex_alpha, 1);
+		loc = glGetUniformLocation(gl_shader_object(shader_t), "alpha_tex");
+		glUniform1i(loc, 1);	
+		vec4f color = vec4f(0,0,0,1);
+		float use_alpha = 0;
+
+		if(i == 2)
+			use_alpha = 0;
+		if(i == 0 || i == 1)
+			color = vec4f(1,0,0,1);
+			
+
+			
+
+		
+		loc = glGetUniformLocation(gl_shader_object(shader_t), "color");
+		glUniform4fv(loc, 1,(float *)&color);				
+
+		loc = glGetUniformLocation(gl_shader_object(shader_t), "use_alpha");
+		glUniform1f(loc,use_alpha);
+
+		
+		de->draw_em();
+		i++;
+
+	}	
+//		cout << i << endl;
+
+	glDisable(GL_BLEND);
+	unbind_shader(shader_t);
+
+	
+}
+
 
 float Building::dist_to(vec3f &pos){
     vec3f npos = vec3f(m_model.col_major[3 * 4 + 0], m_model.col_major[3 * 4 + 1], m_model.col_major[3 * 4 + 2]);

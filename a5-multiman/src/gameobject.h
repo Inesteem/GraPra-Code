@@ -89,6 +89,8 @@ public:
     void upgrade(Obj *obj, int state);
     float dist_to(vec3f &pos);
     void draw();
+    void draw_selection_circle();
+    void draw_state_1();
     void draw_selection_circle(int size);
 	unsigned int get_owner_id();
 	unsigned int get_id();

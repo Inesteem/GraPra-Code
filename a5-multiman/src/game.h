@@ -38,6 +38,7 @@ public:
 	
 	client_message_reader *m_messageReader;
     int m_player_id;
+    vec3f player_color;
 private:
 
    ObjHandler *m_objhandler;

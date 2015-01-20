@@ -1,12 +1,23 @@
 # Blender MTL File: 'tree.blend'
 # Material Count: 4
 
-newmtl None
-Ns 0
+newmtl Holz
+Ns 96.078431
 Ka 0.000000 0.000000 0.000000
-Kd 0.8 0.8 0.8
-Ks 0.8 0.8 0.8
-d 1
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd ./render-data/models/blends/textures/baumrinde-mit-schnee_590.png
+
+newmtl Material
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ni 1.000000
+d 1.000000
 illum 2
 map_Kd ./render-data/models/blends/textures/NaturePlants0014_1_S_converted.png
 
@@ -18,19 +29,9 @@ Ks 0.500000 0.500000 0.500000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd ./render-data/models/blends/textures/28469666-hintergrund-textur-gr-ne-blatter-dekorati.png
-
-newmtl Stone_Stein-Felsen_Textur_A_P3071158.png
-Ns 96.078431
-Ka 0.000000 0.000000 0.000000
-Kd 0.640000 0.640000 0.640000
-Ks 0.500000 0.500000 0.500000
-Ni 1.000000
-d 1.000000
-illum 2
 map_Kd ./render-data/models/blends/textures/Stein-Felsen_Textur_A_P3071158.png
 
-newmtl Stone_baumrinde-mit-schnee_590.png
+newmtl leaves
 Ns 96.078431
 Ka 0.000000 0.000000 0.000000
 Kd 0.640000 0.640000 0.640000
@@ -38,4 +39,4 @@ Ks 0.500000 0.500000 0.500000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd ./render-data/models/blends/textures/baumrinde-mit-schnee_590.png
+map_Kd ./render-data/models/blends/textures/28469666-hintergrund-textur-gr-ne-blatter-dekorati.png
