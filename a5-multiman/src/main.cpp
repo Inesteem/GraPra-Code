@@ -278,7 +278,9 @@ void loop() {
 	// 
 	// update logic
 	//
-    game->update();
+    if(messageReader->m_init_done) {
+        game->update();
+    }
 	render_timer.done_with("updates");
 
 	// 
@@ -309,7 +311,9 @@ void loop() {
 	glClear(GL_DEPTH_BUFFER_BIT);
     glClearDepth(1);
     
-    game->draw();
+    if(messageReader->m_init_done) {
+        game->draw();
+    }
 	
 	unbind_framebuffer(the_fbuf);	
 	
@@ -352,8 +356,11 @@ void loop() {
 	glViewport(0,0,1024,1024);	
 	//shadowmapping end	
 
-    game->draw();
-	action->draw();	
+    if(messageReader->m_init_done) {
+        game->draw();
+        action->draw();
+    }
+
 	
 	render_timer.done_with("draw");
 
@@ -396,7 +403,7 @@ void actual_main() {
 	register_scheme_functions_for_key_handling();
 	load_configfile("multiman.scm");
 	cout << "cfg done" << endl;
-	//glDebugMessageCallbackARB(gl_error, 0);
+    glDebugMessageCallbackARB(gl_error, 0);
 
 	// glut initialization
 	//
@@ -423,8 +430,10 @@ void actual_main() {
     objhandler = new ObjHandler();
         objhandler->addObj("tree", "./render-data/models/tree.obj", find_shader("pos+norm+tc"));
         objhandler->addObj("building_lot", "./render-data/models/building_lot.obj", find_shader("pos+norm+tc"));
-        objhandler->addObj_withScale("upgrade_arrow", "./render-data/models/cube.obj", find_shader("pos+norm+tc"), vec3f(0.99,0.99,0.99));
-        objhandler->addObj("house_pacman", "./render-data/models/house_pacman.obj", find_shader("pos+norm+tc"));
+  //      objhandler->addObj_withScale("upgrade_arrow", "./render-data/models/cube.obj", find_shader("pos+norm+tc"), vec3f(0.99,0.99,0.99));
+        objhandler->addObj("upgrade_arrow", "./render-data/models/cube.obj", find_shader("pos+norm+tc"));
+        objhandler->addObj("house_pacman", "./render-data/models/siedlung.obj", find_shader("alpha-color-shader"));
+ //      objhandler->addObj("house_pacman", "./render-data/models/house_pacman.obj", find_shader("pos+norm+tc"));
 
 
 
@@ -441,6 +450,8 @@ void actual_main() {
         objhandler->addMeshObj("selection_circle",mesh,find_shader("selection_circle_shader"),find_texture("selection_circle.png") );
 
         objhandler->addObj("status_bar", "./render-data/models/menu.obj", find_shader("menu-shader"), vec3f(-1,-1,-1), vec3f(1,1,1));
+  //      objhandler->addObj("status_bar", "./render-data/models/menu.obj", find_shader("menu-shader"));
+ //       objhandler->addObj("tree", "./render-data/models/menu.obj", find_shader("pos+norm+tc"));
       //  objhandler->addObj("bomb","./render-data/models/bbm.obj", find_shader("pos+norm+tc"));
 
     sh = new simple_heightmap();

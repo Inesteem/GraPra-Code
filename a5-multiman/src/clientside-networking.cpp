@@ -72,29 +72,30 @@ void client_message_reader::networking_prologue(char *hostName) {
 	}
 }
 
-client_message_reader::client_message_reader(Game *game) : message_reader(), game(game) {}
+client_message_reader::client_message_reader(Game *game) : message_reader(), game(game), m_init_done(false) {}
 
 void client_message_reader::handle_message(msg::init_game *m)
 {
-    std::cout << "Initilizing map with, x = " << (unsigned int) m->mapX << ", y = " << (unsigned int) m->mapY << std::endl;
+    std::cout << "Initilizing map with level " << m->levelName << " (x = " << (unsigned int) m->mapX << ", y = " << (unsigned int) m->mapY << "), player id: " << (unsigned int) m->id << std::endl;
     game->init("./render-data/images/smalllvl_height.png",m->mapX,m->mapY, m->id);
 }
 
 void client_message_reader::handle_message(msg::spawn_house *m)
 {
     // TODO add id (m->id) to building!!
-   game->add_building("building_lot",1,m->x,m->y, m->id);
+   game->add_building("building_lot", 1,m->x,m->y, m->id);
     std::cout << "Spawning house at (" << (unsigned int) m->x << "," << (unsigned int) m->y << ")" << std::endl;
 }
 
 void client_message_reader::handle_message(msg::spawn_tree *m)
 {
     game->add_tree(m->x, m->y);
-    std::cout << "Spawning tree at (" << (unsigned int) m->x << "," << (unsigned int) m->y << ")" << std::endl;
+    //std::cout << "Spawning tree at (" << (unsigned int) m->x << "," << (unsigned int) m->y << ")" << std::endl;
 }
 
 void client_message_reader::handle_message(msg::init_done *m)
 {	
+    m_init_done = true;
 	cout << "Initializeing done, starting game..." << endl;
 }
 
@@ -113,14 +114,14 @@ void client_message_reader::handle_message(msg::next_troup_destination *m)
 
 void client_message_reader::handle_message(msg::troup_arrived *m)
 {
-    cout << "Troup arrived at building..." << endl;
+    cout << "Troup " << (unsigned int) m->troupId << " arrived at building..." << endl;
 	game->troup_arrived(m->troupId);
 }
 
 void client_message_reader::handle_message(msg::building_owner_changed *m)
 {
 
-    cout << "Building owner changed..." << endl;
+    cout << "Building owner changed (old: " << (int) m->oldOwner << ", new: " << (int) m->newOwner << ")" << endl;
     game->change_building_owner(m->buildingId,m->newOwner);
 }
 
@@ -132,7 +133,10 @@ void client_message_reader::handle_message(msg::building_unit_generated *m)
 
 void client_message_reader::handle_message(msg::building_upgrade *m) {
 
-    cout << "Upgraded Building " << m->buildingId << endl;
+    cout << "Upgraded Building " << (unsigned int) m->buildingId << endl;
     game->upgrade_building(m->buildingId, m->state);
 }
 
+void client_message_reader::handle_message(msg::game_over *m) {
+    cout << "GAME OVER, player " << (int) m->winner << " has won the game!" << endl;
+}

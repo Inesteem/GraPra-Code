@@ -4,6 +4,7 @@
 
 Game::Game(ObjHandler *objhandler, simple_heightmap *sh, client_message_reader *message_reader): m_objhandler(objhandler), m_sh(sh), m_messageReader(message_reader)
 {
+	player_color = vec3f(0,0,1);
 }
 
 void Game::add_building(string name, int size, int x, int y, unsigned int id){
@@ -104,7 +105,7 @@ Building* Game::get_building_at(vec3f pos){
         }
     }
 
-    if( dist < 3.0f) {
+    if( dist < 10.0f) {
  //       cout << "Selected building: " << m_selected->get_pos().x << "," << m_selected->get_pos().y << endl;
         return &m_buildings[k];
     }
@@ -124,6 +125,8 @@ void Game::set_selected(Building *building){
 
 
 void Game::draw(){
+	
+	
     m_sh->draw();
 
     for(int i = 0; i < m_buildings.size(); ++i){
@@ -139,7 +142,7 @@ void Game::draw(){
     }
 
     if (m_selected != 0 && m_selected != nullptr){
-       m_selected->draw_selection_circle();
+       m_selected->draw_selection_circle(m_selected->m_size);
     }
 
 

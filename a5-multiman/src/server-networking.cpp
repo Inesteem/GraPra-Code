@@ -6,21 +6,28 @@ namespace client_connections {
     server_message_reader **reader;
 }
 
+void send_message(int player, msg::message *m) {
+    try {
+        boost::asio::write(*client_connections::socket[player], boost::asio::buffer(m, m->message_size), boost::asio::transfer_all());
+    }
+    catch (boost::system::system_error &err) {
+        cerr << "Error sending message to client of player " << player << ": " << err.what() << "\nExiting." << endl;
+        quit(-1);
+    }
+}
+
 wall_time_timer since_last_broadcast;
 
 void broadcast(msg::message *m)
 {
     int i = 0;
-    try {
-        for (i = 0; i < client_connections::sockets; ++i)
-            boost::asio::write(*client_connections::socket[i], boost::asio::buffer(m, m->message_size), boost::asio::transfer_all());
+    for (i = 0; i < client_connections::sockets; ++i) {
+        send_message(i, m);
     }
-    catch (boost::system::system_error &err) {
-        cerr << "Error sending message to client of player " << i << ": " << err.what() << "\nExiting." << endl;
-        quit(-1);
-    }
+
     since_last_broadcast.restart();
 }
+
 
 void quit(int status)
 {

@@ -7,6 +7,7 @@
 
 using namespace std;
 
+void send_message(int player, msg::message *m);
 void broadcast(msg::message *m);
 
 class GameStage;

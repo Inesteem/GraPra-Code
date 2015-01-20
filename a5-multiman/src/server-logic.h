@@ -63,11 +63,13 @@ public:
 
 class Building : public GameObject
 {
-        unsigned int m_unitCount;
 
         wall_time_timer m_generateUnitsTimer;
         const static unsigned int m_unitGenerationTime = 1000;
-public: 
+public:
+    unsigned int m_unitCount;
+    int m_player;
+
     Building(GameStage *gameStage, unsigned int x, unsigned int y, unsigned int id);
 
     void Update();
@@ -77,8 +79,10 @@ public:
 
 class Troup : public GameObject
 {
-    unsigned int m_stepTime = 1000;
+    unsigned int m_stepTime = 300;
     wall_time_timer m_stepTimer;
+    bool m_waiting;
+
 public:
     unsigned int m_unitCount;
 
@@ -96,17 +100,21 @@ class GameStage
 {
     static unsigned int s_nextBuilding;
     static unsigned int s_nextTroup;
+
+    bool m_gameOver;
 public:
     int m_mapX, m_mapY;
     bool **m_map;
 
-    GameStage() {}
+    GameStage() : m_gameOver(false) {}
 
     void init(unsigned int x, unsigned int y);
     void Update();
     Building* spawnHouse(unsigned int x, unsigned int y);
     Troup* spawnTroup(unsigned int sourceBuildingID, unsigned int destinationBuildingID, unsigned int unitCount);
     void upgrade_building(unsigned int buildingId, unsigned int state);
+    int checkGameOver();
+
     unordered_map<unsigned int, Building*> m_buildings;
     unordered_map<unsigned int, Troup*> m_troups;
 };

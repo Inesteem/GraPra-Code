@@ -72,7 +72,7 @@ namespace moac {
 
 	void Action::upgrade_building(){
         
-        if(ob_set && own_building->check_for_upgrade(true)){
+        if(ob_set && game->m_player_id == own_building->get_owner_id() && own_building->check_for_upgrade(true)){
 				
 			msg::building_upgrade_client buc = make_message<msg::building_upgrade_client>();
 			// TODO use own player id
@@ -91,15 +91,15 @@ namespace moac {
 		
         vec3f wp = ClickWorldPosition(x,y);
         Building *building = game->get_building_at(wp);
- 		//TODO: get own id
-        
-		//keine Auswahl, falls bereits Gebaeude ausgewaehlt, verfaellt diese Wahl
-	//	if (!ob_set || building == nullptr || building->get_owner_id() == own_id){
-		if (!ob_set || building == nullptr){
+
+        if (!ob_set || building == nullptr){
 			eb_set = false;
+            ob_set = false;
 			game->set_selected(nullptr);
+            prepare_attack = false;
 			return false;
-		}		
+        }
+
 		slidebar->reset_bar();
 		eb_set = true;
 		enemys_building = building;
@@ -116,11 +116,11 @@ namespace moac {
         
         Building *building = game->get_building_at(wp);
         
-		//TODO: get own id
+        int own_id = game->m_player_id;
 
 		//keine Auswahl, falls bereits Gebaeude ausgewaehlt, verfaellt diese Wahl
-//		if (building == nullptr || building->get_owner_id() != own_id){
-		if (building == nullptr){
+        if (building == nullptr || building->get_owner_id() != own_id){
+        //if (building == nullptr){
 		//	ob_set = false;
 			return false;
 		}
@@ -143,8 +143,7 @@ namespace moac {
 			if(units != 0){
 				
 				msg::spawn_troup_client stc = make_message<msg::spawn_troup_client>();
-				// TODO use own player id
-				stc.playerId = 0;
+                stc.playerId = game->m_player_id;
 				stc.sourceId = own_building->get_id();
 				stc.destinationId = enemys_building->get_id();
 				stc.unitCount = units;
@@ -166,7 +165,7 @@ namespace moac {
             statusbar->render_statusbar();
 	}
 	
-	
+
 	void Action::update_mouse_pos(float x, float y){
 		if(prepare_attack)
 			slidebar->update_mouse_pos(x,y);	

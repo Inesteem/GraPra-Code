@@ -579,22 +579,25 @@ StatusBar::StatusBar(string name, ObjHandler *objhandler){
 void StatusBar::render_statusbar(){
 
 	camera_ref old_camera = current_camera();
-	use_camera(camera);
+//	use_camera(camera);
 	bind_shader(shader);
 
 	glDepthMask(GL_TRUE);	
 
+
 	int i = 0;
 	for(vector<drawelement*>::iterator it = obj->drawelements->begin(); it != obj->drawelements->end(); ++it) {
 		drawelement *de = *it;
-		de->bind();
-		de->apply_default_tex_uniforms_and_bind_textures();
+		mesh_ref mesh_1 = *de->meshes.begin();
+	//	cout << "count_meshes : " << i << ": " <<vertex_buffers_in_mesh(mesh_1) << endl;
+		//de->bind();
+		//de->apply_default_tex_uniforms_and_bind_textures();
 		de->draw_em();
-		de->unbind();
-		
+		//de->unbind();
+		i++;
 	}
-/*
-	int loc;
+
+/*	int loc;
 
 
 		matrix4x4f model;
@@ -603,7 +606,7 @@ void StatusBar::render_statusbar(){
 		model.row_col(1,3) = 5.f;
 
 	bind_texture(texture, 0);
-	loc = glGetUniformLocation(gl_shader_object(shader), "tex");
+	loc = glGetUniformLocation(gl_shader_object(shader), "diffuse_tex");
 	glUniform1i(loc, 0);
 
 	bind_mesh_to_gl(mesh);
