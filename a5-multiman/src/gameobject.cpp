@@ -338,8 +338,8 @@ void Building::draw(){
 		}		
 		
 	}
-		
-		
+
+    draw_selection_circle(3);
 }
 
 float Building::dist_to(vec3f &pos){
@@ -371,7 +371,7 @@ unsigned int Building::get_id(){
 	return id;
 }
 
-void Building::draw_selection_circle(){
+void Building::draw_selection_circle(int size){
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     vec3f color = get_player_color(m_owner);
@@ -384,12 +384,12 @@ void Building::draw_selection_circle(){
 
 
 
-    tmp.col_major[0 * 4 + 0] =  m_model.col_major[0 * 4 + 0] * (render_settings::tile_size_x+2) * m_size;
-    tmp.col_major[1 * 4 + 1] =  m_model.col_major[1 * 4 + 1] * (render_settings::tile_size_x+2) * m_size;
-    tmp.col_major[2 * 4 + 2] =  m_model.col_major[2 * 4 + 2] * (render_settings::tile_size_y+2) * m_size;
-    tmp.col_major[3 * 4 + 0] =  m_pos.x * render_settings::tile_size_x - ((render_settings::tile_size_x+2) * m_size )/2.0f * m_center.x;
+    tmp.col_major[0 * 4 + 0] =  m_model.col_major[0 * 4 + 0] * (render_settings::tile_size_x+2) * size;
+    tmp.col_major[1 * 4 + 1] =  m_model.col_major[1 * 4 + 1] * (render_settings::tile_size_x+2) * size;
+    tmp.col_major[2 * 4 + 2] =  m_model.col_major[2 * 4 + 2] * (render_settings::tile_size_y+2) * size;
+    tmp.col_major[3 * 4 + 0] =  m_pos.x * render_settings::tile_size_x - ((render_settings::tile_size_x+2) * size )/2.0f * m_center.x;
     tmp.col_major[3 * 4 + 1] +=  0.0f;
-    tmp.col_major[3 * 4 + 2] =  m_pos.y * render_settings::tile_size_y - ((render_settings::tile_size_y+2) * m_size )/2.0f *  m_center.z;
+    tmp.col_major[3 * 4 + 2] =  m_pos.y * render_settings::tile_size_y - ((render_settings::tile_size_y+2) * size )/2.0f *  m_center.z;
 
     int loc = glGetUniformLocation(gl_shader_object(find_shader("selection_circle_shader")), "proj");
     glUniformMatrix4fv(loc, 1, GL_FALSE, projection_matrix_of_cam(current_camera())->col_major);

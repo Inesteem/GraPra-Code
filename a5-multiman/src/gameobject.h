@@ -89,7 +89,7 @@ public:
     void upgrade(Obj *obj, int state);
     float dist_to(vec3f &pos);
     void draw();
-    void draw_selection_circle();
+    void draw_selection_circle(int size);
 	unsigned int get_owner_id();
 	unsigned int get_id();
 	void update_unit_count(int count);
@@ -98,10 +98,11 @@ public:
     void change_owner(unsigned int owner);
     bool check_for_upgrade(bool up);
 
-private:
-    unsigned int m_owner;
-    unsigned int unit_count;
     int m_size;
+
+private:
+    int m_owner;
+    unsigned int unit_count;
     int state;
     Obj *selection_circle;
     Obj *upgrade_arrow;

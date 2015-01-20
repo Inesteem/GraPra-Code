@@ -139,7 +139,7 @@ void Game::draw(){
     }
 
     if (m_selected != 0 && m_selected != nullptr){
-       m_selected->draw_selection_circle();
+       m_selected->draw_selection_circle(m_selected->m_size);
     }
 
 

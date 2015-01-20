@@ -21,6 +21,20 @@ void GameStage::init(unsigned int x, unsigned int y)
 
 void GameStage::Update()
 {
+    if(m_gameOver) return;
+
+    int winner = checkGameOver();
+
+    if(winner > -1) {
+        m_gameOver = true;
+
+        msg::game_over go = make_message<msg::game_over>();
+        go.winner = winner;
+        broadcast(&go);
+
+        return;
+    }
+
     for(auto& building : m_buildings) {
         building.second->Update();
     }
@@ -47,6 +61,28 @@ void GameStage::Update()
         m_troups.erase(troupToDelete);
         delete(t);
     }
+}
+
+int GameStage::checkGameOver() {
+    int winningPlayer = -1;
+    for(auto& b : m_buildings) {
+        Building *building = (Building*) b.second;
+
+        if(building->m_player == -1) {
+            return -1;
+        }
+
+        if(winningPlayer == -1) {
+            winningPlayer = building->m_player;
+            continue;
+        }
+
+        if(winningPlayer != building->m_player) {
+            return -1;
+        }
+    }
+
+    return winningPlayer;
 }
 
 Building* GameStage::spawnHouse(unsigned int x, unsigned int y)
@@ -105,7 +141,7 @@ void GameStage::upgrade_building(unsigned int buildingId, unsigned int state){
 }
 
 Troup::Troup(GameStage *gameStage, Building *sourceBuilding, Building *destinationBuilding, unsigned int unitCount, unsigned int id)
-    : GameObject(gameStage, 0, 0, id), m_unitCount(unitCount), m_source(sourceBuilding), m_destination(destinationBuilding)
+    : GameObject(gameStage, 0, 0, id), m_unitCount(unitCount), m_source(sourceBuilding), m_destination(destinationBuilding), m_waiting(false)
 {
     m_x = sourceBuilding->m_x;
     m_y = sourceBuilding->m_y;
@@ -121,10 +157,21 @@ Troup::Troup(GameStage *gameStage, Building *sourceBuilding, Building *destinati
 static int first_run = 0;
 bool Troup::Update()
 {
+    if(m_waiting) {
+        if(m_stepTimer.look() < 50) {
+                return false;
+        } else {
+            m_stepTimer.restart();
+            m_waiting = false;
+        }
+    }
 
-    if(m_stepTimer.look() < m_stepTime) {
+    if(m_stepTimer.look() < m_stepTime - 50) {
         return false;
     }
+
+    m_waiting = true;
+
 	cout << m_stepTimer.look() << endl;
     m_stepTimer.restart();
 	cout << m_stepTimer.look() << endl;
@@ -160,7 +207,7 @@ bool Troup::Update()
 }
 
 Building::Building(GameStage *gameStage, unsigned int x, unsigned int y, unsigned int id)
-    : GameObject(gameStage, x, y, id)
+    : GameObject(gameStage, x, y, id), m_player(-1)
 {
     m_unitCount = 0;
     m_generateUnitsTimer.start();
@@ -168,6 +215,8 @@ Building::Building(GameStage *gameStage, unsigned int x, unsigned int y, unsigne
 
 void Building::Update()
 {
+    if(m_player == - 1) return;
+
     if(m_generateUnitsTimer.look() >= wall_time_timer::msec(m_unitGenerationTime)) {
         m_generateUnitsTimer.restart();
         m_unitCount++;
@@ -181,11 +230,39 @@ void Building::Update()
 
 void Building::IncomingTroup(Troup *troup)
 {
-    m_unitCount += troup->m_unitCount;
-	msg::building_unit_generated bug = make_message<msg::building_unit_generated>();
-	bug.newUnitCount = m_unitCount;
-	bug.buildingId = m_id;
-	broadcast(&bug);    
+    Building *src = troup->m_source;
+    Building *dest = troup->m_destination;
+
+    cout << "src player: " << src->m_player << ", dest player: " << dest->m_player << endl;
+
+    if(src->m_player == dest->m_player) {
+        m_unitCount += troup->m_unitCount;
+        msg::building_unit_generated bug = make_message<msg::building_unit_generated>();
+        bug.newUnitCount = m_unitCount;
+        bug.buildingId = m_id;
+        broadcast(&bug);
+    } else {
+        if(troup->m_unitCount <= dest->m_unitCount) {
+            m_unitCount -= troup->m_unitCount;
+            msg::building_unit_generated bug = make_message<msg::building_unit_generated>();
+            bug.newUnitCount = m_unitCount;
+            bug.buildingId = m_id;
+            broadcast(&bug);
+        } else {
+            msg::building_owner_changed boc = make_message<msg::building_owner_changed>();
+            boc.buildingId = dest->m_id;
+            boc.oldOwner = dest->m_player;
+            boc.newOwner = src->m_player;
+
+            dest->m_player = src->m_player;
+            dest->m_unitCount = troup->m_unitCount - dest->m_unitCount;
+
+            boc.newUnitCount = dest->m_unitCount;
+            broadcast(&boc);
+        }
+    }
+
+
 }
 
 Path::Path(Troup *troup, PathNode &source, PathNode &destination, unsigned int x, unsigned int y) : m_mapX(x), m_mapY(y), m_troup(troup)
