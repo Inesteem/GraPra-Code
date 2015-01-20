@@ -278,7 +278,9 @@ void loop() {
 	// 
 	// update logic
 	//
-    game->update();
+    if(messageReader->m_init_done) {
+        game->update();
+    }
 	render_timer.done_with("updates");
 
 	// 
@@ -309,7 +311,9 @@ void loop() {
 	glClear(GL_DEPTH_BUFFER_BIT);
     glClearDepth(1);
     
-    game->draw();
+    if(messageReader->m_init_done) {
+        game->draw();
+    }
 	
 	unbind_framebuffer(the_fbuf);	
 	
@@ -352,8 +356,11 @@ void loop() {
 	glViewport(0,0,1024,1024);	
 	//shadowmapping end	
 
-    game->draw();
-	action->draw();	
+    if(messageReader->m_init_done) {
+        game->draw();
+        action->draw();
+    }
+
 	
 	render_timer.done_with("draw");
 
@@ -390,13 +397,13 @@ extern "C" {
 
 
 
-
+char *hostName;
 
 void actual_main() {
 	register_scheme_functions_for_key_handling();
 	load_configfile("multiman.scm");
 	cout << "cfg done" << endl;
-	//glDebugMessageCallbackARB(gl_error, 0);
+    glDebugMessageCallbackARB(gl_error, 0);
 
 	// glut initialization
 	//
@@ -452,7 +459,7 @@ void actual_main() {
     game = new Game(objhandler,sh, messageReader);;
 
     messageReader = new client_message_reader(game);
-       messageReader->networking_prologue();
+       messageReader->networking_prologue(hostName);
 
 
 	// set different cursors
@@ -476,7 +483,15 @@ void actual_main() {
 
 int main(int argc, char **argv)
 {
-	parse_cmdline(argc, argv);
+    //parse_cmdline(argc, argv);
+
+    if(argc != 2) {
+        cout << "Usage: ./multiman <host name>" << endl;
+        exit(0);
+    }
+
+    hostName = argv[1];
+
 	render_settings::screenres_x = cmdline.res_x;
 	render_settings::screenres_y = cmdline.res_y;
 	append_image_path("./render-data/images/");
