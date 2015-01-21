@@ -200,6 +200,7 @@ bool Troup::Update()
     ntd.mapY = m_y;
     ntd.troupId = m_id;
     ntd.time = m_stepTime;
+    cout << "NTD: (" << ntd.mapX << "," << ntd.mapY << ") id " << ntd.troupId << ",time " << ntd.time;
     broadcast(&ntd);
 
     cout << "\d troup " << m_id << " to position (" << m_x << ", " << m_y << ")" << endl;
