@@ -16,6 +16,7 @@ class Label;
 struct Obj {
 
     Obj(string name, int id, string filename, shader_ref shader);
+    Obj(string name, int id, string filename, shader_ref shader, int changes);
     Obj(string name, int id, string filename, shader_ref shader, vec3f scale);
     Obj(string name, int id, string filename, shader_ref shader, vec3f bb_min, vec3f bb_max);
     Obj(string name, int id, mesh_ref mesh, texture_ref tex, shader_ref shader);
@@ -32,11 +33,13 @@ struct Obj {
 
 };
 
+
 class ObjHandler{
 public:
     ObjHandler();
     //adds .obj and tries to scale to fit map
     void addObj(string name, string filename, shader_ref shader);
+    void addObj_changeable(string name, string filename, shader_ref shader, int changes);
     void addObj(string name, string filename, shader_ref shader, vec3f bb_min, vec3f bb_max);
     //adds .obj with custom scale
     void addObj_withScale(string name, string filename, shader_ref shader, vec3f scale);
@@ -60,6 +63,7 @@ public:
     void set_model_matrix(matrix4x4f new_model);
     matrix4x4f get_model_matrix();
     void set_height(float height);
+    vec3f get_center(){return m_center;}
     vec2f get_pos(){
         return m_pos;
     }
@@ -115,6 +119,7 @@ private:
     
 };
 
+
 class UnitGroup: public GameObject{
 public:
 
@@ -152,6 +157,20 @@ private:
     vector<float> m_dest_heights;
     vector<float> m_cur_heights;
     vector<float> m_up_speed;
+
+};
+
+class Pacman: public GameObject{
+public:
+
+    Pacman(Obj *obj, unsigned int owner, unsigned m_id, int height, float time);
+	
+	void draw();
+	
+private:
+	float time;
+	unsigned int owner;
+	unsigned int m_id;
 
 };
 

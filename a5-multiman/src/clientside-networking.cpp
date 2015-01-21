@@ -89,7 +89,7 @@ void client_message_reader::handle_message(msg::spawn_house *m)
 
 void client_message_reader::handle_message(msg::spawn_tree *m)
 {
-    game->add_tree(m->x, m->y);
+    game->add_tree(m->x, m->y,m->type);
     //std::cout << "Spawning tree at (" << (unsigned int) m->x << "," << (unsigned int) m->y << ")" << std::endl;
 }
 

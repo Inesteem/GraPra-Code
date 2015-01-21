@@ -1,7 +1,7 @@
 #define update_1 10
 #define update_2 100
 
-
+#include "game.h"
 #include "gameobject.h"
 #include "rendering.h"
 #include "label.h"
@@ -33,6 +33,31 @@ Obj::Obj(string name, int id, string filename, shader_ref shader):id(id),name(na
     unbind_mesh_from_gl(mesh);
     tex_params_t p = default_tex_params();
     tex = make_texture_ub(("tex"), loader.objdata.groups->mtl->tex_d, GL_TEXTURE_2D, &p);
+}
+
+Obj::Obj(string name, int id, string filename, shader_ref shader, int changes):id(id),name(name),shader(shader){
+    ObjLoader loader(name.c_str(), filename.c_str());
+    loader.TranslateToOrigin();
+
+    loader.pos_and_norm_shader = shader;
+    loader.pos_norm_and_tc_shader = shader;
+    loader.default_shader = shader;
+    vec3f min, max;
+    loader.BoundingBox(min, max);
+    bb_min = vec3f(0,0,0);
+     bb_max = vec3f(render_settings::tile_size_x,(max.y-min.y)/(max.x-min.x)*render_settings::tile_size_x,(max.z-min.z)/(max.x-min.x)*render_settings::tile_size_y);
+     loader.ScaleVertexDataToFit(bb_min,bb_max);
+     drawelements = new vector<drawelement*>();
+    loader.GenerateNonsharingMeshesAndDrawElements(*drawelements);
+
+    mesh = make_mesh(name.c_str(),1);
+    bind_mesh_to_gl(mesh);
+    add_vertex_buffer_to_mesh(mesh, "in_pos", GL_FLOAT, loader.objdata.vertices, 3, (float*) loader.objdata.vertex_data , GL_STATIC_DRAW);
+    add_index_buffer_to_mesh(mesh, loader.objdata.groups->triangles * 3, (unsigned int *) loader.objdata.groups->v_ids, GL_STATIC_DRAW);
+    unbind_mesh_from_gl(mesh);
+    tex_params_t p = default_tex_params();
+    tex = make_texture_ub(("tex"), loader.objdata.groups->mtl->tex_d, GL_TEXTURE_2D, &p);
+
 }
 
 
@@ -104,6 +129,9 @@ ObjHandler::ObjHandler(){
 
 
 //adds an .obj
+void ObjHandler::addObj_changeable(string name, string filename, shader_ref shader, int changes){
+    objs.push_back(Obj(name,objs.size(),filename, shader, changes));	
+}
 void ObjHandler::addObj(string name, string filename, shader_ref shader){
 
     objs.push_back(Obj(name,objs.size(),filename, shader));
@@ -112,8 +140,6 @@ void ObjHandler::addObj(string name, string filename, shader_ref shader, vec3f b
 
     objs.push_back(Obj(name,objs.size(),filename, shader, bb_min, bb_max));
 }
-
-
 
 void ObjHandler::addObj_withScale(string name, string filename, shader_ref shader, vec3f scale){
     objs.push_back(Obj(name,objs.size(),filename,shader,scale));
@@ -249,6 +275,7 @@ Building::Building(Obj *obj,Obj *selection_circle,Obj *upgrade_arrow, string nam
     m_model.col_major[3 * 4 + 1] = m_center.y + m_height;
     m_model.col_major[3 * 4 + 2] = m_pos.y*render_settings::tile_size_y;
     
+    
     make_unit_matrix4x4f(&arrow_model);
     arrow_model.col_major[3 * 4 + 0] = m_pos.x*render_settings::tile_size_x;
     arrow_model.col_major[3 * 4 + 1] = m_center.y + height+5;
@@ -259,7 +286,8 @@ Building::Building(Obj *obj,Obj *selection_circle,Obj *upgrade_arrow, string nam
     label= new Label();
     label->setup_display();
     label->update_label_pos(2*x, 2*y, height+2);
- 
+    vec3f color = get_player_color(m_owner);
+	label->set_color(color);
     
     state = 0;
 
@@ -324,7 +352,7 @@ void Building::draw(){
 	label->update_gui_texture_int(unit_count);
 	label->render_gui_overlay();
 	
-	if(check_for_upgrade(true)){
+	if(check_for_upgrade(true) && PLAYER_ID == m_owner){
 		matrix4x4f arrow_model_2;
 		vec3f rot_vec = vec3f(0,1,0);
 		make_rotation_matrix4x4f(&arrow_model_2,&rot_vec, rotation/2);
@@ -352,6 +380,7 @@ void Building::draw_state_1(){
 	bind_shader(shader_t);
 
 	glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	int i = 0;
 	for (vector<drawelement*>::iterator it = m_obj->drawelements->begin(); it != m_obj->drawelements->end(); ++it) {
 		drawelement *de = *it;
@@ -373,10 +402,12 @@ void Building::draw_state_1(){
 		float use_alpha = 0;
 
 		if(i == 2)
-			use_alpha = 0;
-		if(i == 0 || i == 1)
-			color = vec4f(1,0,0,1);
+			use_alpha = 1;
+		if(i == 0 || i == 1){
 			
+			vec3f col = get_player_color(m_owner);
+			color = vec4f(col.x,col.y,col.z,1);
+		}
 
 			
 
@@ -479,6 +510,8 @@ void Building::draw_selection_circle(int size){
 
 void Building::change_owner(unsigned int owner){
     m_owner = owner;
+    vec3f color = get_player_color(m_owner);
+	label->set_color(color);    
 }
 
 //UNITGROUP
@@ -630,4 +663,15 @@ void UnitGroup::spawn_unit_row(unsigned int size){
     }
 }
 
+Pacman::Pacman(Obj *obj, unsigned int owner, unsigned m_id, int height, float time) :  GameObject(obj, obj->name ,obj->shader, height), owner(owner), m_id(m_id), time(time)  {
+	
+}
+
+void Pacman::draw(){
+	time += 0.007;
+	if(time == std::numeric_limits<float>::max()-2)
+		time = 0;
+	
+	
+}
 

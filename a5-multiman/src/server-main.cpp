@@ -77,15 +77,19 @@ void initGame(string &levelName) {
                 bug.newUnitCount = b->m_unitCount;
                 broadcast(&bug);
 							
-			} else if(color.y > 0.9f) {
+			} else if(color.y > 0.4f) {
                 gameStage->m_map[r][c] = false;
 				cout << "Tree at (" << r << "," << c << ")" << endl;
 
 				msg::spawn_tree st = make_message<msg::spawn_tree>();
                 st.x = c;
                 st.y = r;
+                st.type = 1;
+				if(color.y > 0.9f)
+					st.type = 0;
+					
                 broadcast(&st);
-			}
+			} 
 		}
     }
 

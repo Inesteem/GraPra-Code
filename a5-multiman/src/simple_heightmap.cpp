@@ -11,8 +11,8 @@ simple_heightmap::simple_heightmap()
 
 void simple_heightmap::init( const std::string filename, int width, int height){
 
-
-    m_mesh = make_mesh("mesh_heightmap", 1);
+	this->filename = filename;
+    m_mesh = make_mesh("mesh_heightmap", 2);
     vec3f* colors(load_image3f(filename.c_str(), &m_width, &m_height));
    // cout << m_width << " " << m_height << endl;
     if(width != m_width || height != m_height){
@@ -30,7 +30,8 @@ void simple_heightmap::init( const std::string filename, int width, int height){
     for(int i = 0; i < m_height; ++i){
         for(int j = 0; j < m_width; ++j){
             pos[i + j * m_height] = vec3f(j*render_settings::tile_size_x-render_settings::tile_size_x/2,0,i*render_settings::tile_size_y-render_settings::tile_size_y/2);
-            pos[i + j *m_height].y =  colors[i + j *m_height].x * render_settings::height_factor;
+            pos[i + j *m_height].y =  colors[i + j *m_height].x * render_settings::height_factor;          
+            
             m_heights[i + j *m_height] = colors[i + j *m_height].x * render_settings::height_factor;
 
 
@@ -82,6 +83,10 @@ void simple_heightmap::init( const std::string filename, int width, int height){
     add_vertex_buffer_to_mesh(m_mesh, "in_norm", GL_FLOAT, m_width*m_height, 3,(float*) norm.data(), GL_STATIC_DRAW );
     add_index_buffer_to_mesh(m_mesh, index.size(), (unsigned int *) index.data(), GL_STATIC_DRAW);
     unbind_mesh_from_gl(m_mesh);
+
+
+	init_done = true;
+
 }
 
 float simple_heightmap::get_height(float x, float y){
@@ -157,11 +162,18 @@ void simple_heightmap::draw(){
 //	setup_dir_light(m_shader);
 
 
-    bind_mesh_to_gl(m_mesh);
-    glPatchParameteri(GL_PATCH_VERTICES, 3);
-    draw_mesh_as(m_mesh,GL_PATCHES);
+	if(render_planes){
 
-    unbind_mesh_from_gl(m_mesh);
+		bind_mesh_to_gl(m_mesh_2);
+		glPatchParameteri(GL_PATCH_VERTICES, 3);
+		draw_mesh_as(m_mesh_2,GL_PATCHES);
+		unbind_mesh_from_gl(m_mesh_2);
+	} else {
+		bind_mesh_to_gl(m_mesh);
+		glPatchParameteri(GL_PATCH_VERTICES, 3);
+		draw_mesh_as(m_mesh,GL_PATCHES);
+		unbind_mesh_from_gl(m_mesh);
+	}
     unbind_shader(m_shader);
 
     unbind_texture(grass);
@@ -215,6 +227,84 @@ vec3f simple_heightmap::sample_normal(int x, int y){
 	n.y = n.y/8.;
 	normalize_vec3f(&n);
 	return -n;
+}
+
+
+void simple_heightmap::re_init(vector<vec3f> *planes){
+
+
+    m_mesh_2 = make_mesh("mesh_heightmap_2", 2);
+    vec3f* colors(load_image3f(filename.c_str(), &m_width, &m_height));
+
+    vector<vec3f> pos = vector<vec3f>(m_width*m_height);
+    vector<vec3f> norm = vector<vec3f>(m_width*m_height);
+
+    m_heights = vector<float>(m_width*m_height);
+    for(int i = 0; i < m_height; ++i){
+        for(int j = 0; j < m_width; ++j){
+            pos[i + j * m_height] = vec3f(j*render_settings::tile_size_x-render_settings::tile_size_x/2,0,i*render_settings::tile_size_y-render_settings::tile_size_y/2);
+            pos[i + j *m_height].y =  colors[i + j *m_height].x * render_settings::height_factor;
+            m_heights[i + j *m_height] = colors[i + j *m_height].x * render_settings::height_factor;
+   
+            vec2f pos_1 = vec2f(j*render_settings::tile_size_x-render_settings::tile_size_x/2,i*render_settings::tile_size_y-render_settings::tile_size_y/2);
+	
+			for(vector<vec3f>::iterator it = planes->begin(); it != planes->end(); ++it) {
+				vec3f vec = *it;
+			//	vec2f pos_2 = vec2f(vec.x, vec.z);
+			//	vec2f dist = pos_2 - pos_1;
+			//	float distance = length_of_vec2f(&dist);
+		//		if(distance <= 5){
+			//		pos[i + j *m_height].y = 100;
+			//		m_heights[i + j *m_height] = 100;
+			//		cout << "done" << endl;
+				
+			//	}	
+				if((vec.x >= j-1 && vec.x <= j+1) && (vec.z >= i-1 && vec.z <= i+1)){
+//				if(((vec.z == i-1 || vec.z == i+1) && (vec.x == j))||((vec.x == j-1 || vec.x == j+1) && (vec.z == i))){
+			//		pos[i + j *m_height].y = colors[(int)vec.z + (int)vec.x *m_height].x * render_settings::height_factor;
+					pos[i + j *m_height].y = vec.y;
+			//		m_heights[i + j *m_height] = colors[(int)vec.z + (int)vec.x *m_height].x * render_settings::height_factor;
+					m_heights[i + j *m_height] = vec.y;
+				}
+					
+			}
+            
+            
+
+
+        }
+    }
+    
+    for(int i = 0; i < m_height-1; ++i){
+        for(int j = 0; j < m_width; ++j){
+			norm.push_back(sample_normal(i,j));
+		}
+	}
+    
+    std::vector<unsigned int> index;
+
+
+    for(int i = 0; i < m_height-1; ++i){
+        for(int j = 0; j < m_width-1; ++j){
+
+            index.push_back(i + j*m_height);
+            index.push_back((i+1)  + j*m_height);
+            index.push_back(i+1 + (j+1)*m_height);
+
+            index.push_back(i+1 + (j+1)*m_height);
+            index.push_back(i + (j+1)*m_height);
+            index.push_back(i + (j)*m_height);
+
+        }
+    }
+
+    bind_mesh_to_gl(m_mesh_2);
+    add_vertex_buffer_to_mesh(m_mesh_2, "in_pos", GL_FLOAT, m_width*m_height, 3, (float*) pos.data() , GL_STATIC_DRAW);
+    add_vertex_buffer_to_mesh(m_mesh_2, "in_norm", GL_FLOAT, m_width*m_height, 3,(float*) norm.data(), GL_STATIC_DRAW );
+    add_index_buffer_to_mesh(m_mesh_2, index.size(), (unsigned int *) index.data(), GL_STATIC_DRAW);
+    unbind_mesh_from_gl(m_mesh_2);
+    render_planes = true;
+    cout << "changed_mesh" << endl;
 }
 
 

@@ -56,7 +56,8 @@ class Label {
 		// SET id's to -1 in constructor !!!!!!!!!!
 		texture_ref texture;
 		std::string texture_name = "label_texture";		
-		vec3f 		texture_color = {1.f, 0.f, 0.f};
+		vec3f 		texture_color = {1.f, 1.f, 1.f};
+		vec3f 		color = {1.f, 1.f, 1.f};
 		vec3f 		pos;
 		bool		use_cam;
 
@@ -85,6 +86,7 @@ class Label {
 		void set_shader(shader_ref shader);
 		void set_size(vec2f size);
 		void set_texture(const char *name);
+		void set_color(vec3f color);
 		
 		void setup_display();
 

@@ -136,6 +136,9 @@
 
 		float n_dot_l = max(0, dot(norm_wc, -light_dir));
 		out_col += vec4(color * light_col * n_dot_l, 0.);
+		out_col = vec4(color.r,color.g,color.b,1);
+		if(out_col.x <= 0.2 && out_col.y <= 0.2 &&out_col.z <= 0.2)
+			discard;
 	}
 }
 #:inputs (list "in_pos" "in_norm" "in_tc")>
@@ -588,52 +591,6 @@
 
 
 
-#<make-shader "text-shader"
-#:vertex-shader #{
-#version 150 core
-
-in vec3 in_pos;
-in vec2 in_tc;
-uniform mat4 proj;
-uniform mat4 view;
-uniform mat4 model;
-uniform vec3 CameraRight_worldspace;
-uniform vec3 CameraUp_worldspace;
-uniform vec3 BillboardPos; 
-uniform vec2 BillboardSize;
-out vec2 tc;
-
-		void main() {
-			vec3 vp_w = 
-				BillboardPos
-				+ CameraRight_worldspace * in_pos.x  * BillboardSize.x
-				+ CameraUp_worldspace * in_pos.y * BillboardSize.y;
-	
-			gl_Position = proj * view * vec4(vp_w , 1.);
-			tc = in_tc;
-		}
-}
-#:fragment-shader #{
-#version 150 core
-
-in vec2 tc;
-out vec4 out_col;
-uniform sampler2D tex;
-//uniform float LifeLevel;
-
-		void main(){
-
-			gl_FragDepth = 0.001;
-		
-			if(texture(tex, tc).r >= 0.5 || texture(tex, tc).g >= 0.5 || texture(tex, tc).b >= 0.5)
-				out_col = vec4(texture(tex, tc).rgb, 1.);
-			else
-				discard;
-
-
-		}
-}
-
 #:inputs (list "in_pos" "in_tc")>
 
 #<make-shader "count-shader"
@@ -783,13 +740,14 @@ uniform float down;
 			float alpha =  (col_a.r + col_a.g + col_a.b)/3;
 
 			float n_dot_l = max(0, dot(norm_wc, -light_dir));
-			out_col += vec4(col * light_col * n_dot_l, 0.);
-			if(use_alpha == 1)
-				out_col.a = alpha; 
+		//	out_col += vec4(col * light_col * n_dot_l, 0.);
+			out_col = vec4(texture(diffuse_tex, tc.st).r,texture(diffuse_tex, tc.st).g,texture(diffuse_tex, tc.st).b,1);
+			if(use_alpha == 1){
+				out_col.a = 1-alpha; 
+		//		out_col = vec4(texture(diffuse_tex, tc.st).r,texture(diffuse_tex, tc.st).g,texture(diffuse_tex, tc.st).b,1);
+			}
 		} 
 	}
 }
 #:inputs (list "in_pos" "in_norm" "in_tc")>
-
-
 

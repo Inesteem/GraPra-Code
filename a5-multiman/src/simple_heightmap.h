@@ -25,21 +25,26 @@ public:
     vec3f sample_normal(int x, int y);
     float get_height(float x, float y);
     void init(const std::string filename, int width, int height);
+    void re_init( vector<vec3f> *planes);
     void update();
     void draw();
 
    // void add_units(int count, int x, int y);
 
 
+    bool init_done = false;
 
 private:
 
     unsigned int m_width, m_height;
 
     vector<float> m_heights;
+    
 
     matrix4x4f m_model;
     mesh_ref m_mesh;
+    mesh_ref m_mesh_2;
+    bool render_planes = false;
     shader_ref m_shader;
     vector<char> m_gamefield;
 
@@ -48,6 +53,9 @@ private:
     texture_ref stone = find_texture("terrain_2");
     texture_ref water = find_texture("terrain_0");
     texture_ref snow = find_texture("terrain_3");
+
+	std::string filename;
+
 };
 
 
