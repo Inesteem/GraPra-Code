@@ -54,6 +54,11 @@ void Label::set_nChars(unsigned int nChars){
 	this->nChars = nChars;
 
 }
+
+void Label::set_color(vec3f color){
+	this->color = color;
+}
+
 	
 void Label::set_fontSize(unsigned int fontSize){
 
@@ -256,6 +261,9 @@ void Label::render_gui_overlay() {
 	bind_texture(texture, 0);
 	loc = glGetUniformLocation(gl_shader_object(label_shader), "tex");
 	glUniform1i(loc, 0);
+	
+	loc = glGetUniformLocation(gl_shader_object(label_shader), "color");
+	glUniform3fv(loc, 1,(float *)&color);		
 
 
 	bind_mesh_to_gl(mesh);

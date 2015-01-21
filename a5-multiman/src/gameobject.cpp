@@ -1,7 +1,7 @@
 #define update_1 10
 #define update_2 100
 
-
+#include "game.h"
 #include "gameobject.h"
 #include "rendering.h"
 #include "label.h"
@@ -33,6 +33,31 @@ Obj::Obj(string name, int id, string filename, shader_ref shader):id(id),name(na
     unbind_mesh_from_gl(mesh);
     tex_params_t p = default_tex_params();
     tex = make_texture_ub(("tex"), loader.objdata.groups->mtl->tex_d, GL_TEXTURE_2D, &p);
+}
+
+Obj::Obj(string name, int id, string filename, shader_ref shader, int changes):id(id),name(name),shader(shader){
+    ObjLoader loader(name.c_str(), filename.c_str());
+    loader.TranslateToOrigin();
+
+    loader.pos_and_norm_shader = shader;
+    loader.pos_norm_and_tc_shader = shader;
+    loader.default_shader = shader;
+    vec3f min, max;
+    loader.BoundingBox(min, max);
+    bb_min = vec3f(0,0,0);
+     bb_max = vec3f(render_settings::tile_size_x,(max.y-min.y)/(max.x-min.x)*render_settings::tile_size_x,(max.z-min.z)/(max.x-min.x)*render_settings::tile_size_y);
+     loader.ScaleVertexDataToFit(bb_min,bb_max);
+     drawelements = new vector<drawelement*>();
+    loader.GenerateNonsharingMeshesAndDrawElements(*drawelements);
+
+    mesh = make_mesh(name.c_str(),1);
+    bind_mesh_to_gl(mesh);
+    add_vertex_buffer_to_mesh(mesh, "in_pos", GL_FLOAT, loader.objdata.vertices, 3, (float*) loader.objdata.vertex_data , GL_STATIC_DRAW);
+    add_index_buffer_to_mesh(mesh, loader.objdata.groups->triangles * 3, (unsigned int *) loader.objdata.groups->v_ids, GL_STATIC_DRAW);
+    unbind_mesh_from_gl(mesh);
+    tex_params_t p = default_tex_params();
+    tex = make_texture_ub(("tex"), loader.objdata.groups->mtl->tex_d, GL_TEXTURE_2D, &p);
+
 }
 
 
@@ -104,6 +129,9 @@ ObjHandler::ObjHandler(){
 
 
 //adds an .obj
+void ObjHandler::addObj_changeable(string name, string filename, shader_ref shader, int changes){
+    objs.push_back(Obj(name,objs.size(),filename, shader, changes));	
+}
 void ObjHandler::addObj(string name, string filename, shader_ref shader){
 
     objs.push_back(Obj(name,objs.size(),filename, shader));
@@ -112,8 +140,6 @@ void ObjHandler::addObj(string name, string filename, shader_ref shader, vec3f b
 
     objs.push_back(Obj(name,objs.size(),filename, shader, bb_min, bb_max));
 }
-
-
 
 void ObjHandler::addObj_withScale(string name, string filename, shader_ref shader, vec3f scale){
     objs.push_back(Obj(name,objs.size(),filename,shader,scale));
@@ -249,6 +275,7 @@ Building::Building(Obj *obj,Obj *selection_circle,Obj *upgrade_arrow, string nam
     m_model.col_major[3 * 4 + 1] = m_center.y + m_height;
     m_model.col_major[3 * 4 + 2] = m_pos.y*render_settings::tile_size_y;
     
+    
     make_unit_matrix4x4f(&arrow_model);
     arrow_model.col_major[3 * 4 + 0] = m_pos.x*render_settings::tile_size_x;
     arrow_model.col_major[3 * 4 + 1] = m_center.y + height+5;
@@ -259,7 +286,8 @@ Building::Building(Obj *obj,Obj *selection_circle,Obj *upgrade_arrow, string nam
     label= new Label();
     label->setup_display();
     label->update_label_pos(2*x, 2*y, height+2);
- 
+    vec3f color = get_player_color(m_owner);
+	label->set_color(color);
     
     state = 0;
 
@@ -324,7 +352,7 @@ void Building::draw(){
 	label->update_gui_texture_int(unit_count);
 	label->render_gui_overlay();
 	
-	if(check_for_upgrade(true)){
+	if(check_for_upgrade(true) && PLAYER_ID == m_owner){
 		matrix4x4f arrow_model_2;
 		vec3f rot_vec = vec3f(0,1,0);
 		make_rotation_matrix4x4f(&arrow_model_2,&rot_vec, rotation/2);
@@ -352,6 +380,7 @@ void Building::draw_state_1(){
 	bind_shader(shader_t);
 
 	glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	int i = 0;
 	for (vector<drawelement*>::iterator it = m_obj->drawelements->begin(); it != m_obj->drawelements->end(); ++it) {
 		drawelement *de = *it;
@@ -373,10 +402,12 @@ void Building::draw_state_1(){
 		float use_alpha = 0;
 
 		if(i == 2)
-			use_alpha = 0;
-		if(i == 0 || i == 1)
-			color = vec4f(1,0,0,1);
+			use_alpha = 1;
+		if(i == 0 || i == 1){
 			
+			vec3f col = get_player_color(m_owner);
+			color = vec4f(col.x,col.y,col.z,1);
+		}
 
 			
 
@@ -479,6 +510,8 @@ void Building::draw_selection_circle(int size){
 
 void Building::change_owner(unsigned int owner){
     m_owner = owner;
+    vec3f color = get_player_color(m_owner);
+	label->set_color(color);    
 }
 
 //UNITGROUP
@@ -487,14 +520,14 @@ UnitGroup::UnitGroup(Obj *obj, simple_heightmap *sh, string name, vec2f start, v
     GameObject(obj,name,find_shader("pos+norm+tc"), height),
     m_owner(owner), m_start(start), m_end(end),
     m_unit_count(unit_count), m_sh(sh), m_id(m_id),
-    m_time_to_reach_end(time_to_rech_end), m_spawned(0)
+    m_time_to_reach_end(time_to_rech_end), m_spawned(0), m_start_b(start), m_end_b(end)
 {
     m_modelmatrices = vector<matrix4x4f>();
     m_cur_heights = vector<float>();
     m_dest_heights = vector<float>();
     m_up_speed = vector<float>();
     m_row_size = vector<unsigned int>();
-    m_pos = start;
+    m_pos = vec2f(start.x, start.y);
     identifier = 'u';
     vec3f tmp = obj->bb_min + obj->bb_max;
     tmp /= 2;
@@ -524,66 +557,97 @@ int get_coooooords(int index, int size){
     return k/2 + index;
 }
 
+
+
 void UnitGroup::update_model_matrices(){
+//    cout << m_units.size() << endl;
+    for(int i = 0; i < m_units.size(); ++i){
+        vec2f ortho = vec2f(m_view_dir.y, -m_view_dir.x);
+        normalize_vec2f(&ortho);
+        normalize_vec2f(&m_view_dir);
+        vec2f pos = vec2f(m_pos.x + ortho.x *  m_units[i].m_pos_group.x -  m_view_dir.x *  m_units[i].m_pos_group.y , m_pos.y + ortho.y *  m_units[i].m_pos_group.x -  m_view_dir.y *  m_units[i].m_pos_group.y) ;
+        vec2f start = vec2f(m_start.x + ortho.x * (float) i -  m_view_dir.x * (float) m_rows,m_start.y + ortho.y * (float) i -  m_view_dir.y * (float) m_rows) ;
+        vec2f end = vec2f(m_end.x + ortho.x * (float) i -  m_view_dir.x * (float) m_rows,m_end.y + ortho.y * (float) i -  m_view_dir.y * (float) m_rows) ;
+        float time = m_timer.look();
+        float fend = m_sh->get_height(end.x,end.y);
+        float fstart = m_sh->get_height(start.x,start.y);
+
+           float height = fstart + time * (fend - fstart)/m_time_to_reach_end;
+
+        m_units[i].update(pos,height);
+    }
 
 //    cout << m_modelmatrices.size() << endl;
 //    cout << m_cur_heights.size() << endl;
-    unsigned int row_size = 0;
-    for(unsigned int i = 0;  i < m_row_size.size(); ++i){
-//       cout << "array size" <<m_row_size.size() << endl;
-        for(int j = 0; j < m_row_size[i]; ++j){
-//            cout << "row size "<<row_size << endl;
-//            cout << "model size" << m_modelmatrices.size() << endl;
-            vec2f ortho = vec2f(m_view_dir.y, -m_view_dir.x);
-            normalize_vec2f(&ortho);
-            m_modelmatrices.at(row_size ).col_major[3 * 4 + 0] = m_model.col_major[3 * 4 + 0] + get_coooooords(j,m_row_size[i])* ortho.x  - i *m_view_dir.x;
-            m_modelmatrices.at(row_size ).col_major[3 * 4 + 1] = m_center.y + m_cur_heights.at(i);// m_sh->get_height(m_pos.x + cos(2*M_PI * ((float) i/(float)m_spawned)), m_pos.y + sin(2*M_PI * ((float) i/(float)m_spawned)) );
-            m_modelmatrices.at(row_size ).col_major[3 * 4 + 2] = m_model.col_major[3 * 4 + 2] + get_coooooords(j,m_row_size[i])* ortho.y  - i *m_view_dir.y;
-            row_size += 1;
-        }
-    }
+//    unsigned int row_size = 0;
+//    for(unsigned int i = 0;  i < m_row_size.size(); ++i){
+////       cout << "array size" <<m_row_size.size() << endl;
+//        for(int j = 0; j < m_row_size[i]; ++j){
+////            cout << "row size "<<row_size << endl;
+////            cout << "model size" << m_modelmatrices.size() << endl;
+//            vec2f ortho = vec2f(m_view_dir.y, -m_view_dir.x);
+//            normalize_vec2f(&ortho);
+//            m_modelmatrices.at(row_size ).col_major[3 * 4 + 0] = m_model.col_major[3 * 4 + 0] + get_coooooords(j,m_row_size[i])* ortho.x  - i *m_view_dir.x;
+//            m_modelmatrices.at(row_size ).col_major[3 * 4 + 1] = m_center.y + m_cur_heights.at(i);// m_sh->get_height(m_pos.x + cos(2*M_PI * ((float) i/(float)m_spawned)), m_pos.y + sin(2*M_PI * ((float) i/(float)m_spawned)) );
+//            m_modelmatrices.at(row_size ).col_major[3 * 4 + 2] = m_model.col_major[3 * 4 + 2] + get_coooooords(j,m_row_size[i])* ortho.y  - i *m_view_dir.y;
+//            row_size += 1;
+//        }
+//    }
 }
 
 void UnitGroup::move_to(vec2f pos, float time_to_reach){
   //  force_position(m_end);
    // force_position(m_end);
-	vec2f pos_1 = vec2f(m_model.col_major[3 * 4 + 0], m_model.col_major[3 * 4 + 2]);
-    m_start = m_end;
+//	vec2f pos_1 = vec2f(m_model.col_major[3 * 4 + 0], m_model.col_major[3 * 4 + 2]);
 
-    m_end = pos;
-    m_view_dir = m_end - m_start;
-    m_time_to_reach_end = time_to_reach;
-    m_timer.restart();
+    if(move){
+        m_start = m_end;
+        m_end = pos;
+        m_view_dir = m_end - m_start;
+        m_time_to_reach_end = time_to_reach;
+        m_timer.restart();
 
+    } else {
+        move = true;
+        m_start = m_start_b;
+        m_end = pos;
+        m_view_dir = m_end - m_start;
+        m_time_to_reach_end = time_to_reach;
+        m_timer.restart();
+        for(int i = 0; i < m_units.size(); ++i){
+            m_units[i].move = true;
+        }
+    }
     update_model_matrices();
 }
 
 void UnitGroup::update(){
-    float cur_time = m_timer.look();
+//    if(move){
+        float cur_time = m_timer.look();
 
-    if(cur_time < m_time_to_reach_end){
+        if(cur_time < m_time_to_reach_end){
 
-        if(m_spawned < m_unit_count && m_spawn_timer.look() > time_to_spawn){
-            spawn_unit_row(std::min((unsigned int) 5,m_unit_count-m_spawned));
-            m_rows++;
-            m_spawn_timer.restart();
+            if(m_spawned < m_unit_count && m_spawn_timer.look() > time_to_spawn){
+                spawn_unit_row(std::min((unsigned int) 5,m_unit_count-m_spawned));
+                m_rows++;
+                m_spawn_timer.restart();
+            }
+            //        cout << "start: " << m_start.x << "," << m_start.y << endl;
+            //        cout << "pos: " << m_pos.x << "," << m_pos.y << endl;
+            //        cout << "end: " << m_end.x << "," << m_end.y << endl;
+            m_pos.x = m_start.x + cur_time*(m_end.x-m_start.x)/m_time_to_reach_end;
+            m_pos.y = m_start.y + cur_time*(m_end.y-m_start.y)/m_time_to_reach_end;
+            float x = (float) m_start.x + cur_time*((float)m_end.x-(float)m_start.x)/m_time_to_reach_end;
+            float y = (float) m_start.y + cur_time*((float)m_end.y-(float)m_start.y)/m_time_to_reach_end;
+
+            //        cout << x << " " << y << endl;
+            m_model.col_major[3 * 4 + 0] = x * render_settings::tile_size_x;
+            m_model.col_major[3 * 4 + 1] = m_center.y + m_sh->get_height(x, y);
+            m_model.col_major[3 * 4 + 2] = y * render_settings::tile_size_y;
+
+            update_model_matrices();
         }
-    //    cout << "start: " << m_start.x << "," << m_start.y << endl;
-   //     cout << "pos: " << m_pos.x << "," << m_pos.y << endl;
-  //      cout << "end: " << m_end.x << "," << m_end.y << endl;
-        m_pos.x = m_start.x + cur_time*(m_end.x-m_start.x)/m_time_to_reach_end;
-        m_pos.y = m_start.y + cur_time*(m_end.y-m_start.y)/m_time_to_reach_end;
-        float x = (float) m_start.x + cur_time*((float)m_end.x-(float)m_start.x)/m_time_to_reach_end;
-        float y = (float) m_start.y + cur_time*((float)m_end.y-(float)m_start.y)/m_time_to_reach_end;
-
-//        cout << x << " " << y << endl;
-        m_model.col_major[3 * 4 + 0] = x * render_settings::tile_size_x;
-        m_model.col_major[3 * 4 + 1] = m_center.y + m_sh->get_height(x, y);
-        m_model.col_major[3 * 4 + 2] = y * render_settings::tile_size_y;
-        update_dest_heights();
-        update_cur_heights();
-        update_model_matrices();
-    }
+//    }
 
 }
 void UnitGroup::update_cur_heights(){
@@ -603,7 +667,7 @@ void UnitGroup::draw(){
     for(int i = 0; i < m_spawned; ++i){
 		for (vector<drawelement*>::iterator it = m_obj->drawelements->begin(); it != m_obj->drawelements->end(); ++it) {
 			drawelement *de = *it;
-			de->Modelmatrix(&m_modelmatrices[i]);
+            de->Modelmatrix(m_units[i].getModel());
 			de->bind();
 			setup_dir_light(m_shader);
 			de->apply_default_matrix_uniforms();
@@ -616,18 +680,84 @@ void UnitGroup::draw(){
 }
 void UnitGroup::spawn_unit_row(unsigned int size){
     m_row_size.push_back(size);
-    for(int i = 0; i < size; ++i){
-//        cout << size << endl;
+
+    int new_size = size;
+
+    for(int i = -(new_size/2); i <= new_size/2; ++i){
+
+        m_view_dir = m_end - m_start;
+        if(length_of_vec2f(&m_view_dir) < 0.0001) break;
+        vec2f ortho = vec2f(m_view_dir.y, -m_view_dir.x);
+
+        normalize_vec2f(&ortho);
+        normalize_vec2f(&m_view_dir);
+        vec2f pos = vec2f(m_pos.x + ortho.x *  i -  m_view_dir.x *  m_rows , m_pos.y + ortho.y *  i -  m_view_dir.y *  m_rows) ;
+        vec2f start = vec2f(m_start.x + ortho.x * (float) i -  m_view_dir.x * (float) m_rows,m_start.y + ortho.y * (float) i -  m_view_dir.y * (float) m_rows) ;
+        vec2f end = vec2f(m_end.x + ortho.x * (float) i -  m_view_dir.x * (float) m_rows,m_end.y + ortho.y * (float) i -  m_view_dir.y * (float) m_rows) ;
+
+
+        m_units.push_back(Unit(pos
+                              ,m_view_dir
+                               , vec2f(i,m_rows)
+                               ,start
+                               ,end
+                               ,m_sh
+                              , m_center.y));
         m_spawned++;
 
-        matrix4x4f tmp;
-        make_unit_matrix4x4f(&tmp);
-        m_modelmatrices.push_back(tmp);
-        float t = 1.0f;
-        m_cur_heights.push_back(t);
-        m_dest_heights.push_back(t);
-        m_up_speed.push_back(t);
     }
 }
 
+
+// UNIT
+
+Unit::Unit(vec2f pos, vec2f view_dir, vec2f pos_group, vec2f start, vec2f end, simple_heightmap *sh, float base_height): m_pos(pos), m_view_dir(view_dir), m_pos_group(pos_group), m_start(start), m_end(end), m_sh(sh), m_base_height(base_height){
+    make_unit_matrix4x4f(&m_model);
+    m_model.col_major[3 * 4 + 1] = base_height + sh->get_height(pos.x, pos.y);
+    movement_timer.restart();
+}
+
+matrix4x4f* Unit::getModel(){
+    return &m_model;
+}
+
+void Unit::update(vec2f new_pos, float height){
+
+    if(move){
+        cout << "m_pos " << m_pos.x << " " << m_pos.y << endl;
+        cout << "m_start " << m_start.x << " " << m_start.y << endl;
+        cout << "m_end " << m_end.x << " " << m_end.y << endl;
+        cout << "newpos " << new_pos.x << " " << new_pos.y << endl;
+    m_start = m_pos;
+    m_end = new_pos;
+    m_view_dir = m_end - m_pos;
+//    cout << length_of_vec2f(&m_view_dir) << endl;
+    m_speed = BASE_SPEED + length_of_vec2f(&m_view_dir)/(1*render_settings::tile_size_x);
+    normalize_vec2f(&m_view_dir);
+    m_pos +=  m_view_dir * m_speed * 0.05 ;
+    vec2f dis = m_end - m_pos;
+    if(length_of_vec2f(&dis) < 0.001){
+        m_pos = m_end;
+    }
+
+    m_model.col_major[3 * 4 + 0] = m_pos.x * render_settings::tile_size_x;
+    m_model.col_major[3 * 4 + 1] = m_base_height + m_sh->get_height(m_pos.x,m_pos.y);
+    m_model.col_major[3 * 4 + 2] = m_pos.y * render_settings::tile_size_y;
+    }
+//    movement_timer.restart();
+
+}
+
+
+Pacman::Pacman(Obj *obj, unsigned int owner, unsigned m_id, int height, float time) :  GameObject(obj, obj->name ,obj->shader, height), owner(owner), m_id(m_id), time(time)  {
+	
+}
+
+void Pacman::draw(){
+	time += 0.007;
+	if(time == std::numeric_limits<float>::max()-2)
+		time = 0;
+	
+	
+}
 

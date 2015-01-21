@@ -13,7 +13,7 @@ class Game
 {
 public:
     Game(ObjHandler *objhandler, simple_heightmap *sh, client_message_reader *messageReader);
-    void add_tree(int x, int y);
+    void add_tree(int x, int y, int type);
     void add_building(string name, int size, int x, int y, unsigned int id);
     void add_unit_group(unsigned int sourceId, unsigned int destinationId, unsigned int count, unsigned int troupId);
 
@@ -29,6 +29,8 @@ public:
     void draw();
     void update();
 
+    vector<vec3f> *get_planes();
+
     Building* get_last_selected_building();
 	ObjHandler *get_objhandler();
 
@@ -39,6 +41,7 @@ public:
 	client_message_reader *m_messageReader;
     int m_player_id;
     vec3f player_color;
+    vector<vec3f> planes;
 private:
 
    ObjHandler *m_objhandler;
@@ -48,6 +51,8 @@ private:
    vector<Building> m_buildings;
    vector<UnitGroup> m_unitgroups;
    
+   
 };
 
+extern int PLAYER_ID;
 #endif // GAME_H

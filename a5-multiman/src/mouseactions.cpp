@@ -94,7 +94,7 @@ namespace moac {
 
         if (!ob_set || building == nullptr || own_building->get_id() == building->get_id()){
 			eb_set = false;
-            ob_set = false;
+       //     ob_set = false;
 			game->set_selected(nullptr);
             prepare_attack = false;
 			return false;

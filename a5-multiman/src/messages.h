@@ -61,6 +61,7 @@ namespace msg {
 		spawn_tree() : message(code::spawn_tree) {}		
         uint16_t x;
         uint16_t y;
+        uint8_t type;
 	} __attribute__((aligned(8)));
 
 	struct init_done : public message {

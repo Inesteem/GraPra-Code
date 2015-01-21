@@ -16,6 +16,7 @@ class Label;
 struct Obj {
 
     Obj(string name, int id, string filename, shader_ref shader);
+    Obj(string name, int id, string filename, shader_ref shader, int changes);
     Obj(string name, int id, string filename, shader_ref shader, vec3f scale);
     Obj(string name, int id, string filename, shader_ref shader, vec3f bb_min, vec3f bb_max);
     Obj(string name, int id, mesh_ref mesh, texture_ref tex, shader_ref shader);
@@ -32,11 +33,13 @@ struct Obj {
 
 };
 
+
 class ObjHandler{
 public:
     ObjHandler();
     //adds .obj and tries to scale to fit map
     void addObj(string name, string filename, shader_ref shader);
+    void addObj_changeable(string name, string filename, shader_ref shader, int changes);
     void addObj(string name, string filename, shader_ref shader, vec3f bb_min, vec3f bb_max);
     //adds .obj with custom scale
     void addObj_withScale(string name, string filename, shader_ref shader, vec3f scale);
@@ -60,6 +63,7 @@ public:
     void set_model_matrix(matrix4x4f new_model);
     matrix4x4f get_model_matrix();
     void set_height(float height);
+    vec3f get_center(){return m_center;}
     vec2f get_pos(){
         return m_pos;
     }
@@ -100,7 +104,9 @@ public:
     void change_owner(unsigned int owner);
     bool check_for_upgrade(bool up);
 
+
     int m_size;
+
 
 private:
     int m_owner;
@@ -115,6 +121,35 @@ private:
     
 };
 
+
+class Unit {
+
+public:
+    Unit(vec2f pos, vec2f view_dir, vec2f pos_group, vec2f start, vec2f end, simple_heightmap *sh, float base_height);
+    matrix4x4f *getModel();
+    void update(vec2f new_pos,float height);
+        vec2f m_pos_group;
+          bool move = false;
+private:
+    wall_time_timer movement_timer;
+//    wall_time_timer rotations_timer;
+    simple_heightmap* m_sh;
+    vec2f m_pos, m_view_dir, m_start, m_end;
+
+    float m_speed;
+    const float BASE_SPEED = 0.1;
+    float m_base_height;
+    float m_up_speed;
+    float m_dest_height;
+    float m_cur_height;
+
+    bool last_step;
+
+    matrix4x4f m_model;
+
+};
+
+
 class UnitGroup: public GameObject{
 public:
 
@@ -123,6 +158,9 @@ public:
     void draw();
     void move_to(vec2f pos, float time_to_reach);
     void force_position(vec2f pos);
+    float get_height(float x, float y){
+        m_sh->get_height(x,y);
+    }
 
     unsigned int m_id;
     unsigned int m_unit_count;
@@ -134,6 +172,7 @@ private:
      void update_model_matrices();
      void update_cur_heights();
      void update_dest_heights();
+     void update_units();
      unsigned int time_to_spawn = 100;
 
     unsigned int m_spawned;
@@ -141,19 +180,37 @@ private:
     unsigned int m_rows = 0;
     vector<unsigned int> m_row_size;
     bool m_reached = false;
-
+    bool move = false;
     simple_heightmap *m_sh;
     wall_time_timer m_timer;
     wall_time_timer m_spawn_timer;
     vec2f m_start,m_end;
     vec2f m_view_dir;
+    vec2f m_start_b, m_end_b;
     float m_time_to_reach_end;
     vector<matrix4x4f> m_modelmatrices;
     vector<float> m_dest_heights;
     vector<float> m_cur_heights;
     vector<float> m_up_speed;
 
+    vector<Unit> m_units;
+
 };
+
+class Pacman: public GameObject{
+public:
+
+    Pacman(Obj *obj, unsigned int owner, unsigned m_id, int height, float time);
+	
+	void draw();
+	
+private:
+	float time;
+	unsigned int owner;
+	unsigned int m_id;
+
+};
+
 
 
 
