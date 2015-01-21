@@ -93,8 +93,8 @@ void Game::add_unit_group(unsigned int sourceId, unsigned int destinationId, uns
 	Building *source = getBuilding(sourceId);
 	Building *destination = getBuilding(destinationId);
     vec2f start = source->get_pos();
-    vec2f end = source->get_pos();
-	
+    vec2f end = destination->get_pos();
+
     cout << "spawning enemies at: " << start.x << "," << start.y << " count: " << count << endl;
     m_unitgroups.push_back(UnitGroup(m_objhandler->getObjByName("tree"),m_sh,"bomb",start,end,0,count, 10000, m_sh->get_height(start.x, start.y), troupId));
 }
@@ -125,7 +125,7 @@ Building* Game::get_building_at(vec3f pos){
         }
     }
 
-    if( dist < 3.0f) {
+    if( dist < 10.0f) {
  //       cout << "Selected building: " << m_selected->get_pos().x << "," << m_selected->get_pos().y << endl;
         return &m_buildings[k];
     }
