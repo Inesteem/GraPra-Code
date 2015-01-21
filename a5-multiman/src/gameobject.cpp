@@ -625,12 +625,17 @@ void UnitGroup::update(){
 //    if(move){
         float cur_time = m_timer.look();
 
-        if(cur_time < m_time_to_reach_end){
+        if(cur_time < m_time_to_reach_end+100){
 
-            if(m_spawned < m_unit_count && m_spawn_timer.look() > time_to_spawn){
-                spawn_unit_row(std::min((unsigned int) 5,m_unit_count-m_spawned));
+//            if(m_spawned < m_unit_count && m_spawn_timer.look() > time_to_spawn){
+//                spawn_unit_row(std::min((unsigned int) 5,m_unit_count-m_spawned));
+//                m_rows++;
+//                m_spawn_timer.restart();
+//            }
+
+            while(m_spawned < m_unit_count ){
+                spawn_unit_row(std::min((unsigned int) 5, m_unit_count-m_spawned));
                 m_rows++;
-                m_spawn_timer.restart();
             }
             //        cout << "start: " << m_start.x << "," << m_start.y << endl;
             //        cout << "pos: " << m_pos.x << "," << m_pos.y << endl;
@@ -686,7 +691,7 @@ void UnitGroup::spawn_unit_row(unsigned int size){
     for(int i = -(new_size/2); i <= new_size/2; ++i){
 
         m_view_dir = m_end - m_start;
-        if(length_of_vec2f(&m_view_dir) < 0.0001) break;
+     //   if(length_of_vec2f(&m_view_dir) < 0.0001) break;
         vec2f ortho = vec2f(m_view_dir.y, -m_view_dir.x);
 
         normalize_vec2f(&ortho);
@@ -724,10 +729,10 @@ matrix4x4f* Unit::getModel(){
 void Unit::update(vec2f new_pos, float height){
 
     if(move){
-        cout << "m_pos " << m_pos.x << " " << m_pos.y << endl;
-        cout << "m_start " << m_start.x << " " << m_start.y << endl;
-        cout << "m_end " << m_end.x << " " << m_end.y << endl;
-        cout << "newpos " << new_pos.x << " " << new_pos.y << endl;
+//        cout << "m_pos " << m_pos.x << " " << m_pos.y << endl;
+//        cout << "m_start " << m_start.x << " " << m_start.y << endl;
+//        cout << "m_end " << m_end.x << " " << m_end.y << endl;
+//        cout << "newpos " << new_pos.x << " " << new_pos.y << endl;
     m_start = m_pos;
     m_end = new_pos;
     m_view_dir = m_end - m_pos;
@@ -740,8 +745,14 @@ void Unit::update(vec2f new_pos, float height){
         m_pos = m_end;
     }
 
+
+    m_dest_height  = m_sh->get_height((m_pos + m_view_dir*2).x, (m_pos + m_view_dir*2).y);
+    m_cur_height = m_model.col_major[3 * 4 + 1];
+
+    m_up_speed = ( m_dest_height - m_cur_height ) /5;
+
     m_model.col_major[3 * 4 + 0] = m_pos.x * render_settings::tile_size_x;
-    m_model.col_major[3 * 4 + 1] = m_base_height + m_sh->get_height(m_pos.x,m_pos.y);
+    m_model.col_major[3 * 4 + 1] += m_up_speed;
     m_model.col_major[3 * 4 + 2] = m_pos.y * render_settings::tile_size_y;
     }
 //    movement_timer.restart();
