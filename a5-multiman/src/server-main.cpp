@@ -62,7 +62,7 @@ void initGame(string &levelName) {
             vec3f color = mapData[(y - 1 - r) * x + c];
 			if(color.x > 0.9f) {
                 //gameStage->m_map[r][c] = false;
-				cout << "Building at (" << r << "," << c << ")" << endl;
+                //cout << "Building at (" << r << "," << c << ")" << endl;
                 Building *b = gameStage->spawnHouse(c, r);
 
 				msg::spawn_house sh = make_message<msg::spawn_house>();
@@ -98,7 +98,7 @@ void initGame(string &levelName) {
                 blockMap(r-1,c, x, y);
                 blockMap(r-1,c+1, x, y);
 
-				cout << "Tree at (" << r << "," << c << ")" << endl;
+                //cout << "Tree at (" << r << "," << c << ")" << endl;
 
 				msg::spawn_tree st = make_message<msg::spawn_tree>();
                 st.x = c;
@@ -146,7 +146,7 @@ int main(int argc, char **argv)
     int numPlayers = atoi(argv[1]);
 
     if(numPlayers < 1) {
-        cout << "Usage: ./multiman_server <num players>" << endl;
+        cout << "Usage: ./multiman_server <num players> <levelname>" << endl;
         exit(0);
     }
 

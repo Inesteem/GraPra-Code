@@ -64,7 +64,7 @@ vector<vec3f> *Game::get_planes(){
 	for(int i = 0; i < m_buildings.size(); i++){
 		planes[i].y += m_buildings[i].get_center().y;		
 	}
-	m_sh->re_init(&planes);
+    m_sh->re_init(&planes);
 	return &planes;
 }
 
@@ -78,16 +78,14 @@ ObjHandler* Game::get_objhandler(){
 	return m_objhandler;
 }
 
-void Game::update_unit_group(unsigned int x, unsigned int y, unsigned int troupId, unsigned int time){
-	cout << time << endl;
-	
+void Game::update_unit_group(unsigned int x, unsigned int y, unsigned int troupId, unsigned int time){	
+
     for(int i = 0; i < m_unitgroups.size(); ++i){
 		if(troupId == m_unitgroups[i].m_id){
             m_unitgroups[i].move_to(vec2f(x, y), time);
 			return;
 		}
-	}
-	
+	}	
 }
 void Game::add_unit_group(unsigned int sourceId, unsigned int destinationId, unsigned int count, unsigned int troupId){
 	Building *source = getBuilding(sourceId);

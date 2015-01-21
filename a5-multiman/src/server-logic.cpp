@@ -172,9 +172,9 @@ bool Troup::Update()
 
     m_waiting = true;
 
-	cout << m_stepTimer.look() << endl;
+    //cout << m_stepTimer.look() << endl;
     m_stepTimer.restart();
-	cout << m_stepTimer.look() << endl;
+    //cout << m_stepTimer.look() << endl;
 
     PathNode nextDestination = m_path->m_nodes.front();
     m_path->m_nodes.pop_front();
@@ -200,9 +200,10 @@ bool Troup::Update()
     ntd.mapY = m_y;
     ntd.troupId = m_id;
     ntd.time = m_stepTime;
+    //cout << "NTD: (" << ntd.mapX << "," << ntd.mapY << ") id " << ntd.troupId << ",time " << ntd.time << endl;
     broadcast(&ntd);
 
-    cout << "\d troup " << m_id << " to position (" << m_x << ", " << m_y << ")" << endl;
+    //cout << "troup " << m_id << " to position (" << m_x << ", " << m_y << ")" << endl;
     return false;
 }
 
@@ -233,7 +234,7 @@ void Building::IncomingTroup(Troup *troup)
     Building *src = troup->m_source;
     Building *dest = troup->m_destination;
 
-    cout << "src player: " << src->m_player << ", dest player: " << dest->m_player << endl;
+    cout << "incoming troup, src player: " << src->m_player << ", dest player: " << dest->m_player << endl;
 
     if(src->m_player == dest->m_player) {
         m_unitCount += troup->m_unitCount;
@@ -270,7 +271,7 @@ Path::Path(Troup *troup, PathNode &source, PathNode &destination, unsigned int x
     //FindDirectPath(source, destination);
     FindPathAStar(source, destination);
 
-    DumpPath("pathdebug.png");
+    //DumpPath("pathdebug.png");
 }
 
 void Path::FindDirectPath(PathNode &source, PathNode &destination)
@@ -400,7 +401,7 @@ void Path::ExpandNode(PathNode current, PathNode endPosition)
     for(auto & neighbour : neighbours) {
         if(!m_troup->m_gameStage->m_map[neighbour.mapY][neighbour.mapX]) {
             // check if way is blocked
-            cout << "BLOCKED" << endl;
+            //cout << "BLOCKED" << endl;
             continue;
         }
 
@@ -490,7 +491,7 @@ void Path::FindPathAStar(PathNode startPosition, PathNode endPosition)
         m_open[current.mapY][current.mapX] = false;
         m_closed[current.mapY][current.mapX] = true;
 
-        logState(current, startPosition, endPosition);
+        //logState(current, startPosition, endPosition);
 
         ExpandNode(current,endPosition);
     } while(OpenNodesExists());
