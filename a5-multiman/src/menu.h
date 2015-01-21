@@ -14,6 +14,7 @@
 #include "wall-timer.h"
 #include "game.h"
 #include "label.h"
+#include "messages.h"
 
 
 
@@ -21,6 +22,7 @@
 #define __MENU_H__
 
 class Menu{
+	
 
 	shader_ref 	gameshader;
 	camera_ref 	gamecam;
@@ -45,7 +47,10 @@ class Menu{
 	vector<int> max_nums = {-1,2,1,4,-1};
 	vector<int> min_nums = {-1,1,1,1,-1};
 	
+	client_message_reader *message_reader;
 	void update_label();
+	
+	bool enter;
 	
 public:
 
@@ -63,11 +68,17 @@ public:
 	 * Eingabe
 	 */
 	int get_row();
+	int get_row_max(){return max_rows;}
 	void increase_row();
 	void decrease_row();
 	
 	void increase_mom_row();
 	void decrease_mom_row();
+	
+	void set_hostname(char *hostname);
+	
+		
+	
 	
 };
 

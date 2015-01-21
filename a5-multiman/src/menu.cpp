@@ -2,15 +2,12 @@
 #include "menu.h"
 #include "mouseactions.h"
 
+#include <GL/glew.h>
+#include <GL/freeglut.h>
+
 
 void Menu::init(){
-
-//	labels= Label[max_rows];
-//	char **strings;// [max_rows]; // = {"Host Game", "Fraktion", "Level", "Players", "Join Game"};
-//	int *nums;// [max_rows]; // = {-1,1,1,2,-1};
-//	int *max_nums; //[max_rows]; // = {-1,2,1,4,-1};
-//	int *min_nums; // [max_rows];// = {-1,1,1,1,-1};
-
+	enter = false;
 
 	vec3f cam_pos = {0,0,0}, cam_dir = {0,0,-1}, cam_up = {0,1,0};
 	float fovy = 50;
@@ -137,26 +134,26 @@ int Menu::get_row(){
 	return row;
 }
 
-void Menu::decrease_row(){
+void Menu::increase_row(){
 	if(row > 0){
-		labels[row]->set_fontSize(13);
+//		labels[row]->set_fontSize(13);
 		labels[row]->set_color(grey);
 		update_label();
 		row--;
-		labels[row]->set_fontSize(15);
+//		labels[row]->set_fontSize(15);
 		labels[row]->set_color(white);
 		update_label();
 	}
 }
 
-void Menu::increase_row(){
+void Menu::decrease_row(){
 	if(row < max_rows-1){
-		
-		labels[row]->set_fontSize(13);
+			
+//		labels[row]->set_fontSize(13);
 		labels[row]->set_color(grey);
 		update_label();
 		row++;
-		labels[row]->set_fontSize(15);
+//		labels[row]->set_fontSize(15);
 		labels[row]->set_color(white);
 		update_label();
 	}
@@ -181,17 +178,25 @@ void Menu::decrease_mom_row(){
 }
 
 void Menu::update_label(){
-	std::stringstream s;
-	if(nums[row] != min_nums[row] && nums[row] != -1)
-		s << "< ";
-	else
-		s << "    ";
-	s << strings[row];	
-	if(nums[row] != -1)
-		s << " : " << nums[row];
-	if(nums[row] != max_nums[row] && nums[row] != -1)	
-		s << " >";
-	
-	labels[row]->update_gui_texture_string(&s); 
+	if(!enter){
+		std::stringstream s;
+		if(nums[row] != min_nums[row] && nums[row] != -1)
+			s << "< ";
+		else
+			s << "    ";
+		s << strings[row];	
+		if(nums[row] != -1)
+			s << " : " << nums[row];
+		if(nums[row] != max_nums[row] && nums[row] != -1)	
+			s << " >";
 		
+		labels[row]->update_gui_texture_string(&s); 
+	}
+}
+
+void Menu::set_hostname(char * hostName){
+	enter = true;	
+	std::stringstream hostname;
+	hostname << "    " << hostName;
+	labels[max_rows-1]->update_gui_texture_string(&hostname);
 }

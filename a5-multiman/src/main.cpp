@@ -45,6 +45,7 @@ texture_ref color;
 
 matrix4x4f *T;
 char hostName[1024];
+char hostname[1024];
 //char *hostName;
 
 
@@ -192,34 +193,71 @@ void standard_keyboard(unsigned char key, int x, int y)
         recompute_gl_matrices_of_cam(current_camera());
 }
 
-
+static int eingabe= 0;
+int max_length = 15;
+static int index_hostname= 0;
 void menu_keyhandler(unsigned char key, int state){
 	switch(key){
-		//Enter
-		case 13 : if(state == 0 ){
-						messageReader->networking_prologue(hostName);
-						render_menu = false;
+		
+		//Backspace
+		case 8 :  if(eingabe == 1){
+					hostname[index_hostname+1] = '\0';
+					hostname[index_hostname] = '<';
+					if(index_hostname > 0)
+						index_hostname--;
 					}
-					break;
-		//left arrow
-		case 37 : menu->decrease_mom_row(); cout << "left" << endl; break;
+					menu->set_hostname(hostname);
 		
-		//up arrow
-		case 38 : menu->increase_row(); cout << "up" << endl; break;
-		
-		//right arrow
-		case 39 : menu->increase_mom_row(); cout << "right" << endl; break;
-		
-		//down arrow
-		case 40 : menu->decrease_row(); cout << "down" << endl; break;
+		//Enter
+		case 13 : if(menu->get_row() == 0){
+						//exec start_server
+					messageReader->networking_prologue(hostname);
+						render_menu = false;
+				   }
+				   //join game
+				   if(menu->get_row() == menu->get_row_max()-1){
+					   if(eingabe==0){
+						   eingabe = 1;
+						   hostname[index_hostname] = '<';
+							menu->set_hostname(hostname);
+					  }
+				   }
 				
-		default : ;
+					break;
+				
+		default : if(eingabe == 1 && index_hostname < max_length){
+					hostname[index_hostname] = key;
+					hostname[++index_hostname] = '<';
+					menu->set_hostname(hostname);
+				  } else
+					cout << "normal : " << (int)key << endl;
 		
-		}
-	
+	}
 }
 
-
+void special_keyhandler( int key, int x, int y ){
+	
+	if(!render_menu)
+		return;
+		
+    switch(key){
+        case GLUT_KEY_LEFT:
+            menu->decrease_mom_row();
+            break;
+        case GLUT_KEY_RIGHT:
+            menu->increase_mom_row(); 
+            break;
+        case GLUT_KEY_UP:
+            menu->increase_row();
+            break;
+        case GLUT_KEY_DOWN:
+            menu->decrease_row();
+            break;
+        default :
+			cout << "special : " << key << endl;
+    }
+}
+  
 
 void keyhandler(unsigned char key, int x, int y) {
 	
@@ -463,6 +501,9 @@ void actual_main() {
 
 	// glut initialization
 	//
+	
+    glutSpecialFunc(special_keyhandler);
+	
 	register_display_function(loop);
 	register_idle_function(loop);
 	register_keyboard_function(keyhandler);
