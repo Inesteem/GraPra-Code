@@ -92,7 +92,7 @@ namespace moac {
         vec3f wp = ClickWorldPosition(x,y);
         Building *building = game->get_building_at(wp);
 
-        if (!ob_set || building == nullptr){
+        if (!ob_set || building == nullptr || own_building->get_id() == building->get_id()){
 			eb_set = false;
        //     ob_set = false;
 			game->set_selected(nullptr);
