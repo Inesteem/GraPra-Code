@@ -326,7 +326,7 @@ void Path::Init()
 float Path::AbsoluteDistance(PathNode a, PathNode b)
 {
     float dx = fabs(a.mapX - b.mapX);
-    float dy = fabs(b.mapX - b.mapY);
+    float dy = fabs(b.mapY - b.mapY);
 
     return sqrtf(dx*dx + dy*dy);
 }
@@ -380,8 +380,6 @@ void Path::RetracePath(PathNode startPosition, PathNode current)
 
 void Path::ExpandNode(PathNode current, PathNode endPosition)
 {
-    //cout << "current: (" << current.mapX << ", " << current.mapY << ")" << endl;
-
     vector<PathNode> neighbours;
     if(current.mapX > 0 && current.mapY > 0) neighbours.push_back(PathNode(current.mapX - 1, current.mapY - 1));
 
@@ -443,6 +441,29 @@ void Path::ExpandNode(PathNode current, PathNode endPosition)
     }
 }
 
+void Path::logState(PathNode current, PathNode startPosition, PathNode endPosition)
+{
+    cout << "-------------------------------------------------------" << endl;
+    for(unsigned int r = 0; r < m_mapY; r++) {
+        cout << endl;
+        for(unsigned int c = 0; c < m_mapX; c++) {
+            if(startPosition.mapX == c && startPosition.mapY == r) {
+                cout << "S";
+            } else if(endPosition.mapX == c && endPosition.mapY == r) {
+                cout << "E";
+            } else if(current.mapX == c && current.mapY == r) {
+                cout << "C";
+            } else if(m_closed[r][c]) {
+                cout << " ";
+            } else if(m_open[r][c]) {
+                cout << "o";
+            } else {
+                cout << "~";
+            }
+        }
+    }
+}
+
 
 void Path::FindPathAStar(PathNode startPosition, PathNode endPosition)
 {
@@ -456,7 +477,6 @@ void Path::FindPathAStar(PathNode startPosition, PathNode endPosition)
     m_open[startPosition.mapY][startPosition.mapX] = true;
 
     do {
-        //getchar();
         // get node with highest priority
         PathNode current = GetHighestPriorityOpenNode(); // -> set open to false in this position
 
@@ -469,12 +489,18 @@ void Path::FindPathAStar(PathNode startPosition, PathNode endPosition)
 
         m_open[current.mapY][current.mapX] = false;
         m_closed[current.mapY][current.mapX] = true;
+
+        logState(current, startPosition, endPosition);
+
         ExpandNode(current,endPosition);
     } while(OpenNodesExists());
 
     // no path found
     cout << "No path found." << endl;
-    RetracePath(startPosition, endPosition);
+
+    m_nodes.clear();
+    m_nodes.push_back(startPosition);
+    m_nodes.push_back(endPosition);
 }
 
 void Path::DumpPath(string file)
@@ -495,15 +521,13 @@ void Path::DumpPath(string file)
             cout << "Wrong node (" << x << ", " << y << ")" << endl;
             continue;
         }
-        color[y + x * m_mapX] = vec3f(1, 0, 0);
+        color[(m_mapY - 1 - y) + x * m_mapX] = vec3f(1, 0, 0);
     }
 
     int startX = this->m_troup->m_source->m_x;
     int startY = this->m_troup->m_source->m_y;
     int endX = this->m_troup->m_destination->m_x;
     int ednY = this->m_troup->m_destination->m_y;
-
-    //color[]
 
     save_png3f(color, m_mapX, m_mapY, ("./render-data/images/" + file).c_str());
 }

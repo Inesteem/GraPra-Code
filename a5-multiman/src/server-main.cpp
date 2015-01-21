@@ -24,6 +24,11 @@ using namespace std;
 
 GameStage *gameStage;
 
+void blockMap(int r, int c, int maxX, int maxY) {
+    if(r < 0 || c < 0 || r >= maxY || c >= maxX) return;
+    gameStage->m_map[r][c] = false;
+}
+
 void initGame(string &levelName) {
 	unsigned int x, y;
     string levelPath = "./render-data/images/" + levelName + ".png";
@@ -45,18 +50,23 @@ void initGame(string &levelName) {
 
     int buildingPlayerIndex = 0;
 
+    for(unsigned int r = 0; r < y; r++) {
+        gameStage->m_map[r] = new bool[x];
+        for(unsigned int c = 0; c < x; c++) {
+            gameStage->m_map[r][c] = true;
+        }
+    }
+
 	for(unsigned int r = 0; r < y; r++) {
-        gameStage->m_map[y - 1 - r] = new bool[x];
 		for(unsigned int c = 0; c < x; c++) {
-            gameStage->m_map[y - 1 - r][c] = true;
-            vec3f color = mapData[r * x + c];
+            vec3f color = mapData[(y - 1 - r) * x + c];
 			if(color.x > 0.9f) {
-                gameStage->m_map[y - 1 - r][c] = false;
+                //gameStage->m_map[r][c] = false;
 				cout << "Building at (" << r << "," << c << ")" << endl;
                 Building *b = gameStage->spawnHouse(c, r);
 
 				msg::spawn_house sh = make_message<msg::spawn_house>();
-                sh.x = x - 1 - c;
+                sh.x = c;
                 sh.y = r;
                 sh.id = b->m_id;
                 sh.unitCount = 20;
@@ -78,11 +88,20 @@ void initGame(string &levelName) {
                 broadcast(&bug);
 							
 			} else if(color.y > 0.4f) {
-                gameStage->m_map[y - 1 - r][c] = false;
+                blockMap(r,c-1, x, y);
+                blockMap(r,c, x, y);
+                blockMap(r,c+1, x, y);
+                blockMap(r+1,c-1, x, y);
+                blockMap(r+1,c, x, y);
+                blockMap(r+1,c+1, x, y);
+                blockMap(r-1,c-1, x, y);
+                blockMap(r-1,c, x, y);
+                blockMap(r-1,c+1, x, y);
+
 				cout << "Tree at (" << r << "," << c << ")" << endl;
 
 				msg::spawn_tree st = make_message<msg::spawn_tree>();
-                st.x = x - 1 - c;
+                st.x = c;
                 st.y = r;
                 st.type = 1;
 				if(color.y > 0.9f)
@@ -100,7 +119,7 @@ void initGame(string &levelName) {
     for(unsigned int r = 0; r < y; r++) {
         cout << endl;
         for(unsigned int c = 0; c < x; c++) {
-            cout << (gameStage->m_map[r][c] ? "  " : "T ");
+            cout << (gameStage->m_map[r][c] ? " " : "T");
         }
     }
 
