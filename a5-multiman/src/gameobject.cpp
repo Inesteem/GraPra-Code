@@ -528,6 +528,7 @@ UnitGroup::UnitGroup(Obj *obj, simple_heightmap *sh, string name, vec2f start, v
     m_up_speed = vector<float>();
     m_row_size = vector<unsigned int>();
     m_pos = vec2f(start.x, start.y);
+    move = false;
     identifier = 'u';
     vec3f tmp = obj->bb_min + obj->bb_max;
     tmp /= 2;
@@ -599,7 +600,8 @@ void UnitGroup::move_to(vec2f pos, float time_to_reach){
   //  force_position(m_end);
    // force_position(m_end);
 //	vec2f pos_1 = vec2f(m_model.col_major[3 * 4 + 0], m_model.col_major[3 * 4 + 2]);
-
+    cout <<"start: "<< m_start.x << ","<< m_start.y << endl;
+    cout <<"end: " <<m_end.x << ","<< m_end.y << endl;
     if(move){
         m_start = m_end;
         m_end = pos;
@@ -622,7 +624,7 @@ void UnitGroup::move_to(vec2f pos, float time_to_reach){
 }
 
 void UnitGroup::update(){
-//    if(move){
+    if(move){
         float cur_time = m_timer.look();
 
         if(cur_time < m_time_to_reach_end+100){
@@ -652,7 +654,7 @@ void UnitGroup::update(){
 
             update_model_matrices();
         }
-//    }
+    }
 
 }
 void UnitGroup::update_cur_heights(){
@@ -669,9 +671,12 @@ void UnitGroup::update_dest_heights(){
 }
 
 void UnitGroup::draw(){
+
     for(int i = 0; i < m_spawned; ++i){
+
 		for (vector<drawelement*>::iterator it = m_obj->drawelements->begin(); it != m_obj->drawelements->end(); ++it) {
 			drawelement *de = *it;
+
             de->Modelmatrix(m_units[i].getModel());
 			de->bind();
 			setup_dir_light(m_shader);
@@ -720,6 +725,7 @@ Unit::Unit(vec2f pos, vec2f view_dir, vec2f pos_group, vec2f start, vec2f end, s
     make_unit_matrix4x4f(&m_model);
     m_model.col_major[3 * 4 + 1] = base_height + sh->get_height(pos.x, pos.y);
     movement_timer.restart();
+    move = true;
 }
 
 matrix4x4f* Unit::getModel(){

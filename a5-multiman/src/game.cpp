@@ -80,7 +80,7 @@ ObjHandler* Game::get_objhandler(){
 
 void Game::update_unit_group(unsigned int x, unsigned int y, unsigned int troupId, unsigned int time){
 	cout << time << endl;
-	
+    cout << "size unit gr: " << m_unitgroups.size() << endl;
     for(int i = 0; i < m_unitgroups.size(); ++i){
 		if(troupId == m_unitgroups[i].m_id){
             m_unitgroups[i].move_to(vec2f(x, y), time);
