@@ -32,6 +32,12 @@
 
 #include <unistd.h>
 
+//fork?
+#include <iostream>
+#include <string>
+#include <sys/types.h>
+#include <stdlib.h> 
+#include <stdio.h> 
 
 using namespace std;
 using namespace moac;
@@ -196,6 +202,16 @@ void standard_keyboard(unsigned char key, int x, int y)
 static int eingabe= 0;
 int max_length = 15;
 static int index_hostname= 0;
+
+void reset_hostname(){
+    menu->set_enter(false);
+    eingabe = 0;
+	for(int i = 0; i <= index_hostname ; i++){
+		hostname[i] = '\0';
+	}
+    index_hostname = 0;
+}
+
 void menu_keyhandler(unsigned char key, int state){
 	switch(key){
 		
@@ -208,19 +224,62 @@ void menu_keyhandler(unsigned char key, int state){
 					}
 					menu->set_hostname(hostname);
 		
-		//Enter
+		//Enter	
+				  //host game
 		case 13 : if(menu->get_row() == 0){
-						//exec start_server
-					messageReader->networking_prologue(hostname);
-						render_menu = false;
+					   pid_t pID = fork();
+					 
+					   int numplayers = menu->get_num_players();
+					   std::string s = std::to_string(numplayers);
+					 
+					   char *level = menu->get_level();
+					
+					    if (pID == 0) {// child
+					    
+					        char resolved_path[100]; 
+							realpath(".", resolved_path); 
+							std::string str = resolved_path;
+							str += "/src/multiman_server ";
+							str += s;
+							str += " ";
+							str += level;
+							str += " $*; echo '-- '; echo 'press return to close this terminal'; read";
+
+							execl("/usr/bin/xterm","/usr/bin/xterm", "-geometry", "200x100+0+900", "-e", str.c_str(),NULL);
+							
+						}
+						else if (pID < 0){// failed to fork
+						
+							cerr << "Failed to fork" << endl;
+							exit(1);
+							// Throw exception
+						}
+						else {// parent
+						    sleep(1);
+						    gethostname(hostname, 1023);
+						    cout << ">" << hostname << "<" << endl;
+						    messageReader->networking_prologue(hostname);
+						    render_menu = false;		 
+						}
+
 				   }
 				   //join game
 				   if(menu->get_row() == menu->get_row_max()-1){
 					   if(eingabe==0){
 						   eingabe = 1;
 						   hostname[index_hostname] = '<';
-							menu->set_hostname(hostname);
-					  }
+						   menu->set_enter(true);
+						   menu->set_hostname(hostname);
+					  } else {
+						  hostname[index_hostname] = '\0';		
+						   cout << ">" << hostname << "<" << endl;
+						   //todo: fehlerbehandlung
+						   messageReader->networking_prologue(hostname);
+						   render_menu = false;		  
+						  
+						 }
+						
+					  
 				   }
 				
 					break;
@@ -242,15 +301,19 @@ void special_keyhandler( int key, int x, int y ){
 		
     switch(key){
         case GLUT_KEY_LEFT:
+			reset_hostname();
             menu->decrease_mom_row();
             break;
         case GLUT_KEY_RIGHT:
+			reset_hostname();
             menu->increase_mom_row(); 
             break;
         case GLUT_KEY_UP:
+			reset_hostname();
             menu->increase_row();
             break;
         case GLUT_KEY_DOWN:
+			reset_hostname();
             menu->decrease_row();
             break;
         default :

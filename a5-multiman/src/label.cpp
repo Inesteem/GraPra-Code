@@ -186,7 +186,7 @@ void Label::do_update_cairo_stuff(texture_ref &texture, std::string displayed, v
 void Label::make_gui_texture() {
 	
 	std::stringstream stream;
-	stream << "< include >";
+	stream << 0;
 	std::string sn = stream.str();
 	do_cairo_stuff(sn, texture_color, texture_name);
 	

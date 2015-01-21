@@ -18,6 +18,8 @@
 
 
 
+
+
 #ifndef __MENU_H__
 #define __MENU_H__
 
@@ -43,8 +45,9 @@ class Menu{
 	
 	vector<Label *>labels;
 	vector<std::string> strings = {"Host Game", "Fraktion", "Level", "Players", "Join Game"};
+	vector<char*> level_names = {"lvl01","lvl02"};
 	vector<int> nums = {-1,1,1,2,-1};
-	vector<int> max_nums = {-1,2,1,4,-1};
+	vector<int> max_nums = {-1,2,2,4,-1};
 	vector<int> min_nums = {-1,1,1,1,-1};
 	
 	client_message_reader *message_reader;
@@ -76,7 +79,12 @@ public:
 	void decrease_mom_row();
 	
 	void set_hostname(char *hostname);
+	void set_enter(bool enter){this->enter = enter;}
 	
+
+	int get_num_players();
+	char *get_level();
+
 		
 	
 	

@@ -1,3 +1,7 @@
+#define NUM_PLAYERS nums[3]
+#define LEVEL nums[2]
+#define FRAKTION nums[1]
+
 
 #include "menu.h"
 #include "mouseactions.h"
@@ -184,9 +188,19 @@ void Menu::update_label(){
 			s << "< ";
 		else
 			s << "    ";
-		s << strings[row];	
-		if(nums[row] != -1)
-			s << " : " << nums[row];
+		if(row !=1){
+			s << strings[row];	
+			if(nums[row] != -1)
+				s << " : " << nums[row];		
+		
+		} else {
+			if(nums[row] == 1)
+				s << "Pacman";	
+			else
+				s << "Bomberman";
+			
+		}
+		
 		if(nums[row] != max_nums[row] && nums[row] != -1)	
 			s << " >";
 		
@@ -195,8 +209,15 @@ void Menu::update_label(){
 }
 
 void Menu::set_hostname(char * hostName){
-	enter = true;	
 	std::stringstream hostname;
 	hostname << "    " << hostName;
 	labels[max_rows-1]->update_gui_texture_string(&hostname);
+}
+
+
+int Menu::get_num_players(){
+	return NUM_PLAYERS;
+}
+char *Menu::get_level(){
+	return level_names[LEVEL-1];
 }
