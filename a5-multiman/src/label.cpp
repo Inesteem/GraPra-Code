@@ -81,6 +81,20 @@ void Label::set_camera(camera_ref camera){
 	label_camera = camera;
 }
 
+void Label::change_mesh(){
+	
+	mesh = make_mesh("quad", 2);
+	vec3f pos[4] = { {0,0,-10}, {1,0,-10}, {1,1,-10}, {0,1,-10} };
+	vec2f tc[4] = { {0,1}, {1,1}, {1,0}, {0,0} };
+	unsigned int idx[6] = { 0, 1, 2, 2, 3, 0 };
+	
+	bind_mesh_to_gl(mesh);
+	add_vertex_buffer_to_mesh(mesh, "in_pos", GL_FLOAT, 4, 3, (float *) pos, GL_STATIC_DRAW);
+	add_vertex_buffer_to_mesh(mesh, "in_tc", GL_FLOAT, 4, 2, (float *) tc, GL_STATIC_DRAW);
+	add_index_buffer_to_mesh(mesh, 6, idx, GL_STATIC_DRAW);
+	unbind_mesh_from_gl(mesh);
+}
+
 void Label::set_size(vec2f size){
 	BillboardSize = size;
 }
@@ -150,6 +164,8 @@ void Label::do_cairo_stuff(std::string displayed, vec3f color, std::string name)
 
 void Label::do_update_cairo_stuff(texture_ref &texture, std::string displayed, vec3f color, std::string name){
 
+
+
 	texture = find_texture(name.c_str());
 
 	cairo_set_font_size(cairo, fontSize);
@@ -170,7 +186,7 @@ void Label::do_update_cairo_stuff(texture_ref &texture, std::string displayed, v
 void Label::make_gui_texture() {
 	
 	std::stringstream stream;
-	stream << 0;
+	stream << "< include >";
 	std::string sn = stream.str();
 	do_cairo_stuff(sn, texture_color, texture_name);
 	
@@ -186,12 +202,19 @@ void Label::update_gui_texture_int(int n){
 }
 
 
-void Label::update_gui_texture_long(long l){
-		std::stringstream stream;
-		int secs = (int)l/1000;
-		//secs %= 60;
-		update_gui_texture_int(secs);
-	
+void Label::update_gui_texture_string(std::stringstream *stream){
+	//	std::stringstream stream;
+	//	stream << "test";
+		free(cairo_surface_data);
+		free(cairo_surface);
+		std::string sn = stream->str();
+	//	do_update_cairo_stuff(texture, sn, texture_color, texture_name);
+		do_cairo_stuff(sn, texture_color, texture_name);
+}
+
+
+void Label::set_model(matrix4x4f model){
+	this-> model = model;		
 }
 
 
@@ -277,6 +300,11 @@ void Label::render_gui_overlay() {
 	unbind_texture(texture);
 	
 	use_camera(old_camera);
+}
+
+texture_ref Label::get_texture(){
+	return texture;
+	
 }
 
 //some new stuff

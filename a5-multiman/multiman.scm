@@ -29,6 +29,12 @@
 (texture-from-file "none" "exchange_1.png" 'tex2d #t)
 (texture-from-file "alpha_mask_1" "alpha_mask_2.png" 'tex2d #t)
 
+(texture-from-file "game_won" "Menu/game_won.png" 'tex2d #t)
+(texture-from-file "game_loose" "Menu/game_loose.png" 'tex2d #t)
+(texture-from-file "game_paused" "Menu/game_paused.png" 'tex2d #t)
+(texture-from-file "game_start" "Menu/game_start.png" 'tex2d #t)
+(texture-from-file "black_screen" "Menu/black_screen.png" 'tex2d #t)
+
 
 (set-move-factor! 1)
 

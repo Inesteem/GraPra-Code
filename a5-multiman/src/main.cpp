@@ -17,6 +17,7 @@
 #include "messages.h"
 #include "mouseactions.h"
 #include "label.h"
+#include "menu.h"
 
 #include <framebuffer.h>
 #include <texture.h>
@@ -28,6 +29,8 @@
 
 #include <libguile.h>
 #include <math.h>
+
+#include <unistd.h>
 
 
 using namespace std;
@@ -41,9 +44,13 @@ texture_ref shadowmap;
 texture_ref color;
 
 matrix4x4f *T;
+char hostName[1024];
+//char *hostName;
+
 
 
 Action *action;
+Menu *menu;
 
 #define doc(X)
 
@@ -63,6 +70,7 @@ unsigned char key_to_move_up = 'i',
 
 bool wireframe = false;
 bool screenshot = false;
+bool render_menu = true;
 
 SCM_DEFINE(s_set_keymap, "define-keymap", 1, 0, 0, (SCM str), "") {
 	cout << "def km" << endl;
@@ -83,10 +91,18 @@ static bool reload_pending = false;
 
 
 void mouse_move(int x, int y) {
+	
+	if(render_menu)
+		return;
+		
 	action->update_mouse_pos(x,y);
 }
 
 void mouse(int button, int state, int x, int y) {
+	
+	if(render_menu)
+		return;
+	
     if(standard_mouse){
          standard_mouse_func(button, state, x, y);
     } else {
@@ -177,7 +193,31 @@ void standard_keyboard(unsigned char key, int x, int y)
 }
 
 
+void menu_keyhandler(unsigned char key, int state){
+	switch(key){
+		//Enter
+		case 13 : if(state == 0 ){
+						messageReader->networking_prologue(hostName);	
+						render_menu = false;
+					}
+					break;
+				
+		default : ;
+		
+		}
+	
+}
+
+
+
 void keyhandler(unsigned char key, int x, int y) {
+	
+	if(render_menu){
+		menu_keyhandler(key, 0);
+		return;
+		
+	}
+	
 	if (key == 'W')      wireframe = !wireframe;
 	else if (key == 'R') reload_pending = true;
 	else if (key == 'E'){
@@ -246,137 +286,141 @@ struct render_time_table {
 };
 
 void loop() {
-	// 
-	// administrative
-	//
 	
-	if (reload_pending) {
-		scm_c_eval_string("(load-shaders)");
-		reload_pending = false;
-	}
-
-	render_time_table render_timer;
-	render_timer.start_frame();
-
-	static wall_time_timer key_timer;
-	static int frames = 0;
-	static wall_time_timer frames_timer;
-	++frames;
-	float t = frames_timer.look(); // in ms
-	if (t >= wall_time_timer::sec(1)) {
-		float per_sec = (frames*1000.0f)/t;
-		fps_buf[fps_id++%5] = per_sec;
-	}
-
-	if (key_timer.look() > wall_time_timer::msec(20)) {
-		check_navigation_keys();
-		key_timer.restart();
-	}
-
-	render_timer.done_with("keys");
-
-    messageReader->read_and_handle();
-
-	// 
-	// update logic
-	//
-    if(messageReader->m_init_done) {
-        game->update();
-    }
-	render_timer.done_with("updates");
-
-	// 
-	// pre render pass
-	//
+		// 
+		// administrative
+		//
 		
-	//shadowmapping
-	
-	//glViewport(0,0,2048,2048);	
-	//glColorMask(0,0,0,0);
-	
-	//Cam_Setup
-	camera_ref actual_cam = current_camera();
-	use_camera(find_camera("lightcam"));
+		if (reload_pending) {
+			scm_c_eval_string("(load-shaders)");
+			reload_pending = false;
+		}
 
-	static int i = 1;
+		render_time_table render_timer;
+		render_timer.start_frame();
 
-	if(i == 1){
-		vec3f pos = {-22.877605,38.488937,52.607487};
-		vec3f dir = {  0.811107, -0.486664, -0.324443};
-		vec3f up = { 0.584898,0.674882,0.449921};
-		change_lookat_of_cam(find_camera("lightcam"),&pos, &dir,&up);	
-		recompute_gl_matrices_of_cam(find_camera("lightcam"));    
-		i = 0;
-	}		
+		static wall_time_timer key_timer;
+		static int frames = 0;
+		static wall_time_timer frames_timer;
+		++frames;
+		float t = frames_timer.look(); // in ms
+		if (t >= wall_time_timer::sec(1)) {
+			float per_sec = (frames*1000.0f)/t;
+			fps_buf[fps_id++%5] = per_sec;
+		}
 
-	bind_framebuffer(the_fbuf);
-	glClear(GL_DEPTH_BUFFER_BIT);
-    glClearDepth(1);
-    
-    if(messageReader->m_init_done) {
-        game->draw();
-    }
-	
-	unbind_framebuffer(the_fbuf);	
-	
-	if(screenshot){
-		save_texture_as_png(shadowmap, "./screenshot.png");
-		save_texture_as_png(color, "./screenshot_42.png");
-		screenshot = false;
-		std::cout << "Took a shot!" << std::endl;
-	}
+		if (key_timer.look() > wall_time_timer::msec(20)) {
+			check_navigation_keys();
+			key_timer.restart();
+		}
 
-	init_matrices();	
+		render_timer.done_with("keys");
+
+		if(!render_menu) {
+			messageReader->read_and_handle();
+		}
+
+		// 
+		// update logic
+		//
+		if(messageReader->m_init_done) {
+			game->update();
+		}
+		render_timer.done_with("updates");
+
+		// 
+		// pre render pass
+		//
 			
-	//shadowmapping end
-	
-	render_timer.done_with("pre-pass");
+		//shadowmapping
+		
+		//glViewport(0,0,2048,2048);	
+		//glColorMask(0,0,0,0);
+		
+		//Cam_Setup
+		camera_ref actual_cam = current_camera();
+		use_camera(find_camera("lightcam"));
 
-	//
-	// actual render
-	//
+		static int i = 1;
 
-	glClearColor(0,0,0,1);
-	
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    if (wireframe)
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    else
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		if(i == 1){
+			vec3f pos = {-22.877605,38.488937,52.607487};
+			vec3f dir = {  0.811107, -0.486664, -0.324443};
+			vec3f up = { 0.584898,0.674882,0.449921};
+			change_lookat_of_cam(find_camera("lightcam"),&pos, &dir,&up);	
+			recompute_gl_matrices_of_cam(find_camera("lightcam"));    
+			i = 0;
+		}		
+
+		bind_framebuffer(the_fbuf);
+		glClear(GL_DEPTH_BUFFER_BIT);
+		glClearDepth(1);
+		
+		if(messageReader->m_init_done) {
+			game->draw();
+		}
+		
+		unbind_framebuffer(the_fbuf);	
+		
+		if(screenshot){
+			save_texture_as_png(shadowmap, "./screenshot.png");
+			save_texture_as_png(color, "./screenshot_42.png");
+			screenshot = false;
+			std::cout << "Took a shot!" << std::endl;
+		}
+
+		init_matrices();	
+				
+		//shadowmapping end
+		
+		render_timer.done_with("pre-pass");
+
+		//
+		// actual render
+		//
+
+		glClearColor(0,0,0,1);
+		
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		if (wireframe)
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		else
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 
-	//shadowmapping
-	shader_ref shader = find_shader("terrain");
-	bind_shader(shader);
+		//shadowmapping
+		shader_ref shader = find_shader("terrain");
+		bind_shader(shader);
 
-	bind_texture(shadowmap, 4);	
-	int loc = glGetUniformLocation(gl_shader_object(shader), "shadowmap");
-	glUniform1i(loc, 4);			
-	
-	glColorMask(1,1,1,1);
-	use_camera(actual_cam);
-	glViewport(0,0,1024,1024);	
-	//shadowmapping end	
+		bind_texture(shadowmap, 4);	
+		int loc = glGetUniformLocation(gl_shader_object(shader), "shadowmap");
+		glUniform1i(loc, 4);			
+		
+		glColorMask(1,1,1,1);
+		use_camera(actual_cam);
+		glViewport(0,0,1024,1024);	
+		//shadowmapping end	
 
-    if(messageReader->m_init_done) {
-        game->draw();
-        action->draw();
-    }
+		if(messageReader->m_init_done) {
+			game->draw();
+			action->draw();
+		} 
+		if(render_menu){
+			menu->draw(-1,false);
+		}
+		render_timer.done_with("draw");
 
-	
-	render_timer.done_with("draw");
+		// 
+		// finishing up
+		//
 
-	// 
-	// finishing up
-	//
+		check_for_gl_errors("display");
+		swap_buffers();
+		unbind_texture(shadowmap);
 
-	check_for_gl_errors("display");
-	swap_buffers();
-	unbind_texture(shadowmap);
-
-	render_timer.done_with("swap");
-// 	render_timer.print_summary();
-// 	cout << "-----" << endl;
+		render_timer.done_with("swap");
+	// 	render_timer.print_summary();
+	// 	cout << "-----" << endl;
 }
 
 void gl_error(unsigned int source, unsigned int type, unsigned int id, unsigned int severity, int length, const char* message, void*) {
@@ -399,7 +443,6 @@ extern "C" {
 
 
 
-char *hostName;
 
 void actual_main() {
 	register_scheme_functions_for_key_handling();
@@ -460,10 +503,9 @@ void actual_main() {
 
     sh = new simple_heightmap();
 
-    game = new Game(objhandler,sh, messageReader);;
+    game = new Game(objhandler,sh, messageReader);
 
     messageReader = new client_message_reader(game);
-       messageReader->networking_prologue(hostName);
 
 
 	// set different cursors
@@ -474,6 +516,8 @@ void actual_main() {
 	glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
 
 	action = new Action(game, objhandler);
+	menu   = new Menu();
+	menu->init();
 	init_framebuffer();
 
 	// 
@@ -488,13 +532,23 @@ void actual_main() {
 int main(int argc, char **argv)
 {
     //parse_cmdline(argc, argv);
+	
+	hostName[1023] = '\0';
+   
+    if(argc == 2) {
+        //cout << "Usage: ./multiman <host name>" << endl;
+       // exit(0);
+		int i = 0;
+		do{
+			hostName[i] = argv[1][i];
+			i++;
+		}while(argv[1][i] != '\0');
+		
+    
+    } else 
+		gethostname(hostName, 1023);
+//		hostName = argv[1];
 
-    if(argc != 2) {
-        cout << "Usage: ./multiman <host name>" << endl;
-        exit(0);
-    }
-
-    hostName = argv[1];
 
 	render_settings::screenres_x = cmdline.res_x;
 	render_settings::screenres_y = cmdline.res_y;

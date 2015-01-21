@@ -87,14 +87,18 @@ class Label {
 		void set_size(vec2f size);
 		void set_texture(const char *name);
 		void set_color(vec3f color);
+		void set_model(matrix4x4f model);
 		
 		void setup_display();
+		void change_mesh();
+
+		texture_ref get_texture();
 
 
 		void update_label_pos(float x, float y, float z);
 		void update_label_model(matrix4x4f model);
 		void update_gui_texture_int(int n);
-		void update_gui_texture_long(long l);
+		void update_gui_texture_string(std::stringstream *stream);
 		// gui-overlay.cpp
 		void render_gui_overlay();
 		void initialize_gui_overlay();
