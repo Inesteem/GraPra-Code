@@ -79,7 +79,6 @@ namespace moac {
 			buc.buildingId = own_building->get_id();
 			buc.state = own_building->get_state()+1;
 			game->m_messageReader->send_message(buc);
-			cout << "UPDATE" << endl;
 				
 	      
 		}
@@ -149,9 +148,9 @@ namespace moac {
 				stc.unitCount = units;
 				game->m_messageReader->send_message(stc);
 				slidebar->dec_max_count(units);
-				cout << "owner: (" << own_building->get_pos().x << " ' " << own_building->get_pos().y << ")" << endl;
-				cout << "enemy: (" << enemys_building->get_pos().x << " ' " << enemys_building->get_pos().y << ")" << endl;
-				cout << "troups: (" << units << ")" << endl;
+                //cout << "owner: (" << own_building->get_pos().x << " ' " << own_building->get_pos().y << ")" << endl;
+                //cout << "enemy: (" << enemys_building->get_pos().x << " ' " << enemys_building->get_pos().y << ")" << endl;
+                //cout << "troups: (" << units << ")" << endl;
 			}
 			slidebar->reset_bar();
 			prepare_attack = false;

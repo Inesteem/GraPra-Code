@@ -562,9 +562,6 @@ int get_coooooords(int index, int size){
 void UnitGroup::update_model_matrices(){
 //    cout << m_units.size() << endl;
     for(int i = 0; i < m_units.size(); ++i){
-        cout << "A" << i << endl;
-
-        // TODO SEGFAULT
 
         vec2f ortho = vec2f(m_view_dir.y, -m_view_dir.x);
         normalize_vec2f(&ortho);
@@ -578,7 +575,6 @@ void UnitGroup::update_model_matrices(){
 
            float height = fstart + time * (fend - fstart)/m_time_to_reach_end;
 
-           cout << "B" << endl;
 
         m_units[i].update(pos,height);
     }
@@ -605,7 +601,6 @@ void UnitGroup::move_to(vec2f pos, float time_to_reach){
   //  force_position(m_end);
    // force_position(m_end);
 //	vec2f pos_1 = vec2f(m_model.col_major[3 * 4 + 0], m_model.col_major[3 * 4 + 2]);
-    cout << "move_to start" << endl;
 
     if(move){
         m_start = m_end;
@@ -621,17 +616,13 @@ void UnitGroup::move_to(vec2f pos, float time_to_reach){
         m_view_dir = m_end - m_start;
         m_time_to_reach_end = time_to_reach;
         m_timer.restart();
-        cout << "unit update" << endl;
         for(int i = 0; i < m_units.size(); ++i){
             m_units[i].move = true;
-            cout << "unit " << i << " updated" << endl;
         }
     }
-    cout << "end unit update" << endl;
 
     update_model_matrices();
 
-    cout << "move to end" << endl;
 }
 
 void UnitGroup::update(){
