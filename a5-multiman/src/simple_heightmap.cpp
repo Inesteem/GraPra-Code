@@ -14,29 +14,49 @@ void simple_heightmap::init( const std::string filename, int width, int height){
 	this->filename = filename;
     m_mesh = make_mesh("mesh_heightmap", 2);
     vec3f* colors(load_image3f(filename.c_str(), &m_width, &m_height));
+    m_g_height = height;
+    m_g_width = width;
    // cout << m_width << " " << m_height << endl;
-    if(width != m_width || height != m_height){
-        cerr << filename << " width or height doesnt match received width or height!" << endl;
-    }
+//    if(width != m_width || height != m_height){
+//        cerr << filename << " width or height doesnt match received width or height!" << endl;
+//    }
     m_gamefield = vector<char>(m_width*m_height);
     for(int i = 0; i < m_gamefield.size(); i++){
         m_gamefield[i] = 'n';
     }
 
-    vector<vec3f> pos = vector<vec3f>(m_width*m_height);
+    vector<vec3f> pos = vector<vec3f>(m_g_width*m_g_height);
     vector<vec3f> norm = vector<vec3f>(m_width*m_height);
 
     m_heights = vector<float>(m_width*m_height);
     for(int i = 0; i < m_height; ++i){
         for(int j = 0; j < m_width; ++j){
-            pos[i + j * m_height] = vec3f(j*render_settings::tile_size_x-render_settings::tile_size_x/2,0,i*render_settings::tile_size_y-render_settings::tile_size_y/2);
-            pos[i + j *m_height].y =  colors[i + j *m_height].x * render_settings::height_factor;          
-            
+
             m_heights[i + j *m_height] = colors[i + j *m_height].x * render_settings::height_factor;
 
 
         }
     }
+    for(int i = 0; i < m_g_height; ++i){
+        for(int j = 0; j < m_g_width; ++j){
+            pos[i + j * m_g_height] = vec3f(j/(float)m_g_width,0,i/(float)m_g_height);
+            pos[i + j *m_g_height].y =  colors[i*(m_width/m_g_width)  + j*(m_height/m_g_height) *m_g_height].x ;
+            
+//            m_heights[i + j *m_height] = colors[i + j *m_height].x * render_settings::height_factor;
+
+
+        }
+    }
+    make_unit_matrix4x4f(&m_model);
+    m_model.col_major[0 *4 + 0] = render_settings::tile_size_x * m_g_width;
+    m_model.col_major[1 *4 + 1] = render_settings::height_factor;
+    m_model.col_major[2 *4 + 2] = render_settings::tile_size_y * m_g_height;
+    m_model.col_major[3 *4 + 0] = -render_settings::tile_size_x/2;
+    m_model.col_major[3 *4 + 1] = 0;
+    m_model.col_major[3 *4 + 2] = -render_settings::tile_size_y/2;
+
+    tex_params_t p = default_tex_params();
+    height_map = make_texture_ub(("height_map"), filename.c_str(), GL_TEXTURE_2D, &p);
     
     for(int i = 0; i < m_height-1; ++i){
         for(int j = 0; j < m_width; ++j){
@@ -47,7 +67,7 @@ void simple_heightmap::init( const std::string filename, int width, int height){
     
     m_shader = find_shader("heightmap_shader");
 //    m_shader = find_shader("terrain");
-    make_unit_matrix4x4f(&m_model);
+
     std::vector<unsigned int> index;
 //    for(int i = 0; i < m_height-1; ++i){
 //        for(int j = 0; j < m_width; ++j){
@@ -63,16 +83,16 @@ void simple_heightmap::init( const std::string filename, int width, int height){
 //        }
 //    }
 
-    for(int i = 0; i < m_height-1; ++i){
-        for(int j = 0; j < m_width-1; ++j){
+    for(int i = 0; i < m_g_height-1; ++i){
+        for(int j = 0; j < m_g_width-1; ++j){
 
-            index.push_back(i + j*m_height);
-            index.push_back((i+1)  + j*m_height);
-            index.push_back(i+1 + (j+1)*m_height);
+            index.push_back(i + j*m_g_height);
+            index.push_back((i+1)  + j*m_g_height);
+            index.push_back(i+1 + (j+1)*m_g_height);
 
-            index.push_back(i+1 + (j+1)*m_height);
-            index.push_back(i + (j+1)*m_height);
-            index.push_back(i + (j)*m_height);
+            index.push_back(i+1 + (j+1)*m_g_height);
+            index.push_back(i + (j+1)*m_g_height);
+            index.push_back(i + (j)*m_g_height);
 
         }
     }
@@ -139,7 +159,12 @@ void simple_heightmap::draw(){
     bind_texture(snow, 3);
     loc = glGetUniformLocation(gl_shader_object(m_shader), "snow");
     glUniform1i(loc, 3);
+    bind_texture(height_map, 4);
+    loc = glGetUniformLocation(gl_shader_object(m_shader), "height_map");
+    glUniform1i(loc, 4);
 
+    loc = glGetUniformLocation(gl_shader_object(m_shader), "tex_res");
+    glUniform2f(loc, m_width,m_height);
     loc = glGetUniformLocation(gl_shader_object(m_shader), "CamPos");
     glUniform3f(loc,gl_view_matrix_of_cam(current_camera())->col_major[3 *4 + 0],
                 gl_view_matrix_of_cam(current_camera())->col_major[3 *4 + 1],

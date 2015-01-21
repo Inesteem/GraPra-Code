@@ -71,7 +71,7 @@ vector<vec3f> *Game::get_planes(){
 void Game::init(string filename, int widht, int height, int id){
     m_player_id = id;
     PLAYER_ID = id;
-    m_sh->init(filename, widht, height);
+    m_sh->init("./render-data/images/big_heightmap.png", widht, height);
 }
 
 ObjHandler* Game::get_objhandler(){

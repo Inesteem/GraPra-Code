@@ -296,9 +296,12 @@
         in vec3 tcPosition[];
         out vec3 out_pos;
         out vec3 tePatchDistance;
+
+        uniform vec2 tex_res;
         uniform mat4 proj;
         uniform mat4 model;
         uniform mat4 view;
+        uniform sampler2D height_map;
 
         void main()
         {
@@ -308,7 +311,7 @@
             tePatchDistance = gl_TessCoord;
 
             out_pos = p0 + p1 + p2;
-//            out_pos.y = (1-gl_TessCoord.x)*p0.y  + (1-gl_TessCoord.y)*p1.y + (1-gl_TessCoord.z)*p2.y;
+            out_pos.y = texture(height_map,vec2(out_pos.x, out_pos.z));
             gl_Position = proj * view * model * vec4(out_pos, 1);
         }
 

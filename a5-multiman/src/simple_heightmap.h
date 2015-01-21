@@ -37,7 +37,7 @@ public:
 private:
 
     unsigned int m_width, m_height;
-
+    unsigned int m_g_width, m_g_height;
     vector<float> m_heights;
     
 
@@ -53,7 +53,7 @@ private:
     texture_ref stone = find_texture("terrain_2");
     texture_ref water = find_texture("terrain_0");
     texture_ref snow = find_texture("terrain_3");
-
+    texture_ref height_map;
 	std::string filename;
 
 };
