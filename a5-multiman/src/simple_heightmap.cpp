@@ -114,11 +114,12 @@ float simple_heightmap::get_height(float x, float y){
 //    cout << x << " " << y << endl;
 
     if (x < 0 || y < 0 || x > m_width || y > m_height ) return 0;
-
-    vec2i pos1 ((int) x, (int) y);
-    vec2i pos2 ((int) x + 1, (int) y);
-    vec2i pos3 ((int) x, (int) y + 1 );
-    vec2i pos4 ((int) x + 1 , (int) y + 1);
+    float new_x = x*m_height/m_g_height;
+    float new_y = y*m_width/m_g_width;
+    vec2i pos1 ((int) new_x, (int) new_y);
+//    vec2i pos2 ((int) x + 1, (int) y);
+//    vec2i pos3 ((int) x, (int) y + 1 );
+//    vec2i pos4 ((int) x + 1 , (int) y + 1);
     float height;
     try{
     height = m_heights.at(pos1.y + pos1.x *m_height);
