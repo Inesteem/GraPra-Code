@@ -64,7 +64,7 @@ vector<vec3f> *Game::get_planes(){
 	for(int i = 0; i < m_buildings.size(); i++){
 		planes[i].y += m_buildings[i].get_center().y;		
 	}
-	m_sh->re_init(&planes);
+    m_sh->re_init(&planes);
 	return &planes;
 }
 

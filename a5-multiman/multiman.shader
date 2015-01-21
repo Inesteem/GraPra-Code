@@ -240,9 +240,10 @@
         out vec3 tcPosition[];
         uniform vec3 CamPos;
         uniform mat4 view;
+        uniform mat4 model;
         #define ID gl_InvocationID
         vec3 ndc(vec3 world){
-                vec4 v =  view * vec4(world,1);
+                vec4 v =  view *model* vec4(world,1);
                 v /= v.w;
                 return v.xyz;
         }
@@ -261,7 +262,7 @@
         {
             tcPosition[ID] = out_pos[ID];
             vec3 pos = out_pos[ID];
-            float dis = length(view*vec4(pos,1));
+            float dis = length(view*model*vec4(pos,1));
             if(offScreen(tcPosition[ID])){
                 gl_TessLevelInner[0] = 0;
                 gl_TessLevelOuter[0] = 0;
@@ -269,20 +270,20 @@
                 gl_TessLevelOuter[2] = 0;
             }
             if (dis < 20) {
-                gl_TessLevelInner[0] = 16;
-                gl_TessLevelOuter[0] = 16;
-                gl_TessLevelOuter[1] = 16;
-                gl_TessLevelOuter[2] = 16;
-            } else if( dis < 50) {
                 gl_TessLevelInner[0] = 8;
                 gl_TessLevelOuter[0] = 8;
                 gl_TessLevelOuter[1] = 8;
                 gl_TessLevelOuter[2] = 8;
-            }else if( dis < 70) {
+            } else if( dis < 50) {
                 gl_TessLevelInner[0] = 4;
                 gl_TessLevelOuter[0] = 4;
                 gl_TessLevelOuter[1] = 4;
                 gl_TessLevelOuter[2] = 4;
+            }else if( dis < 70) {
+                gl_TessLevelInner[0] = 2;
+                gl_TessLevelOuter[0] = 2;
+                gl_TessLevelOuter[1] = 2;
+                gl_TessLevelOuter[2] = 2;
             } else {
                 gl_TessLevelInner[0] = 1;
                 gl_TessLevelOuter[0] = 1;
@@ -315,8 +316,9 @@
             tePatchDistance = gl_TessCoord;
 
             out_pos = p0 + p1 + p2;
-            out_pos.y = texture(height_map,vec2(out_pos.x, out_pos.z));
-            gl_Position = proj * view * model * vec4(out_pos, 1);
+            out_pos.y = texture(height_map,vec2(out_pos.z, out_pos.x));
+            out_pos = (model*vec4(out_pos, 1)).xyz;
+            gl_Position = proj * view * vec4(out_pos, 1);
         }
 
 
@@ -384,23 +386,23 @@
         uniform sampler2D stone;
         uniform sampler2D water;
         uniform sampler2D snow;
-
+        uniform float height_factor;
         uniform vec3 light_dir;
         uniform vec3 light_col;
         out vec4 out_col;
 
         void main() {
-            float border_water = 0.0 * 10;
-                     float border_water_grass = 0.01 * 10;
-                     float border_grass = 0.2 * 10;
-                     float border_grass_rock = 0.3 * 10;
-                     float border_rock = 0.75 * 10;
-                     float border_rock_snow = 0.85 * 10;
+            float border_water = 0.0 * height_factor;
+                     float border_water_grass = 0.01 * height_factor;
+                     float border_grass = 0.2 * height_factor;
+                     float border_grass_rock = 0.4 * height_factor;
+                     float border_rock = 0.6 * height_factor;
+                     float border_rock_snow = 0.85 * height_factor;
 
-                     vec4 color_water = vec4(texture(water, vec2(pos.x,pos.z)).rgb, 1.0);
-                     vec4 color_grass = vec4(texture(grass, vec2(pos.x,pos.z)).rgb, 1.0);
-                     vec4 color_rock = vec4(texture(stone,vec2(pos.x,pos.z)).rgb, 1.0);
-                     vec4 color_snow = vec4(texture(snow, vec2(pos.x,pos.z)).rgb, 1.0);
+                     vec4 color_water = vec4(texture(water, vec2(pos.z,pos.x)).rgb, 1.0);
+                     vec4 color_grass = vec4(texture(grass, vec2(pos.z,pos.x)).rgb, 1.0);
+                     vec4 color_rock = vec4(texture(stone,vec2(pos.z,pos.x)).rgb, 1.0);
+                     vec4 color_snow = vec4(texture(snow, vec2(pos.z,pos.x)).rgb, 1.0);
 
 
                      if (pos.y <= border_water) {

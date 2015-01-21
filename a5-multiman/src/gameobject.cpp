@@ -752,7 +752,7 @@ void Unit::update(vec2f new_pos, float height){
     m_up_speed = ( m_dest_height - m_cur_height ) /5;
 
     m_model.col_major[3 * 4 + 0] = m_pos.x * render_settings::tile_size_x;
-    m_model.col_major[3 * 4 + 1] += m_up_speed;
+    m_model.col_major[3 * 4 + 1] = m_base_height + m_sh->get_height(m_pos.x,m_pos.y);
     m_model.col_major[3 * 4 + 2] = m_pos.y * render_settings::tile_size_y;
     }
 //    movement_timer.restart();

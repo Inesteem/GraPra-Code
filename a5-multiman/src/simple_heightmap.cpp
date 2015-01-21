@@ -20,7 +20,7 @@ void simple_heightmap::init( const std::string filename, int width, int height){
 //    if(width != m_width || height != m_height){
 //        cerr << filename << " width or height doesnt match received width or height!" << endl;
 //    }
-    m_gamefield = vector<char>(m_width*m_height);
+    m_gamefield = vector<char>(m_g_width*m_g_height);
     for(int i = 0; i < m_gamefield.size(); i++){
         m_gamefield[i] = 'n';
     }
@@ -119,15 +119,21 @@ float simple_heightmap::get_height(float x, float y){
     vec2i pos2 ((int) x + 1, (int) y);
     vec2i pos3 ((int) x, (int) y + 1 );
     vec2i pos4 ((int) x + 1 , (int) y + 1);
+    float height;
+    try{
+    height = m_heights.at(pos1.y + pos1.x *m_height);
 
-    float height; // = m_heights[pos1.y + pos1.x *m_height];
+    }
+    catch(...){
+    height = 0;
+    }
 
-    height = (x - (float)((int) x))*m_heights[pos1.y + pos1.x * m_height] + (1.0f -(x - (float)((int) x)))* m_heights[pos2.y + pos2.x * m_height];
-    height += (y - (float)((int) y))*m_heights[pos1.y + pos1.x * m_height] + (1.0f -(y - (float)((int) y)))* m_heights[pos3.y + pos3.x * m_height];
-    height += (y - (float)((int) y))*m_heights[pos2.y + pos2.x * m_height] + (1.0f -(y - (float)((int) y)))* m_heights[pos4.y + pos4.x * m_height];
-    height += (x - (float)((int) x))*m_heights[pos3.y + pos3.x * m_height] + (1.0f -(x - (float)((int) x)))* m_heights[pos4.y + pos4.x * m_height];
+//    height = (x - (float)((int) x))*m_heights[pos1.y + pos1.x * m_height] + (1.0f -(x - (float)((int) x)))* m_heights[pos2.y + pos2.x * m_height];
+//    height += (y - (float)((int) y))*m_heights[pos1.y + pos1.x * m_height] + (1.0f -(y - (float)((int) y)))* m_heights[pos3.y + pos3.x * m_height];
+//    height += (y - (float)((int) y))*m_heights[pos2.y + pos2.x * m_height] + (1.0f -(y - (float)((int) y)))* m_heights[pos4.y + pos4.x * m_height];
+//    height += (x - (float)((int) x))*m_heights[pos3.y + pos3.x * m_height] + (1.0f -(x - (float)((int) x)))* m_heights[pos4.y + pos4.x * m_height];
 
-    height /= 4;
+//    height /= 4;
 
     return height;
 }
@@ -162,6 +168,10 @@ void simple_heightmap::draw(){
     bind_texture(height_map, 4);
     loc = glGetUniformLocation(gl_shader_object(m_shader), "height_map");
     glUniform1i(loc, 4);
+
+
+    loc = glGetUniformLocation(gl_shader_object(m_shader), "height_factor");
+    glUniform1f(loc, render_settings::height_factor);
 
     loc = glGetUniformLocation(gl_shader_object(m_shader), "tex_res");
     glUniform2f(loc, m_width,m_height);
@@ -205,6 +215,7 @@ void simple_heightmap::draw(){
     unbind_texture(stone);
     unbind_texture(water);
     unbind_texture(snow);
+    unbind_texture(height_map);
 
 
 
@@ -273,26 +284,26 @@ void simple_heightmap::re_init(vector<vec3f> *planes){
    
             vec2f pos_1 = vec2f(j*render_settings::tile_size_x-render_settings::tile_size_x/2,i*render_settings::tile_size_y-render_settings::tile_size_y/2);
 	
-			for(vector<vec3f>::iterator it = planes->begin(); it != planes->end(); ++it) {
-				vec3f vec = *it;
-			//	vec2f pos_2 = vec2f(vec.x, vec.z);
-			//	vec2f dist = pos_2 - pos_1;
-			//	float distance = length_of_vec2f(&dist);
-		//		if(distance <= 5){
-			//		pos[i + j *m_height].y = 100;
-			//		m_heights[i + j *m_height] = 100;
-			//		cout << "done" << endl;
+            for(vector<vec3f>::iterator it = planes->begin(); it != planes->end(); ++it) {
+                vec3f vec = *it;
+            //	vec2f pos_2 = vec2f(vec.x, vec.z);
+            //	vec2f dist = pos_2 - pos_1;
+            //	float distance = length_of_vec2f(&dist);
+        //		if(distance <= 5){
+            //		pos[i + j *m_height].y = 100;
+            //		m_heights[i + j *m_height] = 100;
+            //		cout << "done" << endl;
 				
-			//	}	
-				if((vec.x >= j-1 && vec.x <= j+1) && (vec.z >= i-1 && vec.z <= i+1)){
+            //	}
+                if((vec.x >= j-1 && vec.x <= j+1) && (vec.z >= i-1 && vec.z <= i+1)){
 //				if(((vec.z == i-1 || vec.z == i+1) && (vec.x == j))||((vec.x == j-1 || vec.x == j+1) && (vec.z == i))){
-			//		pos[i + j *m_height].y = colors[(int)vec.z + (int)vec.x *m_height].x * render_settings::height_factor;
-					pos[i + j *m_height].y = vec.y;
-			//		m_heights[i + j *m_height] = colors[(int)vec.z + (int)vec.x *m_height].x * render_settings::height_factor;
-					m_heights[i + j *m_height] = vec.y;
-				}
+            //		pos[i + j *m_height].y = colors[(int)vec.z + (int)vec.x *m_height].x * render_settings::height_factor;
+                    pos[i + j *m_height].y = vec.y;
+            //		m_heights[i + j *m_height] = colors[(int)vec.z + (int)vec.x *m_height].x * render_settings::height_factor;
+                    m_heights[i + j *m_height] = vec.y;
+                }
 					
-			}
+            }
             
             
 
@@ -302,9 +313,9 @@ void simple_heightmap::re_init(vector<vec3f> *planes){
     
     for(int i = 0; i < m_height-1; ++i){
         for(int j = 0; j < m_width; ++j){
-			norm.push_back(sample_normal(i,j));
-		}
-	}
+            norm.push_back(sample_normal(i,j));
+        }
+    }
     
     std::vector<unsigned int> index;
 
