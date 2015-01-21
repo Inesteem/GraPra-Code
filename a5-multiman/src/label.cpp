@@ -218,7 +218,6 @@ void Label::initialize_gui_overlay() {
 }
 
 void Label::render_gui_overlay() {
-	
 
     glDepthMask(GL_TRUE);
 

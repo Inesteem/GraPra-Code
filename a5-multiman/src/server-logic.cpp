@@ -267,8 +267,8 @@ void Building::IncomingTroup(Troup *troup)
 
 Path::Path(Troup *troup, PathNode &source, PathNode &destination, unsigned int x, unsigned int y) : m_mapX(x), m_mapY(y), m_troup(troup)
 {
-    FindDirectPath(source, destination);
-    //FindPathAStar(source, destination);
+    //FindDirectPath(source, destination);
+    FindPathAStar(source, destination);
 
     DumpPath("pathdebug.png");
 }
@@ -369,11 +369,12 @@ void Path::RetracePath(PathNode startPosition, PathNode current)
         //cout << "current: "  << current.mapX << "," << current.mapY << endl;
         current = m_parent[current.mapY][current.mapX];
         //cout << "parent: " << current.mapX << "," << current.mapY << endl;
-
-        m_nodes.insert(m_nodes.begin(), current);
         if(current.mapX == -1 && current.mapY == -1) {
             break;
         }
+
+        m_nodes.insert(m_nodes.begin(), current);
+
     } while(1);
 }
 
@@ -480,8 +481,10 @@ void Path::DumpPath(string file)
 {
     vec3f *color = new vec3f[m_mapX * m_mapY];
     for(int r = 0; r < m_mapY; r++) {
+        cout << endl;
         for(int c = 0; c < m_mapX; c++) {
-            color[r * m_mapX + c]= m_troup->m_gameStage->m_map[r][c] ? vec3f(1,1,1) : vec3f(0,0,0);
+            color[(m_mapY - 1 - r) * m_mapX + c]= m_troup->m_gameStage->m_map[r][c] ? vec3f(1,1,1) : vec3f(0,0,0);
+            cout << (m_troup->m_gameStage->m_map[r][c] ? "  " : ". ");
         }
     }
 
@@ -495,5 +498,12 @@ void Path::DumpPath(string file)
         color[y + x * m_mapX] = vec3f(1, 0, 0);
     }
 
-    save_png3f(color, m_mapX, m_mapY, file.c_str());
+    int startX = this->m_troup->m_source->m_x;
+    int startY = this->m_troup->m_source->m_y;
+    int endX = this->m_troup->m_destination->m_x;
+    int ednY = this->m_troup->m_destination->m_y;
+
+    //color[]
+
+    save_png3f(color, m_mapX, m_mapY, ("./render-data/images/" + file).c_str());
 }

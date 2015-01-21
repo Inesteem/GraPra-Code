@@ -287,7 +287,7 @@ Building::Building(Obj *obj,Obj *selection_circle,Obj *upgrade_arrow, string nam
     label->setup_display();
     label->update_label_pos(2*x, 2*y, height+2);
     vec3f color = get_player_color(m_owner);
-	label->set_color(color);
+    label->set_color(color);
     
     state = 0;
 
