@@ -167,10 +167,14 @@
 	out vec4 out_col;
 	uniform sampler2D tex;
 	void main() {
-		if(texture(tex, tc).r >= 0.5 || texture(tex, tc).g >= 0.5 || texture(tex, tc).b >= 0.5)
-			out_col = vec4(texture(tex, tc).rgb, 1.);
-		else
-			discard;
+
+
+            gl_FragDepth = 0.001;
+
+                if(texture(tex, tc).r >= 0.5 || texture(tex, tc).g >= 0.5 || texture(tex, tc).b >= 0.5)
+                        out_col = vec4(color.x, color.y, color.z, 1.);
+                else
+                        discard;
 		
 	}
 }
@@ -780,3 +784,54 @@ uniform float down;
 	}
 }
 #:inputs (list "in_pos" "in_tc")>
+
+        #<make-shader "text-shader"
+        #:vertex-shader #{
+        #version 150 core
+
+        in vec3 in_pos;
+        in vec2 in_tc;
+        uniform mat4 proj;
+        uniform mat4 view;
+        uniform mat4 model;
+        uniform vec3 CameraRight_worldspace;
+        uniform vec3 CameraUp_worldspace;
+        uniform vec3 BillboardPos;
+        uniform vec2 BillboardSize;
+        out vec2 tc;
+
+                       void main() {
+                               vec3 vp_w =
+                                       BillboardPos
+                                       + CameraRight_worldspace * in_pos.x  * BillboardSize.x
+                                       + CameraUp_worldspace * in_pos.y * BillboardSize.y;
+
+                               gl_Position = proj * view * vec4(vp_w , 1.);
+                               tc = in_tc;
+                       }
+        }
+        #:fragment-shader #{
+        #version 150 core
+
+        in vec2 tc;
+        out vec4 out_col;
+        uniform vec3 color;
+        uniform sampler2D tex;
+        //uniform float LifeLevel;
+
+
+                       void main(){
+
+                               gl_FragDepth = 0.001;
+
+                               if(texture(tex, tc).r >= 0.5 || texture(tex, tc).g >= 0.5 || texture(tex, tc).b >= 0.5)
+                                       out_col = vec4(color.r,color.g,color.b, 1.);
+                               else
+                                       discard;
+
+
+                       }
+        }
+
+         #:inputs (list "in_pos" "in_tc")>
+

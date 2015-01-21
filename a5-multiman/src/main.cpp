@@ -197,10 +197,21 @@ void menu_keyhandler(unsigned char key, int state){
 	switch(key){
 		//Enter
 		case 13 : if(state == 0 ){
-						messageReader->networking_prologue(hostName);	
+						messageReader->networking_prologue(hostName);
 						render_menu = false;
 					}
 					break;
+		//left arrow
+		case 37 : menu->decrease_mom_row(); cout << "left" << endl; break;
+		
+		//up arrow
+		case 38 : menu->increase_row(); cout << "up" << endl; break;
+		
+		//right arrow
+		case 39 : menu->increase_mom_row(); cout << "right" << endl; break;
+		
+		//down arrow
+		case 40 : menu->decrease_row(); cout << "down" << endl; break;
 				
 		default : ;
 		

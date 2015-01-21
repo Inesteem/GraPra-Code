@@ -44,6 +44,8 @@ class Path
     void FindPathAStar(PathNode startPosition, PathNode endPosition);
 
     void DumpPath(string file);
+    void logState(PathNode current, PathNode startPosition, PathNode endPosition);
+
 
     unsigned int m_mapX, m_mapY;
 

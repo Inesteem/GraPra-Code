@@ -13,7 +13,8 @@ void Menu::init(){
 
 
 	vec3f cam_pos = {0,0,0}, cam_dir = {0,0,-1}, cam_up = {0,1,0};
-	gamecam = make_orthographic_cam((char*)"gui cam", &cam_pos, &cam_dir, &cam_up, 50, 0, 50, 0, 0.01, 1000);
+	float fovy = 50;
+	gamecam = make_orthographic_cam((char*)"gui cam", &cam_pos, &cam_dir, &cam_up, fovy, 0, 50, 0, 0.01, 1000);
 	
 
 	gamemesh = make_mesh("quad", 2);
@@ -40,38 +41,24 @@ void Menu::init(){
 	model.row_col(0,0) = 50.f;
 	model.row_col(1,1) = 50.f;
 	model.row_col(0,3) = 0.f;
-	model.row_col(1,3) = 0.f;		
+	model.row_col(1,3) = 0.f;	
 	
-	
-	
-	matrix4x4f l_model;
-	
-
-	//init labels;
-	
+		
 	for(int i = 0; i < max_rows; i++){
+		labels.push_back(new Label(9, 13, "text-shader"));
 		if(i!=0)
-			labels.push_back(new Label(9, 15, "text-shader"));
-		else{
-			labels.push_back(new Label(9, 13, "text-shader"));
 			labels[i]->set_color(grey);
 		
-		}
+		labels[i]->set_size(vec2f(28,5));	
+		
 		labels[i]->set_camera(gamecam);
 		labels[i]->setup_display();
-		labels[i]->change_mesh();
+//		labels[i]->change_mesh();
 		std::stringstream stream;
 		stream << strings[i];
+		labels[i]->update_label_pos(fovy*0.6, -1000, fovy - (fovy/(max_rows+3)*(i+1)+7));	
 		row = i;
 		update_label();
-
-		make_unit_matrix4x4f(&l_model);
-		texture_ref tex = labels[i]->get_texture();
-		l_model.row_col(0,0) = (float)texture_width(tex)*4 / (float)texture_height(tex);
-		l_model.row_col(1,1) = 3.f;
-		l_model.row_col(0,3) = 10.f;
-		l_model.row_col(1,3) = 42.5f-i*10;
-		labels[i]->set_model(l_model);	
 
 	}
 	row = 0;
@@ -87,9 +74,13 @@ void Menu::draw(int state, bool blend){
 void Menu::draw_font(){
 
 
+
+
+
 		// Render score header
 	for(int i = 0; i < max_rows; i++)	
 		labels[i]->render_gui_overlay();
+//		labels[0]->render_gui_overlay();
 
 }
 
@@ -194,7 +185,7 @@ void Menu::update_label(){
 	if(nums[row] != min_nums[row] && nums[row] != -1)
 		s << "< ";
 	else
-		s << "  ";
+		s << "    ";
 	s << strings[row];	
 	if(nums[row] != -1)
 		s << " : " << nums[row];

@@ -267,8 +267,8 @@ void Building::IncomingTroup(Troup *troup)
 
 Path::Path(Troup *troup, PathNode &source, PathNode &destination, unsigned int x, unsigned int y) : m_mapX(x), m_mapY(y), m_troup(troup)
 {
-    FindDirectPath(source, destination);
-    //FindPathAStar(source, destination);
+    //FindDirectPath(source, destination);
+    FindPathAStar(source, destination);
 
     DumpPath("pathdebug.png");
 }
@@ -326,7 +326,7 @@ void Path::Init()
 float Path::AbsoluteDistance(PathNode a, PathNode b)
 {
     float dx = fabs(a.mapX - b.mapX);
-    float dy = fabs(b.mapX - b.mapY);
+    float dy = fabs(b.mapY - b.mapY);
 
     return sqrtf(dx*dx + dy*dy);
 }
@@ -369,18 +369,17 @@ void Path::RetracePath(PathNode startPosition, PathNode current)
         //cout << "current: "  << current.mapX << "," << current.mapY << endl;
         current = m_parent[current.mapY][current.mapX];
         //cout << "parent: " << current.mapX << "," << current.mapY << endl;
-
-        m_nodes.insert(m_nodes.begin(), current);
         if(current.mapX == -1 && current.mapY == -1) {
             break;
         }
+
+        m_nodes.insert(m_nodes.begin(), current);
+
     } while(1);
 }
 
 void Path::ExpandNode(PathNode current, PathNode endPosition)
 {
-    //cout << "current: (" << current.mapX << ", " << current.mapY << ")" << endl;
-
     vector<PathNode> neighbours;
     if(current.mapX > 0 && current.mapY > 0) neighbours.push_back(PathNode(current.mapX - 1, current.mapY - 1));
 
@@ -442,6 +441,29 @@ void Path::ExpandNode(PathNode current, PathNode endPosition)
     }
 }
 
+void Path::logState(PathNode current, PathNode startPosition, PathNode endPosition)
+{
+    cout << "-------------------------------------------------------" << endl;
+    for(unsigned int r = 0; r < m_mapY; r++) {
+        cout << endl;
+        for(unsigned int c = 0; c < m_mapX; c++) {
+            if(startPosition.mapX == c && startPosition.mapY == r) {
+                cout << "S";
+            } else if(endPosition.mapX == c && endPosition.mapY == r) {
+                cout << "E";
+            } else if(current.mapX == c && current.mapY == r) {
+                cout << "C";
+            } else if(m_closed[r][c]) {
+                cout << " ";
+            } else if(m_open[r][c]) {
+                cout << "o";
+            } else {
+                cout << "~";
+            }
+        }
+    }
+}
+
 
 void Path::FindPathAStar(PathNode startPosition, PathNode endPosition)
 {
@@ -455,7 +477,6 @@ void Path::FindPathAStar(PathNode startPosition, PathNode endPosition)
     m_open[startPosition.mapY][startPosition.mapX] = true;
 
     do {
-        //getchar();
         // get node with highest priority
         PathNode current = GetHighestPriorityOpenNode(); // -> set open to false in this position
 
@@ -468,20 +489,28 @@ void Path::FindPathAStar(PathNode startPosition, PathNode endPosition)
 
         m_open[current.mapY][current.mapX] = false;
         m_closed[current.mapY][current.mapX] = true;
+
+        logState(current, startPosition, endPosition);
+
         ExpandNode(current,endPosition);
     } while(OpenNodesExists());
 
     // no path found
     cout << "No path found." << endl;
-    RetracePath(startPosition, endPosition);
+
+    m_nodes.clear();
+    m_nodes.push_back(startPosition);
+    m_nodes.push_back(endPosition);
 }
 
 void Path::DumpPath(string file)
 {
     vec3f *color = new vec3f[m_mapX * m_mapY];
     for(int r = 0; r < m_mapY; r++) {
+        cout << endl;
         for(int c = 0; c < m_mapX; c++) {
-            color[r * m_mapX + c]= m_troup->m_gameStage->m_map[r][c] ? vec3f(1,1,1) : vec3f(0,0,0);
+            color[(m_mapY - 1 - r) * m_mapX + c]= m_troup->m_gameStage->m_map[r][c] ? vec3f(1,1,1) : vec3f(0,0,0);
+            cout << (m_troup->m_gameStage->m_map[r][c] ? "  " : ". ");
         }
     }
 
@@ -492,8 +521,13 @@ void Path::DumpPath(string file)
             cout << "Wrong node (" << x << ", " << y << ")" << endl;
             continue;
         }
-        color[y + x * m_mapX] = vec3f(1, 0, 0);
+        color[(m_mapY - 1 - y) + x * m_mapX] = vec3f(1, 0, 0);
     }
 
-    save_png3f(color, m_mapX, m_mapY, file.c_str());
+    int startX = this->m_troup->m_source->m_x;
+    int startY = this->m_troup->m_source->m_y;
+    int endX = this->m_troup->m_destination->m_x;
+    int ednY = this->m_troup->m_destination->m_y;
+
+    save_png3f(color, m_mapX, m_mapY, ("./render-data/images/" + file).c_str());
 }

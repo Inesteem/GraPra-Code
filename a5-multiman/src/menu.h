@@ -33,8 +33,7 @@ class Menu{
 	texture_ref black_screen;
 
 	matrix4x4f model;
-	//vec3f grey = vec3f(0.7,0.7,0.7);
-	vec3f grey = vec3f(1,0,0);
+	vec3f grey = vec3f(0.7,0.7,0.7);
 	vec3f white = vec3f(1.,1.,1.);
 	
 	int row = 0;
