@@ -29,7 +29,7 @@ void Menu::init(){
 	add_index_buffer_to_mesh(gamemesh, 6, idx, GL_STATIC_DRAW);
 	unbind_mesh_from_gl(gamemesh);
 
-	gameshader = find_shader("game_over");
+	menushader = find_shader("simple-menu-shader");
 	
 	game_loose = find_texture("game_loose");
 	game_won = find_texture("game_won");
@@ -47,17 +47,20 @@ void Menu::init(){
 		
 	for(int i = 0; i < max_rows; i++){
 		labels.push_back(new Label(9, 13, "text-shader"));
-		if(i!=0)
+		if(i!=0){
 			labels[i]->set_color(grey);
+			labels[i]->set_size(normal_size);	
 		
-		labels[i]->set_size(vec2f(28,5));	
+		} else
+			labels[i]->set_size(choosen_size);	
 		
 		labels[i]->set_camera(gamecam);
 		labels[i]->setup_display();
 //		labels[i]->change_mesh();
 		std::stringstream stream;
 		stream << strings[i];
-		labels[i]->update_label_pos(fovy*0.6, -1000, fovy - (fovy/(max_rows+3)*(i+1)+7));	
+	//	labels[i]->update_label_pos(fovy*0.6, -1000, fovy - (fovy/(max_rows+3)*(i+1)+7));	
+		labels[i]->update_label_pos(fovy*0.578, -1000, fovy - (fovy/(max_rows+7)*(i+1)+8));	
 		row = i;
 		update_label();
 
@@ -68,20 +71,14 @@ void Menu::init(){
 
 void Menu::draw(int state, bool blend){
 	
-//	draw_background(state, blend);
+	draw_background(state, blend);
 	draw_font();
 }
 
 void Menu::draw_font(){
 
-
-
-
-
-		// Render score header
 	for(int i = 0; i < max_rows; i++)	
 		labels[i]->render_gui_overlay();
-//		labels[0]->render_gui_overlay();
 
 }
 
@@ -90,12 +87,12 @@ void Menu::draw_background(int state, bool blend){
 	
 		camera_ref old_cam = current_camera();
 		use_camera(gamecam);
-		bind_shader(gameshader);
+		bind_shader(menushader);
 
-		int loc = glGetUniformLocation(gl_shader_object(gameshader), "proj");
+		int loc = glGetUniformLocation(gl_shader_object(menushader), "proj");
 		glUniformMatrix4fv(loc, 1, GL_FALSE, projection_matrix_of_cam(current_camera())->col_major);
 
-		loc = glGetUniformLocation(gl_shader_object(gameshader), "view");
+		loc = glGetUniformLocation(gl_shader_object(menushader), "view");
 		glUniformMatrix4fv(loc, 1, GL_FALSE, gl_view_matrix_of_cam(current_camera())->col_major);
 
 
@@ -104,7 +101,7 @@ void Menu::draw_background(int state, bool blend){
 			glBlendFunc(GL_ONE, GL_ONE);
 		}
 		
-		glDepthMask(GL_TRUE);
+		glDepthMask(GL_FALSE);
 		
 		texture_ref tex;
 		
@@ -116,10 +113,10 @@ void Menu::draw_background(int state, bool blend){
 			default : tex = black_screen; 
 		}
 
-		loc = glGetUniformLocation(gl_shader_object(gameshader), "model");
+		loc = glGetUniformLocation(gl_shader_object(menushader), "model");
 		glUniformMatrix4fv(loc, 1, GL_FALSE, model.col_major);
 
-		loc = glGetUniformLocation(gl_shader_object(gameshader), "tex");
+		loc = glGetUniformLocation(gl_shader_object(menushader), "tex");
 
 		bind_texture(tex, 0);
 
@@ -129,7 +126,8 @@ void Menu::draw_background(int state, bool blend){
 		draw_mesh(gamemesh);
 		unbind_mesh_from_gl(gamemesh);
 
-		unbind_shader(gameshader);
+		glDepthMask(GL_TRUE);
+		unbind_shader(menushader);
 		glDisable(GL_BLEND);
 		use_camera(old_cam);
 }
@@ -140,11 +138,11 @@ int Menu::get_row(){
 
 void Menu::increase_row(){
 	if(row > 0){
-//		labels[row]->set_fontSize(13);
+		labels[row]->set_size(normal_size);	
 		labels[row]->set_color(grey);
 		update_label();
 		row--;
-//		labels[row]->set_fontSize(15);
+		labels[row]->set_size(choosen_size);	
 		labels[row]->set_color(white);
 		update_label();
 	}
@@ -153,11 +151,11 @@ void Menu::increase_row(){
 void Menu::decrease_row(){
 	if(row < max_rows-1){
 			
-//		labels[row]->set_fontSize(13);
+		labels[row]->set_size(normal_size);	
 		labels[row]->set_color(grey);
 		update_label();
 		row++;
-//		labels[row]->set_fontSize(15);
+		labels[row]->set_size(choosen_size);	
 		labels[row]->set_color(white);
 		update_label();
 	}

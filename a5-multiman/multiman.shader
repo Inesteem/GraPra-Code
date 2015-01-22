@@ -754,7 +754,7 @@ uniform float down;
 #:inputs (list "in_pos" "in_tc")>
 
 
-#<make-shader "simple-text-shader"
+#<make-shader "simple-menu-shader"
 #:vertex-shader #{
 #version 150 core
 	in vec3 in_pos;
@@ -774,17 +774,12 @@ uniform float down;
 #:fragment-shader #{
 #version 150 core
 	in vec2 tc;
-	uniform vec3 color;
 	out vec4 out_col;
 	uniform sampler2D tex;
 	void main() {
-		gl_FragDepth = 0.001;
+		gl_FragDepth = 0.9;
 	
-	//	if(texture(tex, tc).r >= 0.5 || texture(tex, tc).g >= 0.5 || texture(tex, tc).b >= 0.5)
-	//		out_col = vec4(texture(tex, tc).rgb, 1.);
-			out_col = vec4(1,1,1, 1.);
-	//	else
-	//		discard;
+		out_col = vec4(texture(tex, tc).rgb, 1);
 		
 	}
 }

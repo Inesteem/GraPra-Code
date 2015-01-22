@@ -283,6 +283,8 @@ void menu_keyhandler(unsigned char key, int state){
 				   }
 				
 					break;
+		//esc	
+		case 27 : exit(0);
 				
 		default : if(eingabe == 1 && index_hostname < max_length){
 					hostname[index_hostname] = key;
@@ -345,6 +347,8 @@ void keyhandler(unsigned char key, int x, int y) {
 	else if (key == 'L') use_camera(find_camera("lightcam"));    
 	else if (key == 'u') action->upgrade_building();    
 	else if (key == 'p') game->get_planes(); 
+	else if (key == 'r' || key == 'f'){//skip zoom with keyboard//
+	} 
   
     
 	else {
@@ -518,7 +522,7 @@ void loop() {
 			action->draw();
 		} 
 		if(render_menu){
-			menu->draw(-1,false);
+			menu->draw(1,false);
 		}
 		render_timer.done_with("draw");
 

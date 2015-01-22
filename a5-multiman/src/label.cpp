@@ -203,8 +203,6 @@ void Label::update_gui_texture_int(int n){
 
 
 void Label::update_gui_texture_string(std::stringstream *stream){
-	//	std::stringstream stream;
-	//	stream << "test";
 		free(cairo_surface_data);
 		free(cairo_surface);
 		std::string sn = stream->str();

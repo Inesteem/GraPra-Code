@@ -26,7 +26,7 @@
 class Menu{
 	
 
-	shader_ref 	gameshader;
+	shader_ref 	menushader;
 	camera_ref 	gamecam;
 	mesh_ref 	gamemesh;
 	
@@ -39,6 +39,11 @@ class Menu{
 	matrix4x4f model;
 	vec3f grey = vec3f(0.7,0.7,0.7);
 	vec3f white = vec3f(1.,1.,1.);
+	
+//	vec2f choosen_size = vec2f(29,6);
+	vec2f choosen_size = vec2f(20,3);
+//	vec2f normal_size = vec2f(28,5);
+	vec2f normal_size = vec2f(19,2);
 	
 	int row = 0;
 	int max_rows = 5;
