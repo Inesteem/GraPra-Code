@@ -32,6 +32,8 @@ void GameStage::Update()
         go.winner = winner;
         broadcast(&go);
 
+        exit(0);
+
         return;
     }
 

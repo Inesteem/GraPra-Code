@@ -113,6 +113,8 @@ void Game::upgrade_building(unsigned int buildingId, unsigned int state){
 
 
 Building* Game::get_building_at(vec3f pos){
+    const float selectionRadius = 20.0;
+
     int k = 0;
     float dist = m_buildings[0].dist_to(pos);
     for(int i = 0; i < m_buildings.size(); ++i){
@@ -123,7 +125,7 @@ Building* Game::get_building_at(vec3f pos){
         }
     }
 
-    if( dist < 10.0f) {
+    if( dist < selectionRadius) {
  //       cout << "Selected building: " << m_selected->get_pos().x << "," << m_selected->get_pos().y << endl;
         return &m_buildings[k];
     }
