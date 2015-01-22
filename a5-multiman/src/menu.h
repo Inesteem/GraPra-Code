@@ -107,11 +107,27 @@ public:
 
 	void reset_menu();
 
-		
+};
+
+
+
+class IconBar{
+	
+	texture_ref texture;
+	matrix4x4f  model;
+
+	shader_ref 	shader;
+	camera_ref 	cam;
+	mesh_ref 	mesh;
+	
+	
+public: 
+
+	IconBar();
+	void draw();
 	
 	
 };
-
 
 
 #endif

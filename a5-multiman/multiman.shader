@@ -775,11 +775,22 @@ uniform float down;
 #version 150 core
 	in vec2 tc;
 	out vec4 out_col;
+	uniform vec3 color;
 	uniform sampler2D tex;
 	void main() {
-		gl_FragDepth = 0.9;
-	
-		out_col = vec4(texture(tex, tc).rgb, 1);
+		gl_FragDepth = 0.001;
+		if(color.x == -1)
+			out_col = vec4(texture(tex, tc).rgb, 1);
+		
+		else{
+           // vec4 tex_col = vec4(texture(tex,tc).x,texture(tex,tc).y,texture(tex,tc).z,1);
+			//if(	tex_col.x > color.x-0.1 && tex_col.x < color.x+0.1 &&
+			//	tex_col.y > color.y-0.1 && tex_col.y < color.y+0.1 &&
+			//	tex_col.z > color.z-0.1 && tex_col.z < color.z+0.1){
+			//		discard
+			//} else
+			//	outcol = tex_col;
+		}
 		
 	}
 }

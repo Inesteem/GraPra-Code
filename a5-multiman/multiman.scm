@@ -34,6 +34,7 @@
 (texture-from-file "game_paused" "Menu/game_paused.png" 'tex2d #t)
 (texture-from-file "game_start" "Menu/game_start.png" 'tex2d #t)
 (texture-from-file "black_screen" "Menu/black_screen.png" 'tex2d #t)
+(texture-from-file "iconbar" "Menu/bar.png" 'tex2d #t)
 
 
 (set-move-factor! 1)

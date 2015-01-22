@@ -160,8 +160,8 @@ namespace moac {
 	void Action::draw(){
 		if(prepare_attack)
 			slidebar->render_slidebar();	
-        if(render_status_bar)
-            statusbar->render_statusbar();
+  //      if(render_status_bar)
+  //          statusbar->render_statusbar();
 	}
 	
 

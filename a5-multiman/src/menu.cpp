@@ -91,6 +91,8 @@ void Menu::draw_font(){
 }
 
 
+
+
 void Menu::draw_background(bool blend){
 	
 		camera_ref old_cam = current_camera();
@@ -124,10 +126,14 @@ void Menu::draw_background(bool blend){
 		loc = glGetUniformLocation(gl_shader_object(menushader), "model");
 		glUniformMatrix4fv(loc, 1, GL_FALSE, model.col_major);
 
-		loc = glGetUniformLocation(gl_shader_object(menushader), "tex");
+
+		vec3f color = vec3f(-1,-1,-1);
+		loc = glGetUniformLocation(gl_shader_object(menushader), "color");
+		glUniform3fv(loc, 1,(float *)&color);		
+
 
 		bind_texture(tex, 0);
-
+		loc = glGetUniformLocation(gl_shader_object(menushader), "tex");
 		glUniform1i(loc, 0);
 
 		bind_mesh_to_gl(gamemesh);
@@ -257,4 +263,70 @@ void Menu::set_mode(Mode mode){
 void Menu::reset_menu(){
 	enter = false;
 	row = 0;
+}
+
+IconBar::IconBar(){
+	
+	vec3f cam_pos = {0,0,0}, cam_dir = {0,0,-1}, cam_up = {0,1,0};
+	float fovy = 50;
+	cam = make_orthographic_cam((char*)"gui cam", &cam_pos, &cam_dir, &cam_up, fovy, 0, 50, 0, 0.01, 1000);	
+	
+	texture = find_texture("iconbar");
+	
+	make_unit_matrix4x4f(&model);
+	model.row_col(0,0) = 50.f;
+	model.row_col(1,1) = 50.f;
+	model.row_col(0,3) = 0.f;
+	model.row_col(1,3) = 0.f;		
+	
+	mesh = make_mesh("quad", 2);
+	vec3f pos[4] = { {0,0,-10}, {1,0,-10}, {1,1,-10}, {0,1,-10} };
+	vec2f tc[4] = { {0,1}, {1,1}, {1,0}, {0,0} };
+	unsigned int idx[6] = { 0, 1, 2, 2, 3, 0 };
+	
+	bind_mesh_to_gl(mesh);
+	add_vertex_buffer_to_mesh(mesh, "in_pos", GL_FLOAT, 4, 3, (float *) pos, GL_STATIC_DRAW);
+	add_vertex_buffer_to_mesh(mesh, "in_tc", GL_FLOAT, 4, 2, (float *) tc, GL_STATIC_DRAW);
+	add_index_buffer_to_mesh(mesh, 6, idx, GL_STATIC_DRAW);
+	unbind_mesh_from_gl(mesh);	
+}
+
+
+void IconBar::draw(){
+		camera_ref old_cam = current_camera();
+		use_camera(cam);
+		bind_shader(shader);
+
+		int loc = glGetUniformLocation(gl_shader_object(shader), "proj");
+		glUniformMatrix4fv(loc, 1, GL_FALSE, projection_matrix_of_cam(current_camera())->col_major);
+
+		loc = glGetUniformLocation(gl_shader_object(shader), "view");
+		glUniformMatrix4fv(loc, 1, GL_FALSE, gl_view_matrix_of_cam(current_camera())->col_major);
+		
+		loc = glGetUniformLocation(gl_shader_object(shader), "model");
+		glUniformMatrix4fv(loc, 1, GL_FALSE, model.col_major);
+
+
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_ONE, GL_ONE);
+		glDepthMask(GL_TRUE);
+
+
+		vec3f color = vec3f(0.1,0.1,0.1);
+		loc = glGetUniformLocation(gl_shader_object(shader), "color");
+		glUniform3fv(loc, 1,(float *)&color);		
+
+
+		bind_texture(texture, 0);
+		loc = glGetUniformLocation(gl_shader_object(shader), "tex");
+		glUniform1i(loc, 0);
+
+		bind_mesh_to_gl(mesh);
+		draw_mesh(mesh);
+		unbind_mesh_from_gl(mesh);
+
+		unbind_shader(shader);
+		glDisable(GL_BLEND);
+		use_camera(old_cam);
+	
 }

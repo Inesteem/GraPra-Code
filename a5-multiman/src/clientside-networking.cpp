@@ -140,4 +140,5 @@ void client_message_reader::handle_message(msg::building_upgrade *m) {
 void client_message_reader::handle_message(msg::game_over *m) {
     cout << "GAME OVER, player " << (int) m->winner << " has won the game!" << endl;
     game->game_over(m->winner);
+    m_init_done = false;
 }
