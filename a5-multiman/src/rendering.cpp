@@ -25,6 +25,20 @@ vec3f get_player_color(int id){
     return vec3f(0.2,0.2,0.2);
 }
 
+
+void set_player_color(int id, vec3f color){
+	using namespace render_settings;
+	for(int i = 0; i < player_colors.size(); i++){
+		if(player_colors[i].x == color.x && player_colors[i].y == color.y && player_colors[i].z == color.z){
+			player_colors[i] = player_colors[id];
+			player_colors[id] = color;
+			break;
+		}
+	}
+	
+}
+
+
 void setup_dir_light(shader_ref shader) {
 	vec3f light_dir = { 1.f, -0.6f, -0.4f };
 	normalize_vec3f(&light_dir);

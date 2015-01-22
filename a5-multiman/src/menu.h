@@ -46,17 +46,20 @@ class Menu{
 	vec2f normal_size = vec2f(19,2);
 	
 	int row = 0;
-	int max_rows = 5;
+	int max_rows = 6;
 	
 	vector<Label *>labels;
-	vector<std::string> strings = {"Host Game", "Fraktion", "Level", "Players", "Join Game"};
+	vector<std::string> strings = {"Host Game", "Fraktion", "Level","Color", "Players", "Join Game"};
 	vector<char*> level_names = {"lvl01","lvl02"};
-	vector<int> nums = {-1,1,1,2,-1};
-	vector<int> max_nums = {-1,2,2,4,-1};
-	vector<int> min_nums = {-1,1,1,1,-1};
+	vector<char*> color_names = {"Color","Grey","Red", "Yellow", "Violet", "Cyan","Blue","Green", "Pink","LightBlue","PaleYellow"};
+    vector<vec3f> player_colors = { vec3f(1.,1.,1.),vec3f(0.7,0.7,0.7), vec3f(1,0,0),vec3f(1,1,0),vec3f(1,0,1),vec3f(0,1,1),vec3f(0,0,1),
+								vec3f(0,1,0),vec3f(1,0.5,1),vec3f(0.5,1,1),vec3f(1,1,0.5) };
+	vector<int> nums = {-1,1,1,1,2,-1};
+	vector<int> max_nums = {-1,2,2,11,4,-1};
+	vector<int> min_nums = {-1,1,1,1,1,-1};
 	
 	client_message_reader *message_reader;
-	void update_label();
+	void update_label(bool choosen);
 	
 	bool enter;
 	
@@ -77,6 +80,9 @@ public:
 	 */
 	int get_row();
 	int get_row_max(){return max_rows;}
+	
+	vec3f get_player_color();
+	
 	void increase_row();
 	void decrease_row();
 	

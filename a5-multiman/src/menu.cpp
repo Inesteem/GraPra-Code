@@ -1,7 +1,10 @@
-#define NUM_PLAYERS nums[3]
+#define NUM_PLAYERS nums[4]
+#define COLOR nums[3]
 #define LEVEL nums[2]
 #define FRAKTION nums[1]
 
+#define COLOR_ID 3
+#define FRAKTION_ID 1
 
 #include "menu.h"
 #include "mouseactions.h"
@@ -48,7 +51,6 @@ void Menu::init(){
 	for(int i = 0; i < max_rows; i++){
 		labels.push_back(new Label(9, 13, "text-shader"));
 		if(i!=0){
-			labels[i]->set_color(grey);
 			labels[i]->set_size(normal_size);	
 		
 		} else
@@ -60,10 +62,13 @@ void Menu::init(){
 		std::stringstream stream;
 		stream << strings[i];
 	//	labels[i]->update_label_pos(fovy*0.6, -1000, fovy - (fovy/(max_rows+3)*(i+1)+7));	
-		labels[i]->update_label_pos(fovy*0.578, -1000, fovy - (fovy/(max_rows+7)*(i+1)+8));	
+		labels[i]->update_label_pos(fovy*0.578, -1000, fovy - (fovy/(max_rows+8)*(i+1)+8));	
 		row = i;
-		update_label();
-
+		
+		if(i == 0)
+			update_label(true);
+		else 
+			update_label(false);
 	}
 	row = 0;
 }
@@ -138,13 +143,11 @@ int Menu::get_row(){
 
 void Menu::increase_row(){
 	if(row > 0){
-		labels[row]->set_size(normal_size);	
-		labels[row]->set_color(grey);
-		update_label();
+		labels[row]->set_size(normal_size);
+		update_label(false);
 		row--;
-		labels[row]->set_size(choosen_size);	
-		labels[row]->set_color(white);
-		update_label();
+		labels[row]->set_size(choosen_size);
+		update_label(true);
 	}
 }
 
@@ -152,12 +155,10 @@ void Menu::decrease_row(){
 	if(row < max_rows-1){
 			
 		labels[row]->set_size(normal_size);	
-		labels[row]->set_color(grey);
-		update_label();
+		update_label(false);
 		row++;
-		labels[row]->set_size(choosen_size);	
-		labels[row]->set_color(white);
-		update_label();
+		labels[row]->set_size(choosen_size);
+		update_label(true);
 	}
 }
 
@@ -166,7 +167,7 @@ void Menu::increase_mom_row(){
 		return;
 		
 	nums[row]++;
-	update_label();
+	update_label(true);
 	
 }
 
@@ -175,28 +176,41 @@ void Menu::decrease_mom_row(){
 		return;
 	
 	nums[row]--;
-	update_label();
+	update_label(true);
 	
 }
 
-void Menu::update_label(){
+void Menu::update_label(bool choosen){
 	if(!enter){
+		if(choosen && (row != COLOR_ID || nums[row] == 1))
+			labels[row]->set_color(white);
+		else if (!choosen && (row != COLOR_ID || nums[row] == 1)) 
+			labels[row]->set_color(grey);
+		
 		std::stringstream s;
 		if(nums[row] != min_nums[row] && nums[row] != -1)
 			s << "< ";
 		else
 			s << "    ";
-		if(row !=1){
-			s << strings[row];	
-			if(nums[row] != -1)
-				s << " : " << nums[row];		
-		
-		} else {
+		if(row == COLOR_ID){
+				
+ 			s << color_names[nums[row]-1];	
+			if(nums[row] != 1)
+				labels[row]->set_color(player_colors[nums[row]-1]);
+	
+		} else if(row == FRAKTION_ID) {
+			
 			if(nums[row] == 1)
 				s << "Pacman";	
 			else
 				s << "Bomberman";
-			
+		
+		} else {
+		
+			s << strings[row];	
+			if(nums[row] != -1)
+				s << " : " << nums[row];
+				
 		}
 		
 		if(nums[row] != max_nums[row] && nums[row] != -1)	
@@ -218,4 +232,12 @@ int Menu::get_num_players(){
 }
 char *Menu::get_level(){
 	return level_names[LEVEL-1];
+}
+
+
+vec3f Menu::get_player_color(){
+	if(COLOR == 1)
+		return vec3f(-1,-1,-1);
+		
+	return player_colors[COLOR-1];
 }
