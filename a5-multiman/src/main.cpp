@@ -351,8 +351,8 @@ void keyhandler(unsigned char key, int x, int y) {
     else if (key == 'M') standard_mouse = !standard_mouse;
     else if (key == 'S') reload_pending = true;
     else if (key == 'T') screenshot = true;
-	else if (key == 'P') use_camera(find_camera("playercam"));
-	else if (key == 'L') use_camera(find_camera("lightcam"));    
+    else if (key == 'P') ;//use_camera(find_camera("playercam"));
+    else if (key == 'L') ;//use_camera(find_camera("lightcam"));
 	else if (key == 'u') action->upgrade_building();    
 	else if (key == 'p') game->get_planes(); 
 	else if (key == 'r' || key == 'f'){//skip zoom with keyboard//
@@ -411,6 +411,7 @@ struct render_time_table {
 
 void loop() {
 	
+
 		// 
 		// administrative
 		//
@@ -457,13 +458,13 @@ void loop() {
 		//
 			
 		//shadowmapping
-		
+        /*
 		//glViewport(0,0,2048,2048);	
 		//glColorMask(0,0,0,0);
 		
 		//Cam_Setup
 		camera_ref actual_cam = current_camera();
-		use_camera(find_camera("lightcam"));
+        //use_camera(find_camera("lightcam"));
 
 		static int i = 1;
 
@@ -496,7 +497,7 @@ void loop() {
 		init_matrices();	
 				
 		//shadowmapping end
-		
+        */
 		render_timer.done_with("pre-pass");
 
 		//
@@ -512,6 +513,7 @@ void loop() {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 
+        /*
 		//shadowmapping
 		shader_ref shader = find_shader("terrain");
 		bind_shader(shader);
@@ -519,11 +521,16 @@ void loop() {
 		bind_texture(shadowmap, 4);	
 		int loc = glGetUniformLocation(gl_shader_object(shader), "shadowmap");
 		glUniform1i(loc, 4);			
-		
+
+
 		glColorMask(1,1,1,1);
-		use_camera(actual_cam);
+        //use_camera(actual_cam);
 		glViewport(0,0,1024,1024);	
 		//shadowmapping end	
+*/
+
+        use_camera(find_camera("playercam"));
+
 
 		if(messageReader->m_init_done) {
 			game->draw();
@@ -588,7 +595,7 @@ void actual_main() {
     register_mouse_motion_function(mouse_move);
 	glutIgnoreKeyRepeat(1);
 
-	use_camera(find_camera("playercam"));
+    //use_camera(find_camera("playercam"));
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
