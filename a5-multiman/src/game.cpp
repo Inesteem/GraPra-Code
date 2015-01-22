@@ -23,7 +23,11 @@ void Game::add_building(string name, int size, int x, int y, unsigned int id){
 void Game::change_building_owner(int building_id, int new_owner){
     for(int i = 0; i < m_buildings.size(); i++){
         if(m_buildings[i].get_id() == building_id){
+            if(m_buildings[i].get_owner_id() == -1 && new_owner != -1) {
+                this->upgrade_building(i, 1);
+            }
             m_buildings[i].change_owner(new_owner);
+
             return;
         }
     }
