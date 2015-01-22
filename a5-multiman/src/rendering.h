@@ -19,6 +19,7 @@ namespace render_settings {
 };
 
 vec3f get_player_color(int id);
+void set_player_color(int id, vec3f color);
 
 void setup_dir_light(shader_ref shader);
 

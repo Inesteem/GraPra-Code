@@ -194,20 +194,31 @@ void Label::make_gui_texture() {
 
 
 void Label::update_gui_texture_int(int n){
+	
+	free(cairo_surface_data);
+	free(cairo_surface);
+	free(cairo);
+//	free(data);
+		
 	std::stringstream stream;
 	stream << n;
 	std::string sn = stream.str();
-	do_update_cairo_stuff(texture, sn, texture_color, texture_name);
+//	do_update_cairo_stuff(texture, sn, texture_color, texture_name);
+	
+	do_cairo_stuff(sn, texture_color, texture_name);	
 
 }
 
 
 void Label::update_gui_texture_string(std::stringstream *stream){
-		free(cairo_surface_data);
-		free(cairo_surface);
-		std::string sn = stream->str();
-	//	do_update_cairo_stuff(texture, sn, texture_color, texture_name);
-		do_cairo_stuff(sn, texture_color, texture_name);
+	free(cairo_surface_data);
+	free(cairo_surface);
+	free(cairo);
+//	free(data);
+	
+	std::string sn = stream->str();
+//	do_update_cairo_stuff(texture, sn, texture_color, texture_name);
+	do_cairo_stuff(sn, texture_color, texture_name);
 }
 
 

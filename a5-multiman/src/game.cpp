@@ -1,10 +1,12 @@
+
 #include "game.h"
 #include "messages.h"
 #include "clientside-networking.h"
+#include "rendering.h"
 
 int PLAYER_ID;
 
-Game::Game(ObjHandler *objhandler, simple_heightmap *sh, client_message_reader *message_reader): m_objhandler(objhandler), m_sh(sh), m_messageReader(message_reader)
+Game::Game(ObjHandler *objhandler, simple_heightmap *sh, client_message_reader *message_reader, Menu *menu): m_objhandler(objhandler), m_sh(sh), m_messageReader(message_reader),menu(menu)
 {
 	player_color = vec3f(0,0,1);
 }
@@ -71,6 +73,11 @@ vector<vec3f> *Game::get_planes(){
 void Game::init(string filename, int widht, int height, int id){
     m_player_id = id;
     PLAYER_ID = id;
+    vec3f color = menu->get_player_color();
+    if(color.x != -1){
+		set_player_color(id,color);
+	}
+    
     m_sh->init(filename, widht, height);
 }
 
@@ -182,3 +189,16 @@ Building* Game::getBuilding(unsigned int id)
 	
 	return nullptr;
 }
+
+
+
+void Game::game_over(int winner_id){
+	
+	if(winner_id == PLAYER_ID)
+		menu->set_mode(menu->GAMEWON);
+	else
+		menu->set_mode(menu->GAMELOOSE);
+	menu->set_render_menu(true);
+	
+}
+

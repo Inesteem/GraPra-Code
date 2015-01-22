@@ -4,6 +4,7 @@
 #include "simple_heightmap.h"
 #include "gameobject.h"
 #include "wall-timer.h"
+#include "menu.h"
 
 
 
@@ -12,7 +13,7 @@ class client_message_reader;
 class Game
 {
 public:
-    Game(ObjHandler *objhandler, simple_heightmap *sh, client_message_reader *messageReader);
+    Game(ObjHandler *objhandler, simple_heightmap *sh, client_message_reader *messageReader, Menu *menu);
     void add_tree(int x, int y, int type);
     void add_building(string name, int size, int x, int y, unsigned int id);
     void add_unit_group(unsigned int sourceId, unsigned int destinationId, unsigned int count, unsigned int troupId);
@@ -29,6 +30,9 @@ public:
     void draw();
     void update();
 
+	void game_over(int winner_id);
+
+
     vector<vec3f> *get_planes();
 
     Building* get_last_selected_building();
@@ -42,6 +46,8 @@ public:
     int m_player_id;
     vec3f player_color;
     vector<vec3f> planes;
+    Menu *menu;                      
+                                    
 private:
 
    ObjHandler *m_objhandler;

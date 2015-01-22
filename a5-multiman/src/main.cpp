@@ -1,3 +1,4 @@
+
 #include <iostream>
 #include <iomanip>
 #include <cstdlib>
@@ -232,7 +233,7 @@ void menu_keyhandler(unsigned char key, int state){
 					   int numplayers = menu->get_num_players();
 					   std::string s = std::to_string(numplayers);
 					 
-					   char *level = menu->get_level();
+					   const char *level = menu->get_level();
 					
 					    if (pID == 0) {// child
 					    
@@ -259,7 +260,9 @@ void menu_keyhandler(unsigned char key, int state){
 						    gethostname(hostname, 1023);
 						    cout << ">" << hostname << "<" << endl;
 						    messageReader->networking_prologue(hostname);
-						    render_menu = false;		 
+						    reset_hostname();
+						    render_menu = false;			  
+						    menu->reset_menu();	 
 						}
 
 				   }
@@ -271,15 +274,20 @@ void menu_keyhandler(unsigned char key, int state){
 						   menu->set_enter(true);
 						   menu->set_hostname(hostname);
 					  } else {
-						  hostname[index_hostname] = '\0';		
+						   hostname[index_hostname] = '\0';		
 						   cout << ">" << hostname << "<" << endl;
 						   //todo: fehlerbehandlung
 						   messageReader->networking_prologue(hostname);
 						   render_menu = false;		  
-						  
+						   menu->reset_menu();
+						   reset_hostname();
 						 }
 						
 					  
+				   }
+				   
+				   if(menu->get_row() == -1){
+					   menu->set_mode(menu->GAMESTART);
 				   }
 				
 					break;
@@ -522,7 +530,7 @@ void loop() {
 			action->draw();
 		} 
 		if(render_menu){
-			menu->draw(1,false);
+			menu->draw(false);
 		}
 		render_timer.done_with("draw");
 
@@ -622,7 +630,11 @@ void actual_main() {
 
     sh = new simple_heightmap();
 
-    game = new Game(objhandler,sh, messageReader);
+	menu   = new Menu();
+	menu->init(&render_menu);
+	menu->set_mode(menu->GAMESTART); 
+
+    game = new Game(objhandler,sh, messageReader, menu);
 
     messageReader = new client_message_reader(game);
 
@@ -635,8 +647,7 @@ void actual_main() {
 	glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
 
 	action = new Action(game, objhandler);
-	menu   = new Menu();
-	menu->init();
+
 	init_framebuffer();
 
 	// 

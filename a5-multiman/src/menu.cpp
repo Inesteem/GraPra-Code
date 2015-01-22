@@ -13,7 +13,8 @@
 #include <GL/freeglut.h>
 
 
-void Menu::init(){
+void Menu::init(bool *render_menu){
+	this->render_menu = render_menu;
 	enter = false;
 
 	vec3f cam_pos = {0,0,0}, cam_dir = {0,0,-1}, cam_up = {0,1,0};
@@ -74,21 +75,23 @@ void Menu::init(){
 }
 
 
-void Menu::draw(int state, bool blend){
+void Menu::draw(bool blend){
 	
-	draw_background(state, blend);
+	draw_background(blend);
 	draw_font();
 }
 
 void Menu::draw_font(){
 
-	for(int i = 0; i < max_rows; i++)	
-		labels[i]->render_gui_overlay();
-
+	if(mode == 0){
+		for(int i = 0; i < max_rows; i++)	
+			labels[i]->render_gui_overlay();
+	}
+	
 }
 
 
-void Menu::draw_background(int state, bool blend){
+void Menu::draw_background(bool blend){
 	
 		camera_ref old_cam = current_camera();
 		use_camera(gamecam);
@@ -110,11 +113,11 @@ void Menu::draw_background(int state, bool blend){
 		
 		texture_ref tex;
 		
-		switch (state){
-			case 0 : tex = game_paused; break;
-			case 1 : tex = game_start; break;
-			case 2 : tex = game_loose; break;
-			case 3 : tex = game_won; break;
+		switch (mode){
+			case GAMESTART : tex = game_start; break;
+			case GAMEPAUSED : tex = game_paused; break;
+			case GAMELOOSE : tex = game_loose; break;
+			case GAMEWON 	: tex = game_won; break;
 			default : tex = black_screen; 
 		}
 
@@ -230,14 +233,28 @@ void Menu::set_hostname(char * hostName){
 int Menu::get_num_players(){
 	return NUM_PLAYERS;
 }
-char *Menu::get_level(){
-	return level_names[LEVEL-1];
+const char *Menu::get_level(){
+	return level_names[(int)LEVEL-1];
 }
 
 
 vec3f Menu::get_player_color(){
+
 	if(COLOR == 1)
 		return vec3f(-1,-1,-1);
 		
 	return player_colors[COLOR-1];
+}
+
+void Menu::set_mode(Mode mode){ 
+	this->mode = mode;
+	if(mode == GAMESTART)
+		row = 0;
+	else 
+		row = -1;
+}
+
+void Menu::reset_menu(){
+	enter = false;
+	row = 0;
 }

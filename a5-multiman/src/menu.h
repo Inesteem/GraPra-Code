@@ -25,6 +25,13 @@
 
 class Menu{
 	
+public:
+	enum Mode { GAMESTART, GAMEPAUSED, GAMELOOSE, GAMEWON };
+	
+	
+protected:
+
+	Mode mode = GAMESTART;
 
 	shader_ref 	menushader;
 	camera_ref 	gamecam;
@@ -50,11 +57,11 @@ class Menu{
 	
 	vector<Label *>labels;
 	vector<std::string> strings = {"Host Game", "Fraktion", "Level","Color", "Players", "Join Game"};
-	vector<char*> level_names = {"lvl01","lvl02"};
-	vector<char*> color_names = {"Color","Grey","Red", "Yellow", "Violet", "Cyan","Blue","Green", "Pink","LightBlue","PaleYellow"};
+	vector<const char*> level_names = {"lvl01","lvl02"};
+	vector<const char*> color_names = {"Color","Grey","Red", "Yellow", "Violet", "Cyan","Blue","Green", "Pink","LightBlue","PaleYellow"};
     vector<vec3f> player_colors = { vec3f(1.,1.,1.),vec3f(0.7,0.7,0.7), vec3f(1,0,0),vec3f(1,1,0),vec3f(1,0,1),vec3f(0,1,1),vec3f(0,0,1),
 								vec3f(0,1,0),vec3f(1,0.5,1),vec3f(0.5,1,1),vec3f(1,1,0.5) };
-	vector<int> nums = {-1,1,1,1,2,-1};
+	vector<int> nums = {-1,1,1,1,1,-1};
 	vector<int> max_nums = {-1,2,2,11,4,-1};
 	vector<int> min_nums = {-1,1,1,1,1,-1};
 	
@@ -62,14 +69,17 @@ class Menu{
 	void update_label(bool choosen);
 	
 	bool enter;
+	bool *render_menu;
 	
 public:
 
-	void init();
+
+
+	void init(bool *render_menu);
 	//0 = paused_game, 1 = start_game, 2 = game_loose, 3 = game_won
-	void draw_background(int state, bool blend);
+	void draw_background(bool blend);
 	void draw_font();
-	void draw(int state, bool blend);
+	void draw(bool blend);
 	
 	/* Host Game
 	 * Fraktion
@@ -80,8 +90,9 @@ public:
 	 */
 	int get_row();
 	int get_row_max(){return max_rows;}
-	
 	vec3f get_player_color();
+	int get_num_players();
+	const char *get_level();
 	
 	void increase_row();
 	void decrease_row();
@@ -91,10 +102,10 @@ public:
 	
 	void set_hostname(char *hostname);
 	void set_enter(bool enter){this->enter = enter;}
-	
+	void set_mode(Mode mode);
+	void set_render_menu(bool rm){*render_menu = rm;}
 
-	int get_num_players();
-	char *get_level();
+	void reset_menu();
 
 		
 	
