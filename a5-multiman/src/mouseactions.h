@@ -19,8 +19,6 @@
 #include <cairo/cairo.h>
 
 #include "rendering.h"
-//#include "label.h"
-//#include "gameobject.h"
 
 #include <vector>
 #include <math.h>
@@ -35,9 +33,9 @@ class Building;
 class ObjHandler;
 class SlideBar;
 class StatusBar;
+class IconBar;
 class Game;
 class client_message_reader;
-class IconBar;
 
 namespace moac {
 

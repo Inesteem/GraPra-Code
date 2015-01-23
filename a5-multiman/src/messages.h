@@ -5,7 +5,6 @@
 
 #include <stdint.h>
 #include <boost/asio.hpp>
-#include "menu.h"
 
 /* how to add a message:
  * - specify a message code

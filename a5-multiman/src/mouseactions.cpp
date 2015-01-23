@@ -3,7 +3,7 @@
 #include "label.h"
 #include "gameobject.h"
 #include "game.h"
-
+#include "menu.h"
 
 namespace moac {
 	
@@ -65,11 +65,11 @@ namespace moac {
 		ob_set = false;
 		prepare_attack = false;
 		render_status_bar = true;
-
-		slidebar = new SlideBar();			
+		slidebar = new SlideBar();	
 		slidebar->initialize_slidebar();
-		statusbar = new StatusBar("status_bar", objhandler);			
-		iconbar = new IconBar();
+		statusbar = new StatusBar("status_bar", objhandler);		
+		iconbar = new IconBar();	
+		
 	}
 
 	void Action::upgrade_settlement(){
@@ -178,9 +178,11 @@ namespace moac {
 	void Action::draw(){
 		if(prepare_attack)
 			slidebar->render_slidebar();	
-		if(render_status_bar)
-  //          statusbar->render_statusbar();
+        if(render_status_bar)
 			iconbar->draw();
+  
+  //      if(render_status_bar)
+  //          statusbar->render_statusbar();
 	}
 	
 

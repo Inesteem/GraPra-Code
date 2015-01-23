@@ -39,8 +39,8 @@ void initGame(string &levelName) {
 
     for (unsigned int i = 0; i < client_connections::sockets; ++i) {
         msg::init_game ig = make_message<msg::init_game>();
-        ig.mapX = x;
-        ig.mapY = y;
+        ig.mapX = x+1;
+        ig.mapY = y+1;
         ig.id = i;
         strcpy(ig.levelName, levelName.c_str());
         send_message(i, &ig);

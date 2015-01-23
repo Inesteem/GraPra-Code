@@ -642,6 +642,7 @@ void actual_main() {
 	menu->init(&render_menu);
 	menu->set_mode(menu->GAMESTART); 
 
+
     game = new Game(objhandler,sh, messageReader, menu);
 
     messageReader = new client_message_reader(game);
