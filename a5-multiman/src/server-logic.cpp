@@ -1,5 +1,5 @@
 #define update_1 10
-#define update_2 100
+#define update_2 20
 
 
 #include "server-logic.h"

@@ -114,6 +114,7 @@ void Game::upgrade_building(unsigned int buildingId, unsigned int state){
 			//TODO: const names
 			switch(state){
                 case msg::building_state::house_lvl1 : m_buildings[i].upgrade(m_objhandler->getObjByName("house_pacman"),state); break;
+                case msg::building_state::turret_lvl1 : m_buildings[i].upgrade(m_objhandler->getObjByName("turret_pacman"),state); break;
 				default : m_buildings[i].upgrade(m_objhandler->getObjByName("building_lot"), state);
 			}
 			return;
