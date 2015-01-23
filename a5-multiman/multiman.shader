@@ -197,7 +197,7 @@
 #version 400 core
 
 
-        layout(vertices = 3) out;
+        layout(vertices = 4) out;
         in vec3 out_pos[];
         out vec3 tcPosition[];
         uniform vec3 CamPos;
@@ -236,7 +236,7 @@
             float d0 = length(view*model*vec4(tcPosition[0],1));
             float d1 = length(view*model*vec4(tcPosition[1],1));
             float d2 = length(view*model*vec4(tcPosition[2],1));
-
+            float d3 = length(view*model*vec4(tcPosition[3],1));
             if(offScreen(tcPosition[ID])){
                 gl_TessLevelInner[0] = 0;
                 gl_TessLevelOuter[0] = 0;
@@ -245,11 +245,13 @@
             }
 
 
-                gl_TessLevelOuter[0] = level(mix(d2,d0,.5));
+                gl_TessLevelOuter[0] = level(mix(d3,d0,.5));
                 gl_TessLevelOuter[1] = level(mix(d0,d1,.5));
                 gl_TessLevelOuter[2] = level(mix(d1,d2,.5));
-                float l = max(max(gl_TessLevelOuter[0],gl_TessLevelOuter[1]),gl_TessLevelOuter[2]);
+                gl_TessLevelOuter[3] = level(mix(d2,d3,.5));
+                float l = max(max(gl_TessLevelOuter[0],gl_TessLevelOuter[1]),max(gl_TessLevelOuter[2],gl_TessLevelOuter[3]));
                  gl_TessLevelInner[0] = l;
+                 gl_TessLevelInner[1] = l;
 
         }
         }
@@ -258,7 +260,7 @@
 #version 400 core
 
 
-        layout(triangles, equal_spacing, ccw) in;
+        layout(quads, equal_spacing, ccw) in;
         in vec3 tcPosition[];
         out vec3 out_pos;
         out vec3 tePatchDistance;
@@ -268,15 +270,22 @@
         uniform mat4 model;
         uniform mat4 view;
         uniform sampler2D height_map;
+        vec3 interpolate(vec3 bl, vec3 br, vec3 tr, vec3 tl){
+                float u = gl_TessCoord.x;
+                float v = gl_TessCoord.y;
 
+                vec3 b = mix(bl,br,u);
+                vec3 t = mix(tl,tr,u);
+                return mix(b,t,v);
+        }
         void main()
         {
-            vec3 p0 = gl_TessCoord.x * tcPosition[0];
-            vec3 p1 = gl_TessCoord.y * tcPosition[1];
-            vec3 p2 = gl_TessCoord.z * tcPosition[2];
+//            vec3 p0 = gl_TessCoord.x * tcPosition[0];
+//            vec3 p1 = gl_TessCoord.y * tcPosition[1];
+//            vec3 p2 = gl_TessCoord.z * tcPosition[2];
             tePatchDistance = gl_TessCoord;
 
-            out_pos = p0 + p1 + p2;
+            out_pos = interpolate(tcPosition[0],tcPosition[1],tcPosition[2],tcPosition[3]);
             out_pos.y = texture(height_map,vec2(out_pos.z, out_pos.x));
             out_pos = (model*vec4(out_pos, 1)).xyz;
             gl_Position = proj * view * vec4(out_pos, 1);

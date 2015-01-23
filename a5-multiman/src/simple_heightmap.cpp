@@ -90,9 +90,9 @@ void simple_heightmap::init( const std::string filename, int width, int height){
             index.push_back((i+1)  + j*m_g_height);
             index.push_back(i+1 + (j+1)*m_g_height);
 
-            index.push_back(i+1 + (j+1)*m_g_height);
+//            index.push_back(i+1 + (j+1)*m_g_height);
             index.push_back(i + (j+1)*m_g_height);
-            index.push_back(i + (j)*m_g_height);
+//            index.push_back(i + (j)*m_g_height);
 
         }
     }
@@ -206,7 +206,7 @@ void simple_heightmap::draw(){
 		unbind_mesh_from_gl(m_mesh_2);
 	} else {
 		bind_mesh_to_gl(m_mesh);
-		glPatchParameteri(GL_PATCH_VERTICES, 3);
+        glPatchParameteri(GL_PATCH_VERTICES, 4);
 		draw_mesh_as(m_mesh,GL_PATCHES);
 		unbind_mesh_from_gl(m_mesh);
 	}
