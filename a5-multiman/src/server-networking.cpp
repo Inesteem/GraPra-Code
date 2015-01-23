@@ -39,7 +39,12 @@ void server_message_reader::handle_message(msg::spawn_troup_client *m) {
     m_gameStage->spawnTroup(m->sourceId, m->destinationId, m->unitCount);
 }
 
-void server_message_reader::handle_message(msg::building_upgrade_client *m) {
-    cout << "Upgrading Building " << m->buildingId << endl;
-    m_gameStage->upgrade_building(m->buildingId, m->state);
+void server_message_reader::handle_message(msg::building_upgrade_house *m) {
+    cout << "Upgrading building house " << m->buildingId << endl;
+    m_gameStage->upgrade_building_house(m->buildingId);
+}
+
+void server_message_reader::handle_message(msg::building_upgrade_turret *m) {
+    cout << "Upgrading building turret " << m->buildingId << endl;
+    m_gameStage->upgrade_building_turret(m->buildingId);
 }

@@ -105,15 +105,15 @@ void Game::add_unit_group(unsigned int sourceId, unsigned int destinationId, uns
     vec2f end = destination->get_pos();
 
     cout << "spawning enemies at: " << start.x << "," << start.y << " count: " << count << endl;
-    m_unitgroups.push_back(UnitGroup(m_objhandler->getObjByName("tree"),m_sh,"bomb",start,end,0,count, 10000, m_sh->get_height(start.x, start.y), troupId));
+    m_unitgroups.push_back(UnitGroup(m_objhandler->getObjByName("pacman"),m_sh,"bomb",start,end,0,count, 10000, m_sh->get_height(start.x, start.y), troupId));
 }
 
-void Game::upgrade_building(unsigned int buildingId, unsigned int state){
+void Game::upgrade_settlement(unsigned int buildingId){
     for(int i = 0; i < m_buildings.size(); i++){
 		if(m_buildings[i].get_id() == buildingId){
 			//TODO: const names
 			switch(state){
-				case 1 : m_buildings[i].upgrade(m_objhandler->getObjByName("house_pacman"),state); break;
+                case msg::building_state::house_lvl1 : m_buildings[i].upgrade(m_objhandler->getObjByName("house_pacman"),state); break;
 				default : m_buildings[i].upgrade(m_objhandler->getObjByName("building_lot"), state);
 			}
 			return;

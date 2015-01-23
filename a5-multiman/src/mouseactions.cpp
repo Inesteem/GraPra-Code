@@ -70,17 +70,39 @@ namespace moac {
 		
 	}
 
-	void Action::upgrade_building(){
-        
+	void Action::upgrade_settlement(){
+		
+         if(own_building->get_state() == msg::building_state::turret_lvl1 || own_building->get_state() == msg::building_state::turret_lvl2){
+			//todo: error message
+			return;
+		}       
+		
         if(ob_set && game->m_player_id == own_building->get_owner_id() && own_building->check_for_upgrade(true)){
 				
-			msg::building_upgrade_client buc = make_message<msg::building_upgrade_client>();
+            msg::building_upgrade_house buc = make_message<msg::building_upgrade_house>();
 			// TODO use own player id
 			buc.buildingId = own_building->get_id();
-			buc.state = own_building->get_state()+1;
 			game->m_messageReader->send_message(buc);
 				
 	      
+		}
+		
+	}
+	
+	void Action::upgrade_tower(){
+        
+        if(own_building->get_state() == msg::building_state::house_lvl1 || own_building->get_state() == msg::building_state::house_lvl2){
+			//todo: error message
+			return;
+		}
+        
+        if(ob_set && game->m_player_id == own_building->get_owner_id() && own_building->check_for_upgrade(true)){
+				
+            msg::building_upgrade_house buc = make_message<msg::building_upgrade_turret>();
+			// TODO use own player id
+			buc.buildingId = own_building->get_id();
+			game->m_messageReader->send_message(buc);
+				 
 		}
 		
 	}
