@@ -74,10 +74,9 @@ namespace moac {
         
         if(ob_set && game->m_player_id == own_building->get_owner_id() && own_building->check_for_upgrade(true)){
 				
-			msg::building_upgrade_client buc = make_message<msg::building_upgrade_client>();
+            msg::building_upgrade_house buc = make_message<msg::building_upgrade_house>();
 			// TODO use own player id
 			buc.buildingId = own_building->get_id();
-			buc.state = own_building->get_state()+1;
 			game->m_messageReader->send_message(buc);
 				
 	      

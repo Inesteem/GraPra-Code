@@ -15,7 +15,18 @@
  * the sizeof won't get in there by itself :)
  */
 
+
 namespace msg {
+    namespace building_state {
+        enum {
+            construction_site = 1,
+            house_lvl1,
+            house_lvl2,
+            turret_lvl1,
+            turret_lvl2
+        };
+    }
+
 	namespace code {
 		enum {
 			init_game = 1,
@@ -29,7 +40,8 @@ namespace msg {
             building_owner_changed,
             building_unit_generated,
             building_upgrade,
-            building_upgrade_client,
+            building_upgrade_house,
+            building_upgrade_turret,
             game_over
 		};
 	}
@@ -126,10 +138,14 @@ namespace msg {
         uint16_t unitCount;
     } __attribute__((aligned(8)));
     
-    struct building_upgrade_client : public message {
-        building_upgrade_client() : message(code::building_upgrade_client) {}
+    struct building_upgrade_house : public message {
+        building_upgrade_house() : message(code::building_upgrade_house) {}
         uint8_t buildingId;
-        uint8_t state;
+    } __attribute__((aligned(8)));
+
+    struct building_upgrade_turret : public message {
+        building_upgrade_turret() : message(code::building_upgrade_turret) {}
+        uint8_t buildingId;
     } __attribute__((aligned(8)));
 }
 
@@ -173,7 +189,8 @@ protected:
     virtual void handle_message(msg::building_owner_changed *m) { warn(m); }
     virtual void handle_message(msg::building_unit_generated *m) { warn(m); }
     virtual void handle_message(msg::building_upgrade *m) { warn(m); }
-    virtual void handle_message(msg::building_upgrade_client *m) { warn(m); }
+    virtual void handle_message(msg::building_upgrade_house *m) { warn(m); }
+    virtual void handle_message(msg::building_upgrade_turret *m) { warn(m); }
     virtual void handle_message(msg::game_over *m) { warn(m); }
 };
 

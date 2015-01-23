@@ -289,7 +289,7 @@ Building::Building(Obj *obj,Obj *selection_circle,Obj *upgrade_arrow, string nam
     vec3f color = get_player_color(m_owner);
     label->set_color(color);
     
-    state = 0;
+    state = msg::building_state::construction_site;
 
 }
 
@@ -320,7 +320,7 @@ void Building::draw(){
 		rotation = 0;
 
 //    if(m_owner == -1){
-		if(state <=0){
+        if(state <= msg::building_state::construction_site){
 		matrix4x4f shovel_model;
 		
 		vec3f rot_vec = vec3f(0,1,0);
@@ -342,7 +342,7 @@ void Building::draw(){
 			i++;
 		}
 		
-	} else if (state == 1) {
+    } else if (state == msg::building_state::house_lvl1) {
 		draw_state_1();
 		
 	} else {
@@ -443,7 +443,7 @@ bool Building::check_for_upgrade(bool up){
 	if(!up)
 		return true;
 	
-	if(state == 0 && unit_count >= update_1)
+    if(state == msg::building_state::construction_site && unit_count >= update_1)
 		return true;
 	
 //	else if(state == 1 && unit_count >= update_2)

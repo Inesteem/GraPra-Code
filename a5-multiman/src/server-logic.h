@@ -7,6 +7,7 @@
 
 #include "wall-timer.h"
 #include "server-networking.h"
+#include "messages.h"
 
 using namespace std;
 
@@ -71,6 +72,7 @@ class Building : public GameObject
 public:
     unsigned int m_unitCount;
     int m_player;
+    int m_state; // enum msg::building_state
 
     Building(GameStage *gameStage, unsigned int x, unsigned int y, unsigned int id);
 
@@ -108,13 +110,19 @@ public:
     int m_mapX, m_mapY;
     bool **m_map;
 
+    const unsigned int c_costUpgradeToHouseLvl1 = 10;
+    const unsigned int c_costUpgradeToHouseLvl2 = 30;
+    const unsigned int c_costUpgradeToTurretLvl1 = 20;
+    const unsigned int c_costUpgradeToTurretLvl2 = 50;
+
     GameStage() : m_gameOver(false) {}
 
     void init(unsigned int x, unsigned int y);
     void Update();
     Building* spawnHouse(unsigned int x, unsigned int y);
     Troup* spawnTroup(unsigned int sourceBuildingID, unsigned int destinationBuildingID, unsigned int unitCount);
-    void upgrade_building(unsigned int buildingId, unsigned int state);
+    void upgrade_building_house(unsigned int buildingId);
+    void upgrade_building_turret(unsigned int buildingId);
     int checkGameOver();
 
     unordered_map<unsigned int, Building*> m_buildings;

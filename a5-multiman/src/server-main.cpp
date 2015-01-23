@@ -81,11 +81,15 @@ void initGame(string &levelName) {
                 buildingPlayerIndex++;
                 broadcast(&nho);
 
-                b->m_unitCount = b->m_player == -1 ? 10 : 20;
+                b->m_unitCount = b->m_player == -1 ? 10 : 30;
                 msg::building_unit_generated bug = make_message<msg::building_unit_generated>();
                 bug.buildingId = b->m_id;
                 bug.newUnitCount = b->m_unitCount;
                 broadcast(&bug);
+
+                if(b->m_state > -1) {
+                    gameStage->upgrade_building_house(b->m_id);
+                }
 							
 			} else if(color.y > 0.4f) {
                 blockMap(r,c-1, x, y);

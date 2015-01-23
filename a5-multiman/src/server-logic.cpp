@@ -124,22 +124,56 @@ Troup* GameStage::spawnTroup(unsigned int sourceBuildingID, unsigned int destina
 
     return t;
 }
-void GameStage::upgrade_building(unsigned int buildingId, unsigned int state){
+void GameStage::upgrade_building_house(unsigned int buildingId){
+    Building *building = m_buildings[buildingId];
 
-	
-	msg::building_upgrade bu = make_message<msg::building_upgrade>();
-	bu.buildingId = buildingId;
-	bu.state = state;
-	broadcast(&bu);		
-	
-	int units = 0;
-	
-	if(state == 1)
-		units = update_1;
-	else if(state == 2)
-		units = update_2;
-	
+    if(building->m_state == msg::building_state::house_lvl2) return; // already highest level
+
+    msg::building_upgrade bu = make_message<msg::building_upgrade>();
+    bu.buildingId = buildingId;
+
+    int units = 0;
+
+    if(building->m_state == msg::building_state::construction_site || building->m_state == msg::building_state::turret_lvl1 || building->m_state == msg::building_state::turret_lvl2) {
+        units = c_costUpgradeToHouseLvl1;
+        if(units > building->m_unitCount) return; // not enough units
+        building->m_state = msg::building_state::house_lvl1;
+    } else if(building->m_state == msg::building_state::house_lvl1) {
+        units = c_costUpgradeToHouseLvl2;
+        if(units > building->m_unitCount) return; // not enough units
+        building->m_state = msg::building_state::house_lvl2;
+    } else return;
+
+    bu.state = building->m_state;
+    broadcast(&bu);
+		
 	m_buildings[buildingId]->KillUnits(units);
+}
+
+void GameStage::upgrade_building_turret(unsigned int buildingId){
+    Building *building = m_buildings[buildingId];
+
+    if(building->m_state == msg::building_state::turret_lvl2) return; // already highest level
+
+    msg::building_upgrade bu = make_message<msg::building_upgrade>();
+    bu.buildingId = buildingId;
+
+    int units = 0;
+
+    if(building->m_state == msg::building_state::construction_site || building->m_state == msg::building_state::house_lvl1 || building->m_state == msg::building_state::house_lvl2) {
+        units = c_costUpgradeToHouseLvl1;
+        if(units > building->m_unitCount) return; // not enough units
+        building->m_state = msg::building_state::turret_lvl1;
+    } else if(building->m_state == msg::building_state::turret_lvl1) {
+        units = c_costUpgradeToHouseLvl2;
+        if(units > building->m_unitCount) return; // not enough units
+        building->m_state = msg::building_state::turret_lvl2;
+    } else return;
+
+    bu.state = building->m_state;
+    broadcast(&bu);
+
+    m_buildings[buildingId]->KillUnits(units);
 }
 
 Troup::Troup(GameStage *gameStage, Building *sourceBuilding, Building *destinationBuilding, unsigned int unitCount, unsigned int id)
@@ -210,7 +244,7 @@ bool Troup::Update()
 }
 
 Building::Building(GameStage *gameStage, unsigned int x, unsigned int y, unsigned int id)
-    : GameObject(gameStage, x, y, id), m_player(-1)
+    : GameObject(gameStage, x, y, id), m_player(-1), m_state(msg::building_state::construction_site)
 {
     m_unitCount = 0;
     m_generateUnitsTimer.start();
