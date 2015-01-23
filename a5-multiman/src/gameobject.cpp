@@ -443,10 +443,10 @@ bool Building::check_for_upgrade(bool up){
 	if(!up)
 		return true;
 	
-    if(state == msg::building_state::construction_site && unit_count >= update_1 )
+    if(state == msg::building_state::construction_site && unit_count >= msg::upgrade_cost::UpgradeToHouseLvl1 )
 		return true;
 
-    if(state == msg::building_state::house_lvl1 && unit_count >= update_2)
+    if(state == msg::building_state::house_lvl1 && unit_count >= msg::upgrade_cost::UpgradeToHouseLvl2)
 		return true;
 
 	return false;

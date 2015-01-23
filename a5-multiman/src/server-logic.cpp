@@ -1,7 +1,3 @@
-#define update_1 10
-#define update_2 20
-
-
 #include "server-logic.h"
 #include "messages.h"
 
@@ -136,11 +132,11 @@ void GameStage::upgrade_building_house(unsigned int buildingId){
     int units = 0;
 
     if(building->m_state == msg::building_state::construction_site || building->m_state == msg::building_state::turret_lvl1 || building->m_state == msg::building_state::turret_lvl2) {
-        units = c_costUpgradeToHouseLvl1;
+        units = msg::upgrade_cost::UpgradeToHouseLvl1;
         if(units > building->m_unitCount) return; // not enough units
         building->m_state = msg::building_state::house_lvl1;
     } else if(building->m_state == msg::building_state::house_lvl1) {
-        units = c_costUpgradeToHouseLvl2;
+        units = msg::upgrade_cost::UpgradeToHouseLvl2;
         if(units > building->m_unitCount) return; // not enough units
         building->m_state = msg::building_state::house_lvl2;
     } else return;
@@ -162,11 +158,11 @@ void GameStage::upgrade_building_turret(unsigned int buildingId){
     int units = 0;
 
     if(building->m_state == msg::building_state::construction_site || building->m_state == msg::building_state::house_lvl1 || building->m_state == msg::building_state::house_lvl2) {
-        units = c_costUpgradeToHouseLvl1;
+        units = msg::upgrade_cost::UpgradeToHouseLvl1;
         if(units > building->m_unitCount) return; // not enough units
         building->m_state = msg::building_state::turret_lvl1;
     } else if(building->m_state == msg::building_state::turret_lvl1) {
-        units = c_costUpgradeToHouseLvl2;
+        units = msg::upgrade_cost::UpgradeToHouseLvl2;
         if(units > building->m_unitCount) return; // not enough units
         building->m_state = msg::building_state::turret_lvl2;
     } else return;
