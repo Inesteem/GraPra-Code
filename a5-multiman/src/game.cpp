@@ -108,12 +108,13 @@ void Game::add_unit_group(unsigned int sourceId, unsigned int destinationId, uns
     m_unitgroups.push_back(UnitGroup(m_objhandler->getObjByName("pacman"),m_sh,"bomb",start,end,0,count, 10000, m_sh->get_height(start.x, start.y), troupId));
 }
 
-void Game::upgrade_settlement(unsigned int buildingId){
+void Game::upgrade_building(unsigned int buildingId, unsigned int state){
     for(int i = 0; i < m_buildings.size(); i++){
 		if(m_buildings[i].get_id() == buildingId){
 			//TODO: const names
 			switch(state){
                 case msg::building_state::house_lvl1 : m_buildings[i].upgrade(m_objhandler->getObjByName("house_pacman"),state); break;
+                case msg::building_state::turret_lvl1 : m_buildings[i].upgrade(m_objhandler->getObjByName("turret_pacman"),state); break;
 				default : m_buildings[i].upgrade(m_objhandler->getObjByName("building_lot"), state);
 			}
 			return;

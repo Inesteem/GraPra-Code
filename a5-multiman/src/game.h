@@ -20,8 +20,7 @@ public:
 
     void change_building_owner(int building_id, int new_owner);
     void update_unit_group(unsigned int x, unsigned int y, unsigned int troupId, unsigned int time);
-    void upgrade_settlement(unsigned int buildingId, unsigned int state);
-    void upgrade_tower(unsigned int buildingId, unsigned int state);
+    void upgrade_building(unsigned int buildingId, unsigned int state);
     
     void set_selected(Building *building);
 

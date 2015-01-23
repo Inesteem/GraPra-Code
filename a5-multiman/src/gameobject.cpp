@@ -1,5 +1,5 @@
 #define update_1 10
-#define update_2 100
+#define update_2 20
 
 #include "game.h"
 #include "gameobject.h"
@@ -443,14 +443,15 @@ bool Building::check_for_upgrade(bool up){
 	if(!up)
 		return true;
 	
-    if(state == msg::building_state::construction_site && unit_count >= update_1)
+    if(state == msg::building_state::construction_site && unit_count >= update_1 )
+		return true;
+
+    if(state == msg::building_state::house_lvl1 && unit_count >= update_2)
 		return true;
 
 	return false;
 		
 }
-
-bool Building
 
 
 unsigned int Building::get_owner_id(){

@@ -355,7 +355,7 @@ void keyhandler(unsigned char key, int x, int y) {
     else if (key == 'P') ;//use_camera(find_camera("playercam"));
     else if (key == 'L') ;//use_camera(find_camera("lightcam"));
 	else if (key == 'u') action->upgrade_settlement();    
-	else if (key == 't') action->upgrade_tower();    
+	else if (key == 't') action->upgrade_turret();    
 	else if (key == 'p') game->get_planes(); 
 	else if (key == 'r' || key == 'f'){//skip zoom with keyboard//
 	} 
@@ -615,12 +615,8 @@ void actual_main() {
   //      objhandler->addObj_withScale("upgrade_arrow", "./render-data/models/cube.obj", find_shader("pos+norm+tc"), vec3f(0.99,0.99,0.99));
         objhandler->addObj("upgrade_arrow", "./render-data/models/cube.obj", find_shader("pos+norm+tc"));
         objhandler->addObj("house_pacman", "./render-data/models/siedlung.obj", find_shader("alpha-color-shader"));
-<<<<<<< HEAD
-        objhandler->addObj("tower_pacman", "./render-data/models/simple_tower_pacman.obj", find_shader("alpha-color-shader"));
-  //      objhandler->addObj("pacman", "./render-data/models/pacman.obj", find_shader("pos+norm+tc"), 2);
-=======
+        objhandler->addObj("turret_pacman", "./render-data/models/simple_tower_pacman.obj", find_shader("alpha-color-shader"));
         objhandler->addObj("pacman", "./render-data/models/pacman.obj", find_shader("pos+norm+tc"));
->>>>>>> b4b5d515bfc0c44b6fa59bf66dfeb6a791494af5
  //      objhandler->addObj("house_pacman", "./render-data/models/house_pacman.obj", find_shader("pos+norm+tc"));
 
 
