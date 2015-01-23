@@ -299,6 +299,8 @@ IconBar::IconBar(){
 
 
 void IconBar::draw(){
+	
+	return;
 
 	camera_ref old_cam = current_camera();
 	use_camera(cam);
