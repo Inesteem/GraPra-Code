@@ -299,7 +299,9 @@ IconBar::IconBar(){
 
 
 void IconBar::draw(){
+	
 	return;
+
 	camera_ref old_cam = current_camera();
 	use_camera(cam);
 	bind_shader(shader);
@@ -316,7 +318,7 @@ void IconBar::draw(){
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_ONE, GL_ONE);
-	glDepthMask(GL_TRUE);
+	glDepthMask(GL_FALSE);
 
 
 	vec3f color = vec3f(0.1,0.1,0.1);
@@ -330,13 +332,15 @@ void IconBar::draw(){
 
 	bind_mesh_to_gl(mesh);
 	draw_mesh(mesh);
+	
 	unbind_texture(background);
 	glDisable(GL_BLEND);
 	
-//	draw_fraction();
-	
+	draw_fraction();
+
 
 	unbind_mesh_from_gl(mesh);
+	
 	unbind_shader(shader);
 	use_camera(old_cam);
 }
@@ -349,6 +353,12 @@ void IconBar::draw_fraction(){
 	bind_texture(fraction[frac], 0);
 	loc = glGetUniformLocation(gl_shader_object(shader), "tex");
 	glUniform1i(loc, 0);
+
+	vec3f color = vec3f(-1,-1,-1);
+	loc = glGetUniformLocation(gl_shader_object(shader), "color");
+	glUniform3fv(loc, 1,(float *)&color);	
+	
+	draw_mesh(mesh);	
 	
 	unbind_texture(fraction[frac]);
 
@@ -371,8 +381,8 @@ void IconBar::init_modelmatrices(){
 	model_background.row_col(1,3) = 0.f;
 	
 	make_unit_matrix4x4f(&model_fraction);
-	model_fraction.row_col(0,0) = fovy;
-	model_fraction.row_col(1,1) = fovy;
+	model_fraction.row_col(0,0) = 0.2 * fovy;
+	model_fraction.row_col(1,1) = 0.2 * fovy;
 	model_fraction.row_col(0,3) = 0.f;
 	model_fraction.row_col(1,3) = 0.f;
 	
