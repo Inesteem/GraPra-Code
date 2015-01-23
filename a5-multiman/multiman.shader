@@ -783,13 +783,13 @@ uniform float down;
 			out_col = vec4(texture(tex, tc).rgb, 1);
 		
 		else{
-           // vec4 tex_col = vec4(texture(tex,tc).x,texture(tex,tc).y,texture(tex,tc).z,1);
-			//if(	tex_col.x > color.x-0.1 && tex_col.x < color.x+0.1 &&
-			//	tex_col.y > color.y-0.1 && tex_col.y < color.y+0.1 &&
-			//	tex_col.z > color.z-0.1 && tex_col.z < color.z+0.1){
-			//		discard
-			//} else
-			//	outcol = tex_col;
+            vec4 tex_col = vec4(texture(tex,tc).x,texture(tex,tc).y,texture(tex,tc).z,1);
+			if(	tex_col.x > color.x-0.1 && tex_col.x < color.x+0.1 &&
+				tex_col.y > color.y-0.1 && tex_col.y < color.y+0.1 &&
+				tex_col.z > color.z-0.1 && tex_col.z < color.z+0.1){
+					discard;
+			} else
+				out_col = tex_col;
 		}
 		
 	}
