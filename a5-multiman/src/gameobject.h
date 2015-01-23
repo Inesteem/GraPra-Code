@@ -97,6 +97,7 @@ public:
     void draw_selection_circle();
     void draw_state_1();
     void draw_selection_circle(int size);
+    void change_size(int size);
 	unsigned int get_owner_id();
 	unsigned int get_id();
 	void update_unit_count(int count);
@@ -156,7 +157,8 @@ public:
 
     UnitGroup(Obj *obj,simple_heightmap *sh, string name, vec2f start, vec2f end, unsigned int owner, unsigned int unit_count, float time_to_rech_end, float height, unsigned m_id);
     void update();
-    void draw();
+    void draw_drawelement();
+    void draw_mesh();
     void move_to(vec2f pos, float time_to_reach);
     void force_position(vec2f pos);
     float get_height(float x, float y){
@@ -184,6 +186,7 @@ private:
     bool move = false;
     simple_heightmap *m_sh;
     wall_time_timer m_timer;
+    wall_time_timer m_another_timer;
     wall_time_timer m_spawn_timer;
     vec2f m_start,m_end;
     vec2f m_view_dir;

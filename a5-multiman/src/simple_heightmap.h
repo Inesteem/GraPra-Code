@@ -25,7 +25,7 @@ public:
     vec3f sample_normal(int x, int y);
     float get_height(float x, float y);
     void init(const std::string filename, int width, int height);
-    void re_init( vector<vec3f> *planes);
+//    void re_init( vector<vec3f> *planes);
     void update();
     void draw();
 
@@ -38,7 +38,7 @@ private:
 
     unsigned int m_width, m_height;
     unsigned int m_g_width, m_g_height;
-    vector<float> m_heights;
+    vector<vec3f> m_heights;
     
 
     matrix4x4f m_model;

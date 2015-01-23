@@ -136,9 +136,9 @@
 
 		float n_dot_l = max(0, dot(norm_wc, -light_dir));
 		out_col += vec4(color * light_col * n_dot_l, 0.);
-		out_col = vec4(color.r,color.g,color.b,1);
-		if(out_col.x <= 0.2 && out_col.y <= 0.2 &&out_col.z <= 0.2)
-			discard;
+//		out_col = vec4(color.r,color.g,color.b,1);
+//		if(out_col.x <= 0.2 && out_col.y <= 0.2 &&out_col.z <= 0.2)
+//			discard;
 	}
 }
 #:inputs (list "in_pos" "in_norm" "in_tc")>
@@ -201,28 +201,14 @@
         layout(vertices = 4) out;
         in vec3 out_pos[];
         out vec3 tcPosition[];
-        uniform vec3 CamPos;
+
         uniform mat4 view;
         uniform mat4 model;
         uniform float lod = 0.1;
         #define ID gl_InvocationID
-        vec3 ndc(vec3 world){
-                vec4 v =  view * model * vec4(world,1);
-                v /= v.w;
-                return v.xyz;
-        }
 
-        //determine if is vertex is on the screen.  This is used to do culling.  My assumption is that if all vertices are off the screen then the patch should be discarded.
-        //Unfortunately this isn't true if you stand close to a patch and look at its center.  The extra stuff you see is an attempt to prevent culling of a patch if it is close to the eye.
-        bool offScreen(vec3 vertex){//vertex should be ndc
-                vertex = ndc(vertex);
-                float z = vertex.z * .5 + .5;
-
-                float w = 1 + (1-z) * 100;
-                return vertex.z < -1 || vertex.z > 1 || any(lessThan(vertex.xy, vec2(-w)) || greaterThan(vertex.xy, vec2(w)));
-        }
         float level(float d){
-                return clamp(lod * 2000/d, 1, 64);
+                return clamp(lod * 5000/d, 1, 64);
         }
         void main()
         {
@@ -238,12 +224,7 @@
             float d1 = length(view*model*vec4(tcPosition[1],1));
             float d2 = length(view*model*vec4(tcPosition[2],1));
             float d3 = length(view*model*vec4(tcPosition[3],1));
-            if(offScreen(tcPosition[ID])){
-                gl_TessLevelInner[0] = 0;
-                gl_TessLevelOuter[0] = 0;
-                gl_TessLevelOuter[1] = 0;
-                gl_TessLevelOuter[2] = 0;
-            }
+
 
 
                 gl_TessLevelOuter[0] = level(mix(d3,d0,.5));
@@ -253,6 +234,7 @@
                 float l = max(max(gl_TessLevelOuter[0],gl_TessLevelOuter[1]),max(gl_TessLevelOuter[2],gl_TessLevelOuter[3]));
                  gl_TessLevelInner[0] = l;
                  gl_TessLevelInner[1] = l;
+
 
         }
         }
@@ -362,6 +344,13 @@
         uniform vec3 light_col;
         out vec4 out_col;
 
+        float amplify(float d, float scale, float offset){
+            d = scale*d + offset;
+            d = clamp(d,0,1);
+            d = 1-exp2(-2*d*d);
+            return d;
+        }
+
         void main() {
             float border_water = 0.0 * height_factor;
                      float border_water_grass = 0.01 * height_factor;
@@ -395,9 +384,14 @@
                      vec3 N = normalize(gFacetNormal);
                      vec3 L = light_dir;
                      float df = abs(dot(N, L));
+                     float d1 = min(min(gTriDistance.x, gTriDistance.y), gTriDistance.z);
+                     float d2 = min(min(gPatchDistance.x, gPatchDistance.y), gPatchDistance.z);
+                     vec3 color = df*light_col;
 
 
-                     out_col *= (df)*vec4(light_col,1);
+
+
+                     out_col *= (df)*vec4(color,1);
 
 
 
@@ -574,11 +568,11 @@
 #:vertex-shader #{
 #version 150 core
 
+        in vec3 in_pos_0;
         in vec3 in_pos_1;
-        in vec3 in_pos_2;
         in vec2 in_tc;
+        in vec3 in_norm_0;
         in vec3 in_norm_1;
-        in vec3 in_norm_2;
         uniform mat4 proj;
         uniform mat4 view;
         uniform mat4 model;
@@ -587,9 +581,11 @@
         out vec3 norm_wc;
         out vec4 pos_wc;
         void main() {
-            float t = (sin(time)+1)/2.0;
-            norm_wc = mix(in_norm_1,in_norm_2,t);
-                    pos_wc = model * vec4(mix(in_pos_1,in_pos_2, t), 1.0);
+            float t = (sin(time/1000)+1)/2.0;
+            norm_wc = mix(in_norm_0,in_norm_1,t);
+//            vec3 pos = mix(in_pos_0,in_pos_1,t);
+//                    pos_wc = model * vec4(pos, 1.0);
+            pos_wc = model * vec4(in_pos_0, 1.0);
                 norm_wc = transpose(inverse(mat3x3(model))) * norm_wc;
 //                    norm_wc = (model_normal * vec4(in_norm,0)).xyz;
                     tc = in_tc;
@@ -614,9 +610,7 @@
 
                 float n_dot_l = max(0, dot(norm_wc, -light_dir));
                 out_col += vec4(color * light_col * n_dot_l, 0.);
-                out_col = vec4(color.r,color.g,color.b,1);
-                if(out_col.x <= 0.2 && out_col.y <= 0.2 &&out_col.z <= 0.2)
-                        discard;
+//                out_col = vec4(1,1,1,1);
         }
 }
 
