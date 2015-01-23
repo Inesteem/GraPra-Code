@@ -87,7 +87,7 @@ void initGame(string &levelName) {
                 bug.newUnitCount = b->m_unitCount;
                 broadcast(&bug);
 
-                if(b->m_state > -1) {
+                if(b->m_player != -1) {
                     gameStage->upgrade_building_house(b->m_id);
                 }
 							

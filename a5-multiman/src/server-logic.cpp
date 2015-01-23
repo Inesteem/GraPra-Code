@@ -286,6 +286,12 @@ void Building::IncomingTroup(Troup *troup)
             bug.buildingId = m_id;
             broadcast(&bug);
         } else {
+            dest->m_state = msg::building_state::house_lvl1;
+            //msg::building_upgrade bu = make_message<msg::building_upgrade>();
+            //bu.buildingId = dest->m_id;
+            //bu.state = dest->m_state;
+            //broadcast(&bu);
+
             msg::building_owner_changed boc = make_message<msg::building_owner_changed>();
             boc.buildingId = dest->m_id;
             boc.oldOwner = dest->m_player;
