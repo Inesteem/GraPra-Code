@@ -299,6 +299,7 @@ IconBar::IconBar(){
 
 
 void IconBar::draw(){
+	return;
 	camera_ref old_cam = current_camera();
 	use_camera(cam);
 	bind_shader(shader);
@@ -332,7 +333,7 @@ void IconBar::draw(){
 	unbind_texture(background);
 	glDisable(GL_BLEND);
 	
-	draw_fraction();
+//	draw_fraction();
 	
 
 	unbind_mesh_from_gl(mesh);
