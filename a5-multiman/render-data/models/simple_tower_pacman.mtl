@@ -1,5 +1,5 @@
-# Blender MTL File: 'simple_tower_pacman.blend'
-# Material Count: 2
+# Blender MTL File: 'simple_tower_pacman_modifier.blend'
+# Material Count: 7
 
 newmtl Material
 Ns 96.078431
@@ -9,9 +9,9 @@ Ks 0.500000 0.500000 0.500000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd ./render-data/models/blends/textures/flames.png
+map_Kd blends/textures/pacman_turret/MarbleNoisy0023_S.png
 
-newmtl Material_NONE
+newmtl Material_BrickOldRounded0236_7_L.png
 Ns 96.078431
 Ka 0.000000 0.000000 0.000000
 Kd 0.640000 0.640000 0.640000
@@ -19,3 +19,54 @@ Ks 0.500000 0.500000 0.500000
 Ni 1.000000
 d 1.000000
 illum 2
+map_Kd ./render-data/models/blends/textures/pacman_turret/BrickOldRounded0236_7_L.png
+
+newmtl Material_BrickRound0047_12_S.png
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd ./render-data/models/blends/textures/pacman_turret/BrickRound0047_12_S.png
+
+newmtl Material_DoorsOrnate0256_S.png
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd ./render-data/models/blends/textures/pacman_turret/DoorsOrnate0256_S.png
+
+newmtl Material_pacman.png
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd ./render-data/models/blends/textures/pacman.png
+
+newmtl tower_middle
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd ./render-data/models/blends/textures/pacman_turret/BrickOldRounded0236_7_L.png
+
+newmtl upper
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd ./render-data/models/blends/textures/pacman_turret/MarbleNoisy0023_S.png

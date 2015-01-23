@@ -59,7 +59,6 @@ char hostname[1024];
 
 Action *action;
 Menu *menu;
-IconBar *iconbar;
 
 #define doc(X)
 
@@ -546,7 +545,6 @@ void loop() {
 		// 
 		// finishing up
 		//
-	//	iconbar->draw();
 		check_for_gl_errors("display");
 		swap_buffers();
 		unbind_texture(shadowmap);
@@ -644,7 +642,6 @@ void actual_main() {
 	menu->init(&render_menu);
 	menu->set_mode(menu->GAMESTART); 
 
-	iconbar = new IconBar();
 
     game = new Game(objhandler,sh, messageReader, menu);
 

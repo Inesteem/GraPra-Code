@@ -271,18 +271,24 @@ IconBar::IconBar(){
 	float fovy = 50;
 	cam = make_orthographic_cam((char*)"gui cam", &cam_pos, &cam_dir, &cam_up, fovy, 0, 50, 0, 0.01, 1000);	
 	
-	texture = find_texture("iconbar");
+	background = 					find_texture("iconbar");
+	fraction[0] = 					find_texture("terrain_hm");
+	fraction[1] = 					find_texture("terrain_hm");
+	upgrade_button_tower_1 = 		find_texture("terrain_hm");
+	upgrade_button_tower_2 = 		find_texture("terrain_hm");
+	upgrade_button_settlement_1 = 	find_texture("terrain_hm");
+	upgrade_button_settlement_2 = 	find_texture("terrain_hm");
+	picture = 						find_texture("terrain_hm");
 	
-	make_unit_matrix4x4f(&model);
-	model.row_col(0,0) = 50.f;
-	model.row_col(1,1) = 50.f;
-	model.row_col(0,3) = 0.f;
-	model.row_col(1,3) = 0.f;		
+	shader = find_shader("simple-menu-shader");
 	
+	init_modelmatrices();
+
 	mesh = make_mesh("quad", 2);
-	vec3f pos[4] = { {0,0,-10}, {1,0,-10}, {1,1,-10}, {0,1,-10} };
+	vec3f pos[4] = { {0,0,-10}, {1,0,-10}, {1,1,-10}, {0,1,-10} };	
 	vec2f tc[4] = { {0,1}, {1,1}, {1,0}, {0,0} };
-	unsigned int idx[6] = { 0, 1, 2, 2, 3, 0 };
+	unsigned int idx[6] = { 0, 1, 2, 2, 3, 0 };	
+	
 	
 	bind_mesh_to_gl(mesh);
 	add_vertex_buffer_to_mesh(mesh, "in_pos", GL_FLOAT, 4, 3, (float *) pos, GL_STATIC_DRAW);
@@ -293,40 +299,83 @@ IconBar::IconBar(){
 
 
 void IconBar::draw(){
-		camera_ref old_cam = current_camera();
-		use_camera(cam);
-		bind_shader(shader);
+	camera_ref old_cam = current_camera();
+	use_camera(cam);
+	bind_shader(shader);
 
-		int loc = glGetUniformLocation(gl_shader_object(shader), "proj");
-		glUniformMatrix4fv(loc, 1, GL_FALSE, projection_matrix_of_cam(current_camera())->col_major);
+	int loc = glGetUniformLocation(gl_shader_object(shader), "proj");
+	glUniformMatrix4fv(loc, 1, GL_FALSE, projection_matrix_of_cam(current_camera())->col_major);
 
-		loc = glGetUniformLocation(gl_shader_object(shader), "view");
-		glUniformMatrix4fv(loc, 1, GL_FALSE, gl_view_matrix_of_cam(current_camera())->col_major);
-		
-		loc = glGetUniformLocation(gl_shader_object(shader), "model");
-		glUniformMatrix4fv(loc, 1, GL_FALSE, model.col_major);
-
-
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_ONE, GL_ONE);
-		glDepthMask(GL_TRUE);
-
-
-		vec3f color = vec3f(0.1,0.1,0.1);
-		loc = glGetUniformLocation(gl_shader_object(shader), "color");
-		glUniform3fv(loc, 1,(float *)&color);		
-
-
-		bind_texture(texture, 0);
-		loc = glGetUniformLocation(gl_shader_object(shader), "tex");
-		glUniform1i(loc, 0);
-
-		bind_mesh_to_gl(mesh);
-		draw_mesh(mesh);
-		unbind_mesh_from_gl(mesh);
-
-		unbind_shader(shader);
-		glDisable(GL_BLEND);
-		use_camera(old_cam);
+	loc = glGetUniformLocation(gl_shader_object(shader), "view");
+	glUniformMatrix4fv(loc, 1, GL_FALSE, gl_view_matrix_of_cam(current_camera())->col_major);
 	
+	loc = glGetUniformLocation(gl_shader_object(shader), "model");
+	glUniformMatrix4fv(loc, 1, GL_FALSE, model_background.col_major);
+
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_ONE, GL_ONE);
+	glDepthMask(GL_TRUE);
+
+
+	vec3f color = vec3f(0.1,0.1,0.1);
+	loc = glGetUniformLocation(gl_shader_object(shader), "color");
+	glUniform3fv(loc, 1,(float *)&color);		
+
+
+	bind_texture(background, 0);
+	loc = glGetUniformLocation(gl_shader_object(shader), "tex");
+	glUniform1i(loc, 0);
+
+	bind_mesh_to_gl(mesh);
+	draw_mesh(mesh);
+	unbind_texture(background);
+	glDisable(GL_BLEND);
+	
+	draw_fraction();
+	
+
+	unbind_mesh_from_gl(mesh);
+	unbind_shader(shader);
+	use_camera(old_cam);
 }
+
+void IconBar::draw_fraction(){
+	
+	int loc = glGetUniformLocation(gl_shader_object(shader), "model");
+	glUniformMatrix4fv(loc, 1, GL_FALSE, model_fraction.col_major);	
+	
+	bind_texture(fraction[frac], 0);
+	loc = glGetUniformLocation(gl_shader_object(shader), "tex");
+	glUniform1i(loc, 0);
+	
+	unbind_texture(fraction[frac]);
+
+}
+
+void IconBar::init_modelmatrices(){
+	
+	float fovy = 50;
+	
+	models[0] = &model_background;
+	models[1] = &model_button_t;
+	models[2] = &model_button_s;
+	models[3] = &model_picture;
+	models[4] = &model_fraction;
+	
+	make_unit_matrix4x4f(&model_background);
+	model_background.row_col(0,0) = fovy;
+	model_background.row_col(1,1) = fovy;
+	model_background.row_col(0,3) = 0.f;
+	model_background.row_col(1,3) = 0.f;
+	
+	make_unit_matrix4x4f(&model_fraction);
+	model_fraction.row_col(0,0) = fovy;
+	model_fraction.row_col(1,1) = fovy;
+	model_fraction.row_col(0,3) = 0.f;
+	model_fraction.row_col(1,3) = 0.f;
+	
+	
+		
+}
+

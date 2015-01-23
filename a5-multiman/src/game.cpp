@@ -3,6 +3,7 @@
 #include "messages.h"
 #include "clientside-networking.h"
 #include "rendering.h"
+#include "menu.h"
 
 int PLAYER_ID;
 

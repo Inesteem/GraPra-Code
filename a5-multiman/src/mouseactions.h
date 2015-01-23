@@ -19,8 +19,6 @@
 #include <cairo/cairo.h>
 
 #include "rendering.h"
-//#include "label.h"
-//#include "gameobject.h"
 
 #include <vector>
 #include <math.h>
@@ -35,6 +33,7 @@ class Building;
 class ObjHandler;
 class SlideBar;
 class StatusBar;
+class IconBar;
 class Game;
 class client_message_reader;
 
@@ -50,6 +49,7 @@ namespace moac {
 		bool ob_set, eb_set, prepare_attack, render_status_bar;
 		SlideBar *slidebar;
 		StatusBar *statusbar;
+		IconBar *iconbar;
 		Game *game;
 		
 		Action(Game *game, ObjHandler *objhandler);
