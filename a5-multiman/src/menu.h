@@ -1,11 +1,10 @@
-#include <shader.h>
-#include <camera.h>
-#include <mesh.h>
-#include <texture.h>
+#include <libcgl/shader.h>
+#include <libcgl/camera.h>
+#include <libcgl/mesh.h>
+#include <libcgl/texture.h>
 #include <libmcm/vectors.h>
 #include <libmcm/matrix.h>
 #include <libcgl/impex.h>
-#include <impex.h>
 
 #include <string>
 #include <sstream>
@@ -113,13 +112,25 @@ public:
 
 class IconBar{
 	
-	texture_ref texture;
-	matrix4x4f  model;
+	texture_ref background;
+	texture_ref upgrade_button_tower_1;
+	texture_ref upgrade_button_tower_2;
+	texture_ref upgrade_button_settlement_1;
+	texture_ref upgrade_button_settlement_2;
+	texture_ref picture;
+	
+	matrix4x4f *models[4];
+	
+	matrix4x4f  model_background;
+	matrix4x4f  model_button_t;
+	matrix4x4f  model_button_s;
+	matrix4x4f  model_picture;
 
 	shader_ref 	shader;
 	camera_ref 	cam;
 	mesh_ref 	mesh;
 	
+	void init_modelmatrices();
 	
 public: 
 

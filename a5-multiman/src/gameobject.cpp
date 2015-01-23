@@ -331,7 +331,6 @@ void Building::draw(){
 	if(rotation == std::numeric_limits<float>::max()-2)
 		rotation = 0;
 
-//    if(m_owner == -1){
         if(state <= msg::building_state::construction_site){
 		matrix4x4f shovel_model;
 		
@@ -471,10 +470,6 @@ bool Building::check_for_upgrade(bool next, int state){
 	return true;
 		
 }
-
-
-
-
 
 unsigned int Building::get_owner_id(){
 	return m_owner;
@@ -623,7 +618,6 @@ void UnitGroup::update_model_matrices(){
 
 void UnitGroup::move_to(vec2f pos, float time_to_reach){
   //  force_position(m_end);
-   // force_position(m_end);
 //	vec2f pos_1 = vec2f(m_model.col_major[3 * 4 + 0], m_model.col_major[3 * 4 + 2]);
     cout <<"start: "<< m_start.x << ","<< m_start.y << endl;
     cout <<"end: " <<m_end.x << ","<< m_end.y << endl;

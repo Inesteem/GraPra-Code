@@ -37,6 +37,7 @@ class SlideBar;
 class StatusBar;
 class Game;
 class client_message_reader;
+class IconBar;
 
 namespace moac {
 
@@ -50,6 +51,7 @@ namespace moac {
 		bool ob_set, eb_set, prepare_attack, render_status_bar;
 		SlideBar *slidebar;
 		StatusBar *statusbar;
+		IconBar *iconbar;
 		Game *game;
 		
 		Action(Game *game, ObjHandler *objhandler);

@@ -8,6 +8,9 @@
 
 #include "menu.h"
 #include "mouseactions.h"
+#include "messages.h"
+#include "game.h"
+#include "label.h"
 
 #include <GL/glew.h>
 #include <GL/freeglut.h>
@@ -271,13 +274,10 @@ IconBar::IconBar(){
 	float fovy = 50;
 	cam = make_orthographic_cam((char*)"gui cam", &cam_pos, &cam_dir, &cam_up, fovy, 0, 50, 0, 0.01, 1000);	
 	
-	texture = find_texture("iconbar");
+	background = find_texture("iconbar");
+	shader = find_shader("simple-menu-shader");
 	
-	make_unit_matrix4x4f(&model);
-	model.row_col(0,0) = 50.f;
-	model.row_col(1,1) = 50.f;
-	model.row_col(0,3) = 0.f;
-	model.row_col(1,3) = 0.f;		
+	init_modelmatrices();
 	
 	mesh = make_mesh("quad", 2);
 	vec3f pos[4] = { {0,0,-10}, {1,0,-10}, {1,1,-10}, {0,1,-10} };
@@ -304,7 +304,7 @@ void IconBar::draw(){
 		glUniformMatrix4fv(loc, 1, GL_FALSE, gl_view_matrix_of_cam(current_camera())->col_major);
 		
 		loc = glGetUniformLocation(gl_shader_object(shader), "model");
-		glUniformMatrix4fv(loc, 1, GL_FALSE, model.col_major);
+		glUniformMatrix4fv(loc, 1, GL_FALSE, model_picture.col_major);
 
 
 		glEnable(GL_BLEND);
@@ -317,7 +317,7 @@ void IconBar::draw(){
 		glUniform3fv(loc, 1,(float *)&color);		
 
 
-		bind_texture(texture, 0);
+		bind_texture(background, 0);
 		loc = glGetUniformLocation(gl_shader_object(shader), "tex");
 		glUniform1i(loc, 0);
 
@@ -326,7 +326,22 @@ void IconBar::draw(){
 		unbind_mesh_from_gl(mesh);
 
 		unbind_shader(shader);
+		unbind_texture(background);
 		glDisable(GL_BLEND);
 		use_camera(old_cam);
 	
+}
+
+void IconBar::init_modelmatrices(){
+	
+	models[0] = &model_background;
+	models[1] = &model_button_t;
+	models[2] = &model_button_s;
+	models[3] = &model_picture;
+	
+	make_unit_matrix4x4f(&model_background);
+	model_background.row_col(0,0) = 50.f;
+	model_background.row_col(1,1) = 50.f;
+	model_background.row_col(0,3) = 0.f;
+	model_background.row_col(1,3) = 0.f;	
 }
