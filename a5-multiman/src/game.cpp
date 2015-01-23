@@ -1,9 +1,9 @@
 
 #include "game.h"
 #include "messages.h"
+#include "mouseactions.h"
 #include "clientside-networking.h"
 #include "rendering.h"
-#include "menu.h"
 
 int PLAYER_ID;
 

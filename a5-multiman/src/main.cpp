@@ -108,8 +108,15 @@ void mouse_move(int x, int y) {
 
 void mouse(int button, int state, int x, int y) {
 	
-	if(render_menu)
+	if(render_menu){
+		//todo : simple return
+        if(state == GLUT_DOWN)
+			action->check_button_clicked(x,y, 0);
+		else
+			action->check_button_clicked(x,y, 1);
+			
 		return;
+	}
 	
     if(standard_mouse){
          standard_mouse_func(button, state, x, y);
@@ -538,7 +545,8 @@ void loop() {
 			action->draw();
 		} 
 		if(render_menu){
-			menu->draw(false);
+		//	menu->draw(false);
+			action->draw();
 		}
 		render_timer.done_with("draw");
 

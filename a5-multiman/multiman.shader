@@ -777,8 +777,9 @@ uniform float down;
 	out vec4 out_col;
 	uniform vec3 color;
 	uniform sampler2D tex;
+	uniform float depth;
 	void main() {
-		gl_FragDepth = 0.001;
+		gl_FragDepth = depth;
 		if(color.x == -1)
 			out_col = vec4(texture(tex, tc).rgb, 1);
 		

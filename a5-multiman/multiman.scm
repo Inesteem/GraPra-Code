@@ -25,7 +25,7 @@
 (texture-from-file "terrain_3" "terrain_3.png" 'tex2d #t)
 (texture-from-file "selection_circle" "selection_circle.png" 'tex2d #t)
 (texture-from-file "slidebar2" "slidebar_2.png" 'tex2d #t)
-(texture-from-file "dorf" "exchange_2.png" 'tex2d #t)
+(texture-from-file "dorf" "Menu/dorf.png" 'tex2d #t)
 (texture-from-file "none" "exchange_1.png" 'tex2d #t)
 (texture-from-file "alpha_mask_1" "alpha_mask_2.png" 'tex2d #t)
 
@@ -34,7 +34,17 @@
 (texture-from-file "game_paused" "Menu/game_paused.png" 'tex2d #t)
 (texture-from-file "game_start" "Menu/game_start.png" 'tex2d #t)
 (texture-from-file "black_screen" "Menu/black_screen.png" 'tex2d #t)
+
+(texture-from-file "pacman" "pacman.png" 'tex2d #t)
 (texture-from-file "iconbar" "Menu/bar.png" 'tex2d #t)
+(texture-from-file "nu_b_s2" "Menu/noupgrade_button_settlement2.png" 'tex2d #t)
+(texture-from-file "nu_b_s3" "Menu/noupgrade_button_settlement3.png" 'tex2d #t)
+(texture-from-file "u_b_s2" "Menu/upgrade_button_settlement2.png" 'tex2d #t)
+(texture-from-file "u_b_s3" "Menu/upgrade_button_settlement3.png" 'tex2d #t)
+(texture-from-file "nu_b_t1" "Menu/noupgrade_button_turret1.png" 'tex2d #t)
+(texture-from-file "nu_b_t2" "Menu/noupgrade_button_turret2.png" 'tex2d #t)
+(texture-from-file "u_b_t1" "Menu/upgrade_button_turret1.png" 'tex2d #t)
+(texture-from-file "u_b_t2" "Menu/upgrade_button_turret2.png" 'tex2d #t)
 
 
 (set-move-factor! 1)

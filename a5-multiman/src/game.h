@@ -4,11 +4,12 @@
 #include "simple_heightmap.h"
 #include "gameobject.h"
 #include "wall-timer.h"
+#include "menu.h"
 
 
 
 class client_message_reader;
-class Menu;
+class moac::Action;
 
 class Game
 {

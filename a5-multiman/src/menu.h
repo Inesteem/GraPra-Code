@@ -55,6 +55,8 @@ protected:
 	int row = 0;
 	int max_rows = 6;
 	
+	float depth = 0.001;
+	
 	vector<Label *>labels;
 	vector<std::string> strings = {"Host Game", "Fraktion", "Level","Color", "Players", "Join Game"};
 	vector<const char*> level_names = {"lvl01","lvl02"};
@@ -113,22 +115,42 @@ public:
 
 class IconBar{
 	
+	int loc = -1;
+	int button_pressed = -1;
+	
 	//0 = Pacman, 1 = Bomberman
-	unsigned int frac = 0;
-	unsigned int t_level = 1;
-	unsigned int s_level = 1;
-	// 1 = settlement, 2 = tower, else = none
-	unsigned int pic;
+	unsigned int frac = 0;	
+	unsigned int t_level = 0;
+	unsigned int s_level = 0;
+	// 1 = settlement, 2 = turret, else = none
+	unsigned int pic = 0;
+	
+	bool t_upgradeable = true;
+	bool s_upgradeable = true;
+	
+	float depth_background = 0.1;
+	float depth_button = 0.01;	
+	float depth_button_s = 0.001;	
+	float depth_acc_button_s = 0.0001;	
+	float depth_button_t = 0.0001;
+	float depth_acc_button_t = 0.00005;
+	
+	float fovy = 50;
+	float near = 0.01;
+	float far = 1000;
+	
+	float offset_button_y = 0.01 * fovy;
+	float scale_button_y = 0.05 * fovy;
 	
 	texture_ref background;
 	texture_ref fraction[2];
-	texture_ref upgrade_button_tower_1;
-	texture_ref upgrade_button_tower_2;
-	texture_ref upgrade_button_settlement_1;
-	texture_ref upgrade_button_settlement_2;
-	texture_ref picture;
+	texture_ref upgrade_button_turret[2];
+	texture_ref noupgrade_button_turret[2];
+	texture_ref upgrade_button_settlement[2];
+	texture_ref noupgrade_button_settlement[2];
+	texture_ref picture[2];
 	
-	matrix4x4f *models[4];
+	matrix4x4f *models[5];
 	
 	matrix4x4f  model_background;
 	matrix4x4f  model_fraction;
@@ -142,11 +164,15 @@ class IconBar{
 	
 	void init_modelmatrices();
 	void draw_fraction();
+	void draw_buttons();
+	void draw_picture();
 	
 public: 
 
 	IconBar();
 	void draw();
+	int click(int x, int y, vec3f (*ptr)(int x, int y));
+	void scale_button(int b, bool greater);
 	
 	
 };

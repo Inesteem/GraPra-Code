@@ -69,6 +69,9 @@ namespace moac {
 		slidebar->initialize_slidebar();
 		statusbar = new StatusBar("status_bar", objhandler);		
 		iconbar = new IconBar();	
+			
+		vec3f cam_pos = {0,0,0}, cam_dir = {0,0,-1}, cam_up = {0,1,0};
+		orthocam = make_orthographic_cam((char*)"gui cam", &cam_pos, &cam_dir, &cam_up, 50, 0, 50, 0, 0.01, 1000);	
 		
 	}
 
@@ -131,6 +134,7 @@ namespace moac {
 		
         vec3f wp = ClickWorldPosition(x,y);
         
+        
         Building *building = game->get_building_at(wp);
         
         int own_id = game->m_player_id;
@@ -189,6 +193,29 @@ namespace moac {
 	void Action::update_mouse_pos(float x, float y){
 		if(prepare_attack)
 			slidebar->update_mouse_pos(x,y);	
+	}
+	
+	void Action::check_button_clicked(int x, int y, int state){
+		
+		if(state != 0){
+				iconbar->scale_button(state, true);
+				return;
+		}
+		
+		
+		int button = iconbar->click(x,y,ClickWorldPosition);
+		switch(button){
+			//settlement
+			case 0 :iconbar->scale_button(button, false);  
+					break;
+			//turret
+			case 1 :iconbar->scale_button(button, false);   
+					break;
+			
+			default : return;
+		}
+		
+		
 	}
 
 }

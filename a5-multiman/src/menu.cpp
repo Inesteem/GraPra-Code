@@ -132,6 +132,10 @@ void Menu::draw_background(bool blend){
 		glUniform3fv(loc, 1,(float *)&color);		
 
 
+		loc = glGetUniformLocation(gl_shader_object(menushader), "depth");
+		glUniform1f(loc,depth);
+
+
 		bind_texture(tex, 0);
 		loc = glGetUniformLocation(gl_shader_object(menushader), "tex");
 		glUniform1i(loc, 0);
@@ -268,17 +272,21 @@ void Menu::reset_menu(){
 IconBar::IconBar(){
 	
 	vec3f cam_pos = {0,0,0}, cam_dir = {0,0,-1}, cam_up = {0,1,0};
-	float fovy = 50;
-	cam = make_orthographic_cam((char*)"gui cam", &cam_pos, &cam_dir, &cam_up, fovy, 0, 50, 0, 0.01, 1000);	
+	cam = make_orthographic_cam((char*)"gui cam", &cam_pos, &cam_dir, &cam_up, fovy, 0, 50, 0, near, far);	
 	
 	background = 					find_texture("iconbar");
-	fraction[0] = 					find_texture("terrain_hm");
+	fraction[0] = 					find_texture("pacman");
 	fraction[1] = 					find_texture("terrain_hm");
-	upgrade_button_tower_1 = 		find_texture("terrain_hm");
-	upgrade_button_tower_2 = 		find_texture("terrain_hm");
-	upgrade_button_settlement_1 = 	find_texture("terrain_hm");
-	upgrade_button_settlement_2 = 	find_texture("terrain_hm");
-	picture = 						find_texture("terrain_hm");
+	upgrade_button_turret[0] = 		find_texture("u_b_t1");
+	upgrade_button_turret[1] = 		find_texture("u_b_t2");
+	noupgrade_button_turret[0] = 	find_texture("nu_b_t1");
+	noupgrade_button_turret[1] = 	find_texture("nu_b_t2");
+	upgrade_button_settlement[0] = 	find_texture("u_b_s2");
+	upgrade_button_settlement[1] = 	find_texture("u_b_s3");
+	noupgrade_button_settlement[0] =find_texture("nu_b_s2");
+	noupgrade_button_settlement[1] =find_texture("nu_b_s3");
+	picture[0] =					find_texture("terrain_hm");
+	picture[1] =					find_texture("dorf");
 	
 	shader = find_shader("simple-menu-shader");
 	
@@ -300,13 +308,12 @@ IconBar::IconBar(){
 
 void IconBar::draw(){
 	
-	return;
 
 	camera_ref old_cam = current_camera();
 	use_camera(cam);
 	bind_shader(shader);
 
-	int loc = glGetUniformLocation(gl_shader_object(shader), "proj");
+	loc = glGetUniformLocation(gl_shader_object(shader), "proj");
 	glUniformMatrix4fv(loc, 1, GL_FALSE, projection_matrix_of_cam(current_camera())->col_major);
 
 	loc = glGetUniformLocation(gl_shader_object(shader), "view");
@@ -315,10 +322,9 @@ void IconBar::draw(){
 	loc = glGetUniformLocation(gl_shader_object(shader), "model");
 	glUniformMatrix4fv(loc, 1, GL_FALSE, model_background.col_major);
 
-
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_ONE, GL_ONE);
-	glDepthMask(GL_FALSE);
+	glDepthMask(GL_TRUE);
 
 
 	vec3f color = vec3f(0.1,0.1,0.1);
@@ -330,13 +336,29 @@ void IconBar::draw(){
 	loc = glGetUniformLocation(gl_shader_object(shader), "tex");
 	glUniform1i(loc, 0);
 
+	loc = glGetUniformLocation(gl_shader_object(shader), "depth");
+	glUniform1f(loc,depth_background);
+
+
 	bind_mesh_to_gl(mesh);
 	draw_mesh(mesh);
 	
 	unbind_texture(background);
 	glDisable(GL_BLEND);
+
+	//buttons etc
+
+	color = vec3f(-1,-1,-1);
+	loc = glGetUniformLocation(gl_shader_object(shader), "color");
+	glUniform3fv(loc, 1,(float *)&color);	
+	
+	loc = glGetUniformLocation(gl_shader_object(shader), "depth");
+	glUniform1f(loc,depth_button);	
+
 	
 	draw_fraction();
+	draw_picture();	
+	draw_buttons();
 
 
 	unbind_mesh_from_gl(mesh);
@@ -347,16 +369,12 @@ void IconBar::draw(){
 
 void IconBar::draw_fraction(){
 	
-	int loc = glGetUniformLocation(gl_shader_object(shader), "model");
+	loc = glGetUniformLocation(gl_shader_object(shader), "model");
 	glUniformMatrix4fv(loc, 1, GL_FALSE, model_fraction.col_major);	
 	
 	bind_texture(fraction[frac], 0);
 	loc = glGetUniformLocation(gl_shader_object(shader), "tex");
 	glUniform1i(loc, 0);
-
-	vec3f color = vec3f(-1,-1,-1);
-	loc = glGetUniformLocation(gl_shader_object(shader), "color");
-	glUniform3fv(loc, 1,(float *)&color);	
 	
 	draw_mesh(mesh);	
 	
@@ -364,29 +382,184 @@ void IconBar::draw_fraction(){
 
 }
 
+void IconBar::draw_buttons(){
+
+	//settlement_button
+
+	loc = glGetUniformLocation(gl_shader_object(shader), "depth");
+	glUniform1f(loc,depth_button_s);	
+
+	loc = glGetUniformLocation(gl_shader_object(shader), "model");
+	glUniformMatrix4fv(loc, 1, GL_FALSE, model_button_s.col_major);	
+
+	if(s_upgradeable)
+		bind_texture(upgrade_button_settlement[s_level], 0);
+	else
+		bind_texture(noupgrade_button_settlement[s_level], 0);
+
+	loc = glGetUniformLocation(gl_shader_object(shader), "tex");	
+	glUniform1i(loc, 0);	
+	
+	draw_mesh(mesh);	
+	
+	if(s_upgradeable)
+		unbind_texture(upgrade_button_settlement[s_level]);
+	else
+		unbind_texture(noupgrade_button_settlement[s_level]);
+	
+	//turret_button	
+
+	loc = glGetUniformLocation(gl_shader_object(shader), "depth");
+	glUniform1f(loc,depth_button_t);	
+		
+	loc = glGetUniformLocation(gl_shader_object(shader), "model");
+	glUniformMatrix4fv(loc, 1, GL_FALSE, model_button_t.col_major);	
+	
+
+	if(t_upgradeable)
+		bind_texture(upgrade_button_turret[t_level], 0);
+	else
+		bind_texture(noupgrade_button_turret[t_level], 0);
+
+	loc = glGetUniformLocation(gl_shader_object(shader), "tex");
+	glUniform1i(loc, 0);
+	
+	draw_mesh(mesh);	
+	
+	if(s_upgradeable)
+		unbind_texture(upgrade_button_turret[t_level]);
+	else
+		unbind_texture(noupgrade_button_turret[t_level]);		
+		
+}
+
+void IconBar::draw_picture(){
+
+	loc = glGetUniformLocation(gl_shader_object(shader), "model");
+	glUniformMatrix4fv(loc, 1, GL_FALSE, model_picture.col_major);	
+
+	bind_texture(picture[pic], 0);
+	loc = glGetUniformLocation(gl_shader_object(shader), "tex");	
+	glUniform1i(loc, 0);	
+	
+	draw_mesh(mesh);	
+	
+	unbind_texture(picture[pic]);
+}
+
 void IconBar::init_modelmatrices(){
 	
-	float fovy = 50;
+
 	
 	models[0] = &model_background;
 	models[1] = &model_button_t;
 	models[2] = &model_button_s;
 	models[3] = &model_picture;
 	models[4] = &model_fraction;
+
+	for(int i = 0; i < 5; i++){
+		make_unit_matrix4x4f(models[i]);
+		models[i]->row_col(1,1) = scale_button_y;
+		models[i]->row_col(1,3) = offset_button_y;
+	}
+
 	
-	make_unit_matrix4x4f(&model_background);
+	//BACKGROUND
 	model_background.row_col(0,0) = fovy;
-	model_background.row_col(1,1) = fovy;
+	model_background.row_col(1,1) = 0.77 * fovy;
 	model_background.row_col(0,3) = 0.f;
 	model_background.row_col(1,3) = 0.f;
 	
-	make_unit_matrix4x4f(&model_fraction);
-	model_fraction.row_col(0,0) = 0.2 * fovy;
-	model_fraction.row_col(1,1) = 0.2 * fovy;
-	model_fraction.row_col(0,3) = 0.f;
-	model_fraction.row_col(1,3) = 0.f;
+
 	
+	float x_offset = offset_button_y;
+	
+	//FRACTION
+	model_fraction.row_col(0,0) = 0.05 * fovy;
+	model_fraction.row_col(0,3) = x_offset;
+
+	x_offset += model_fraction.row_col(0,0) + 2*offset_button_y;
+	
+	//BUTTONS
+	model_button_s.row_col(0,0) = 0.12 * fovy;
+	model_button_s.row_col(0,3) = x_offset;
+	
+
+	x_offset += model_button_s.row_col(0,0) + offset_button_y;
+
+	model_button_t.row_col(0,0) = 0.12 * fovy;
+	model_button_t.row_col(0,3) = x_offset;
+	
+	//PICTURE
+	
+	model_picture.row_col(1,1) = 0.12 * fovy;
+	model_picture.row_col(0,0) = 0.12 * fovy;
+	model_picture.row_col(0,3) = 0.85 * fovy;
+	model_picture.row_col(1,3) = 0.02 * fovy;
 	
 		
 }
 
+int IconBar::click(int x, int y, vec3f (*ptr)(int x, int y)){
+	
+	camera_ref old_camera = current_camera();
+	use_camera(cam);
+	
+	vec3f pos = ptr(x,y);
+
+	float rel_depth=(pos.z-near)/(far-near);
+
+	if(-rel_depth >= (depth_button_s - depth_acc_button_s) && -rel_depth <= (depth_button_s + depth_acc_button_s)){
+		return 0;
+		cout << "click_settlement" << endl;
+		
+	}
+	else if(-rel_depth >= (depth_button_t - depth_acc_button_t) && -rel_depth <= (depth_button_t + depth_acc_button_t)){
+		return 1;
+		cout << "click_turret" << endl;
+	}
+	use_camera(old_camera);	
+
+	return -1;
+	
+}
+
+void IconBar::scale_button(int b, bool greater){
+
+	int i = -1;
+	if(greater){
+		if(button_pressed < 0 || button_pressed > 1)
+			return;
+		b = button_pressed;
+		i = 1;
+	}
+	
+	float scale = 0.008 * fovy * i;
+	float offset = -0.5*scale;
+
+	
+	switch(b){
+		//settlement
+		case 0 : 
+				button_pressed = 0; 
+				model_button_s.row_col(0,0) += scale;
+				model_button_s.row_col(1,1) += scale;
+				model_button_s.row_col(0,3) += offset;
+				model_button_s.row_col(1,3) += offset;
+				break;
+		//turret
+		case 1 : 
+				button_pressed = 1;
+				model_button_t.row_col(0,0) += scale;
+				model_button_t.row_col(1,1) += scale;
+				model_button_t.row_col(0,3) += offset;
+				model_button_t.row_col(1,3) += offset;
+				break;
+		
+		default : return;
+	}
+	
+	if(greater)
+		button_pressed = -1;
+	
+}
