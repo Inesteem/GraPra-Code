@@ -245,9 +245,10 @@ Building::Building(GameStage *gameStage, unsigned int x, unsigned int y, unsigne
 
 void Building::Update()
 {
-    if(m_player == - 1) return;
+    if(m_player == - 1 || m_state == msg::building_state::turret_lvl1 || m_state == msg::building_state::turret_lvl2 || m_state == msg::building_state::construction_site) return;
 
-    if(m_generateUnitsTimer.look() >= wall_time_timer::msec(m_unitGenerationTime)) {
+    unsigned int upgradeRate = m_state == msg::building_state::house_lvl1 ? c_upgradeRateLvl1 : c_upgradeRateLvl2;
+    if(m_generateUnitsTimer.look() >= wall_time_timer::msec(upgradeRate)) {
         m_generateUnitsTimer.restart();
         m_unitCount++;
 
