@@ -120,7 +120,8 @@ Troup* GameStage::spawnTroup(unsigned int sourceBuildingID, unsigned int destina
     sts.troupId = t->m_id;
     sts.unitCount = unitCount;
     broadcast(&sts);
-    t->Update();
+
+    t->NextDestination();
 
     return t;
 }
@@ -177,7 +178,7 @@ void GameStage::upgrade_building_turret(unsigned int buildingId){
 }
 
 Troup::Troup(GameStage *gameStage, Building *sourceBuilding, Building *destinationBuilding, unsigned int unitCount, unsigned int id)
-    : GameObject(gameStage, 0, 0, id), m_unitCount(unitCount), m_source(sourceBuilding), m_destination(destinationBuilding), m_waiting(false)
+    : GameObject(gameStage, 0, 0, id), m_unitCount(unitCount), m_source(sourceBuilding), m_destination(destinationBuilding)
 {
     m_x = sourceBuilding->m_x;
     m_y = sourceBuilding->m_y;
@@ -190,33 +191,19 @@ Troup::Troup(GameStage *gameStage, Building *sourceBuilding, Building *destinati
 
     m_stepTimer.start();
 }
-static int first_run = 0;
-bool Troup::Update()
+
+bool Troup::NextDestination()
 {
-    if(m_waiting) {
-        if(m_stepTimer.look() < 50) {
-                return false;
-        } else {
-            m_stepTimer.restart();
-            m_waiting = false;
-        }
-    }
-
-    if(m_stepTimer.look() < m_stepTime - 50) {
-        return false;
-    }
-
-    m_waiting = true;
-
-    //cout << m_stepTimer.look() << endl;
-    m_stepTimer.restart();
-    //cout << m_stepTimer.look() << endl;
-
-    PathNode nextDestination = m_path->m_nodes.front();
+    PathNode currentDestination = m_path->m_nodes.front();
     m_path->m_nodes.pop_front();
 
-    m_x = nextDestination.mapX;
-    m_y = nextDestination.mapY;
+    m_x = currentDestination.mapX;
+    m_y = currentDestination.mapY;
+
+    PathNode nextDestination = m_path->m_nodes.front();
+
+    cout << "Troup " << m_id << " now at destination (" << m_x << "," << m_y << "), next (" << nextDestination.mapX << "," << nextDestination.mapY << ")" << endl;
+
 //    if((m_x < 0 || m_x > 32) && (m_y < 0 || m_y > 32)){
 //        exit(-1); //TODO
 //    }
@@ -227,20 +214,30 @@ bool Troup::Update()
         delete m_path;
         return true;
     }
-    if( first_run == 0 ){
-        first_run = 1;
-        return false;
-    }
+
     msg::next_troup_destination ntd = make_message<msg::next_troup_destination>();
-    ntd.mapX = m_x;
-    ntd.mapY = m_y;
+    ntd.mapX = nextDestination.mapX;
+    ntd.mapY = nextDestination.mapY;
     ntd.troupId = m_id;
     ntd.time = m_stepTime;
     //cout << "NTD: (" << ntd.mapX << "," << ntd.mapY << ") id " << ntd.troupId << ",time " << ntd.time << endl;
     broadcast(&ntd);
 
-    //cout << "troup " << m_id << " to position (" << m_x << ", " << m_y << ")" << endl;
     return false;
+}
+
+bool Troup::Update()
+{
+    if(m_stepTimer.look() < m_stepTime) {
+        return false;
+    }
+
+    //cout << m_stepTimer.look() << endl;
+    m_stepTimer.restart();
+    //cout << m_stepTimer.look() << endl;
+
+    //cout << "troup " << m_id << " to position (" << m_x << ", " << m_y << ")" << endl;
+    return NextDestination();
 }
 
 Building::Building(GameStage *gameStage, unsigned int x, unsigned int y, unsigned int id)

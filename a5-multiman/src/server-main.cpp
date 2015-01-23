@@ -92,6 +92,7 @@ void initGame(string &levelName) {
                 }
 							
 			} else if(color.y > 0.4f) {
+                // block area around tree
                 blockMap(r,c-1, x, y);
                 blockMap(r,c, x, y);
                 blockMap(r,c+1, x, y);

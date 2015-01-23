@@ -85,7 +85,6 @@ class Troup : public GameObject
 {
     unsigned int m_stepTime = 300;
     wall_time_timer m_stepTimer;
-    bool m_waiting;
 
 public:
     unsigned int m_unitCount;
@@ -97,6 +96,7 @@ public:
 
     Troup(GameStage *gameStage, Building *sourceBuilding, Building *destinationBuilding, unsigned int unitCount, unsigned int id);
 
+    bool NextDestination();
     bool Update();
 };
 
@@ -109,11 +109,6 @@ class GameStage
 public:
     int m_mapX, m_mapY;
     bool **m_map;
-
-    const unsigned int c_costUpgradeToHouseLvl1 = 10;
-    const unsigned int c_costUpgradeToHouseLvl2 = 30;
-    const unsigned int c_costUpgradeToTurretLvl1 = 20;
-    const unsigned int c_costUpgradeToTurretLvl2 = 50;
 
     GameStage() : m_gameOver(false) {}
 

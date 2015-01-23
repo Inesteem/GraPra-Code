@@ -27,6 +27,13 @@ namespace msg {
         };
     }
 
+    namespace upgrade_cost {
+        const unsigned int c_costUpgradeToHouseLvl1 = 10;
+        const unsigned int c_costUpgradeToHouseLvl2 = 30;
+        const unsigned int c_costUpgradeToTurretLvl1 = 20;
+        const unsigned int c_costUpgradeToTurretLvl2 = 50;
+    }
+
 	namespace code {
 		enum {
 			init_game = 1,
