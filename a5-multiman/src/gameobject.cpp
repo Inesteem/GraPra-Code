@@ -265,7 +265,8 @@ Building::Building(Obj *obj,Obj *selection_circle,Obj *upgrade_arrow, string nam
     m_owner(owner) , m_size(size), selection_circle(selection_circle), upgrade_arrow(upgrade_arrow)
 
 {
-
+	settlement = true;
+	turret = false;
     selection_circle->mesh;
 	unit_count = 0;
     identifier = 'b';
@@ -310,6 +311,17 @@ int Building::get_state(){
 void Building::upgrade(Obj *obj, int state){
 	m_obj = obj;
 	this->state = state;
+	
+	if(state == msg::building_state::turret_lvl1 || state == msg::building_state::turret_lvl2){
+		settlement = false;
+		turret = true;
+	} 
+	else if(state == msg::building_state::house_lvl1 || state == msg::building_state::house_lvl2){
+		settlement = true;
+		turret = false;
+	}
+	
+	
 }
 
 
@@ -352,7 +364,7 @@ void Building::draw(){
 	label->update_gui_texture_int(unit_count);
 	label->render_gui_overlay();
 	
-	if(check_for_upgrade(true) && PLAYER_ID == m_owner){
+	if(check_for_upgrade(true, state+1) && PLAYER_ID == m_owner){
 		matrix4x4f arrow_model_2;
 		vec3f rot_vec = vec3f(0,1,0);
 		make_rotation_matrix4x4f(&arrow_model_2,&rot_vec, rotation/2);
@@ -439,19 +451,29 @@ float Building::dist_to(vec3f &pos){
 
 }
 
-bool Building::check_for_upgrade(bool up){
-	if(!up)
-		return true;
-	
-    if(state == msg::building_state::construction_site && unit_count >= msg::upgrade_cost::UpgradeToHouseLvl1 )
-		return true;
 
-    if(state == msg::building_state::house_lvl1 && unit_count >= msg::upgrade_cost::UpgradeToHouseLvl2)
-		return true;
-
-	return false;
+bool Building::check_for_upgrade(bool next, int state){
+	if(next){
+		if(settlement){
+			if(this->state == msg::building_state::construction_site && unit_count >= msg::upgrade_cost::UpgradeToHouseLvl1 )
+				return true;
+			if(this->state == msg::building_state::house_lvl1 && unit_count >= msg::upgrade_cost::UpgradeToHouseLvl2)
+				return true;
+			return false;
+		}
+		else if(turret){
+			if(this->state == msg::building_state::turret_lvl1 && unit_count >= msg::upgrade_cost::UpgradeToTurretLvl2)
+				return true;
+			return false;		
+			
+		}
+	} else
+	return true;
 		
 }
+
+
+
 
 
 unsigned int Building::get_owner_id(){

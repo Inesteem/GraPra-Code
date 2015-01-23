@@ -102,7 +102,7 @@ public:
 	int get_unit_count();
 	int get_state();
     void change_owner(unsigned int owner);
-    bool check_for_upgrade(bool up);
+    bool check_for_upgrade(bool next, int state);
 
 
     int m_size;
@@ -116,7 +116,7 @@ private:
     Obj *upgrade_arrow;
     matrix4x4f arrow_model;
     Label *label;
-    
+    bool settlement, turret;
     unsigned int id;
     
 };

@@ -23,7 +23,7 @@ namespace msg {
             house_lvl1,
             house_lvl2,
             turret_lvl1,
-            turret_lvl2
+            turret_lvl2         
         };
     }
 
