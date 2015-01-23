@@ -148,6 +148,7 @@ void ObjHandler::addObj_withScale(string name, string filename, shader_ref shade
 void ObjHandler::addMeshObj(string name, mesh_ref mesh, shader_ref shader, texture_ref tex){
     objs.push_back(Obj(name, objs.size(), mesh, tex, shader));
 }
+//void ObjHandler::makeObjFMS(vector<string> filenames, string name);
 
 Obj* ObjHandler::getObjByID(int id){
 

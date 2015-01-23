@@ -203,9 +203,10 @@
         uniform vec3 CamPos;
         uniform mat4 view;
         uniform mat4 model;
+        uniform float lod = 0.1;
         #define ID gl_InvocationID
         vec3 ndc(vec3 world){
-                vec4 v =  view *model* vec4(world,1);
+                vec4 v =  view * model * vec4(world,1);
                 v /= v.w;
                 return v.xyz;
         }
@@ -219,47 +220,45 @@
                 float w = 1 + (1-z) * 100;
                 return vertex.z < -1 || vertex.z > 1 || any(lessThan(vertex.xy, vec2(-w)) || greaterThan(vertex.xy, vec2(w)));
         }
-
+        float level(float d){
+                return clamp(lod * 2000/d, 1, 64);
+        }
         void main()
         {
+
             tcPosition[ID] = out_pos[ID];
+
             vec3 pos = out_pos[ID];
-            float dis = length(view*model*vec4(pos,1));
+
+            if(ID == 0){
+//            float dis = length(view*model*vec4(tcPosition[0],1));
+
+            float d0 = length(view*model*vec4(tcPosition[0],1));
+            float d1 = length(view*model*vec4(tcPosition[1],1));
+            float d2 = length(view*model*vec4(tcPosition[2],1));
+
             if(offScreen(tcPosition[ID])){
                 gl_TessLevelInner[0] = 0;
                 gl_TessLevelOuter[0] = 0;
                 gl_TessLevelOuter[1] = 0;
                 gl_TessLevelOuter[2] = 0;
             }
-            if (dis < 20) {
-                gl_TessLevelInner[0] = 8;
-                gl_TessLevelOuter[0] = 8;
-                gl_TessLevelOuter[1] = 8;
-                gl_TessLevelOuter[2] = 8;
-            } else if( dis < 50) {
-                gl_TessLevelInner[0] = 4;
-                gl_TessLevelOuter[0] = 4;
-                gl_TessLevelOuter[1] = 4;
-                gl_TessLevelOuter[2] = 4;
-            }else if( dis < 70) {
-                gl_TessLevelInner[0] = 2;
-                gl_TessLevelOuter[0] = 2;
-                gl_TessLevelOuter[1] = 2;
-                gl_TessLevelOuter[2] = 2;
-            } else {
-                gl_TessLevelInner[0] = 1;
-                gl_TessLevelOuter[0] = 1;
-                gl_TessLevelOuter[1] = 1;
-                gl_TessLevelOuter[2] = 1;
-            }
 
+
+                gl_TessLevelOuter[0] = level(mix(d2,d0,.5));
+                gl_TessLevelOuter[1] = level(mix(d0,d1,.5));
+                gl_TessLevelOuter[2] = level(mix(d1,d2,.5));
+                float l = max(max(gl_TessLevelOuter[0],gl_TessLevelOuter[1]),gl_TessLevelOuter[2]);
+                 gl_TessLevelInner[0] = l;
+
+        }
         }
 }
 #:tess-eval-shader #{
 #version 400 core
 
 
-        layout(triangles, fractional_even_spacing, ccw) in;
+        layout(triangles, equal_spacing, ccw) in;
         in vec3 tcPosition[];
         out vec3 out_pos;
         out vec3 tePatchDistance;
@@ -295,7 +294,7 @@
         layout(triangle_strip, max_vertices = 3) out;
         in vec3 out_pos[3];
         in vec3 tePatchDistance[3];
-        smooth out vec3 gFacetNormal;
+         out vec3 gFacetNormal;
         out vec3 gPatchDistance;
         out vec3 gTriDistance;
         out vec3 pos;
@@ -316,17 +315,17 @@
             gl_Position = gl_in[0].gl_Position;
             pos = out_pos[0]; EmitVertex();
 
-            A = out_pos[0] - out_pos[1];
-            B = out_pos[2] - out_pos[1];
-            gFacetNormal = normal * normalize(cross(A, B));
+//            A = out_pos[0] - out_pos[1];
+//            B = out_pos[2] - out_pos[1];
+//            gFacetNormal = normal * normalize(cross(A, B));
             gPatchDistance = tePatchDistance[1];
             gTriDistance = vec3(0, 1, 0);
             gl_Position = gl_in[1].gl_Position;
             pos = out_pos[1]; EmitVertex();
 
-            A = out_pos[1] - out_pos[2];
-            B = out_pos[0] - out_pos[2];
-            gFacetNormal = normal * normalize(cross(A, B));
+//            A = out_pos[1] - out_pos[2];
+//            B = out_pos[0] - out_pos[2];
+//            gFacetNormal = normal * normalize(cross(A, B));
             gPatchDistance = tePatchDistance[2];
             gTriDistance = vec3(0, 0, 1);
             gl_Position = gl_in[2].gl_Position;
