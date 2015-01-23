@@ -68,7 +68,8 @@ class Building : public GameObject
 {
 
         wall_time_timer m_generateUnitsTimer;
-        const static unsigned int m_unitGenerationTime = 1000;
+        const static unsigned int c_upgradeRateLvl1 = 4000;
+        const static unsigned int c_upgradeRateLvl2 = 2000;
 public:
     unsigned int m_unitCount;
     int m_player;
