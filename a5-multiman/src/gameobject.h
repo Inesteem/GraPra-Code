@@ -20,7 +20,7 @@ struct Obj {
     Obj(string name, int id, string filename, shader_ref shader, vec3f scale);
     Obj(string name, int id, string filename, shader_ref shader, vec3f bb_min, vec3f bb_max);
     Obj(string name, int id, mesh_ref mesh, texture_ref tex, shader_ref shader);
-
+    Obj(string name, int id, vector<string> filenames, shader_ref shader);
     vector<drawelement*> *drawelements;
     mesh_ref mesh;
     texture_ref tex;
@@ -44,6 +44,7 @@ public:
     //adds .obj with custom scale
     void addObj_withScale(string name, string filename, shader_ref shader, vec3f scale);
     void addMeshObj(string name, mesh_ref mesh, shader_ref shader, texture_ref tex);
+    void makeObjFMS(vector<string> filenames, string name, shader_ref shader);
     Obj *getObjByName(string name);
     Obj *getObjByID(int id);
     Obj *get_selection_circle();

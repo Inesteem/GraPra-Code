@@ -121,6 +121,36 @@ Obj::Obj(string name, int id, mesh_ref mesh, texture_ref tex, shader_ref shader)
 
 }
 
+Obj::Obj(string name, int id, vector<string> filenames, shader_ref shader):name(name), id(id){
+    vector<ObjLoader> loaders;;
+    mesh = make_mesh(name.c_str(),loaders.size()*2 + 1);
+    for(int i = 0; i < filenames.size(); ++i){
+        loaders.push_back( ObjLoader(name.c_str(),filenames[i].c_str()));
+        loaders[i].TranslateToOrigin();
+        loaders[i].pos_and_norm_shader = shader;
+        loaders[i].pos_norm_and_tc_shader = shader;
+        loaders[i].default_shader = shader;
+        string inpos = "in_pos_" + i;
+        string innorm = "in_norm_" + i;
+        bind_mesh_to_gl(mesh);
+        add_vertex_buffer_to_mesh(mesh, inpos.c_str(), GL_FLOAT, loaders[i].objdata.vertices, 3, (float*) loaders[i].objdata.vertex_data , GL_STATIC_DRAW);
+        add_vertex_buffer_to_mesh(mesh, innorm.c_str(), GL_FLOAT, loaders[i].objdata.vertices, 3, (float *) loaders[i].objdata.normal_data, GL_STATIC_DRAW);
+        unbind_mesh_from_gl(mesh);
+
+    }
+
+
+    loaders[0].BoundingBox(bb_min,bb_max);
+
+    bind_mesh_to_gl(mesh);
+    add_vertex_buffer_to_mesh(mesh, "in_tc", GL_FLOAT, loaders[0].objdata.vertices, 2, (float *) loaders[0].objdata.texcoord_data, GL_STATIC_DRAW);
+    add_index_buffer_to_mesh(mesh, loaders[0].objdata.groups->triangles * 3, (unsigned int *) loaders[0].objdata.groups->v_ids, GL_STATIC_DRAW);
+    unbind_mesh_from_gl(mesh);
+
+    tex_params_t p = default_tex_params();
+    tex = make_texture_ub(("tex"), loaders[0].objdata.groups->mtl->tex_d, GL_TEXTURE_2D, &p);
+}
+
 
 //handler for all .obj
 ObjHandler::ObjHandler(){
@@ -148,7 +178,10 @@ void ObjHandler::addObj_withScale(string name, string filename, shader_ref shade
 void ObjHandler::addMeshObj(string name, mesh_ref mesh, shader_ref shader, texture_ref tex){
     objs.push_back(Obj(name, objs.size(), mesh, tex, shader));
 }
-//void ObjHandler::makeObjFMS(vector<string> filenames, string name);
+void ObjHandler::makeObjFMS(vector<string> filenames, string name, shader_ref shader){
+    objs.push_back(Obj(name,objs.size(),filenames, shader));
+}
+
 
 Obj* ObjHandler::getObjByID(int id){
 
@@ -273,9 +306,9 @@ Building::Building(Obj *obj,Obj *selection_circle,Obj *upgrade_arrow, string nam
     identifier = 'b';
     m_pos = vec2f(x,y);
 
-    m_model.col_major[3 * 4 + 0] = m_pos.x*render_settings::tile_size_x;
+    m_model.col_major[3 * 4 + 0] = m_pos.x*m_size*render_settings::tile_size_x;
     m_model.col_major[3 * 4 + 1] = m_center.y + m_height;
-    m_model.col_major[3 * 4 + 2] = m_pos.y*render_settings::tile_size_y;
+    m_model.col_major[3 * 4 + 2] = m_pos.y*m_size*render_settings::tile_size_y;
     
     
     make_unit_matrix4x4f(&arrow_model);
