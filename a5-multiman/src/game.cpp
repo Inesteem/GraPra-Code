@@ -71,7 +71,7 @@ vector<vec3f> *Game::get_planes(){
 	for(int i = 0; i < m_buildings.size(); i++){
 		planes[i].y += m_buildings[i].get_center().y;		
 	}
-    m_sh->re_init(&planes);
+//    m_sh->re_init(&planes);
 	return &planes;
 }
 
@@ -170,7 +170,7 @@ void Game::draw(){
     }
 
     for(int i = 0; i < m_unitgroups.size(); ++i){
-        m_unitgroups[i].draw();
+        m_unitgroups[i].draw_mesh();
     }
 
     if (m_selected != 0 && m_selected != nullptr){

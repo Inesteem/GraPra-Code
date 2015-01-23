@@ -121,6 +121,40 @@ Obj::Obj(string name, int id, mesh_ref mesh, texture_ref tex, shader_ref shader)
 
 }
 
+Obj::Obj(string name, int id, vector<string> filenames, shader_ref shader):name(name), id(id), shader(shader){
+    vector<ObjLoader> loaders;
+    mesh = make_mesh(name.c_str(),filenames.size()*2 + 1);
+    for(int i = 0; i < filenames.size(); ++i){
+        loaders.push_back( ObjLoader(filenames[i].c_str(),filenames[i].c_str()));
+        loaders[i].TranslateToOrigin();
+        loaders[i].pos_and_norm_shader = shader;
+        loaders[i].pos_norm_and_tc_shader = shader;
+        loaders[i].default_shader = shader;
+        string inpos = "in_pos_";
+        string innorm = "in_norm_";
+
+        inpos  += to_string(i);
+        innorm += to_string(i);
+        cout << inpos << innorm << endl;
+        bind_mesh_to_gl(mesh);
+        add_vertex_buffer_to_mesh(mesh, inpos.c_str(), GL_FLOAT, loaders[i].objdata.vertices, 3, (float*) loaders[i].objdata.vertex_data , GL_STATIC_DRAW);
+        add_vertex_buffer_to_mesh(mesh, innorm.c_str(), GL_FLOAT, loaders[i].objdata.vertices, 3, (float *) loaders[i].objdata.normal_data, GL_STATIC_DRAW);
+        unbind_mesh_from_gl(mesh);
+
+    }
+
+
+    loaders[0].BoundingBox(bb_min,bb_max);
+
+    bind_mesh_to_gl(mesh);
+    add_vertex_buffer_to_mesh(mesh, "in_tc", GL_FLOAT, loaders[0].objdata.vertices, 2, (float *) loaders[0].objdata.texcoord_data, GL_STATIC_DRAW);
+    add_index_buffer_to_mesh(mesh, loaders[0].objdata.groups->triangles * 3, (unsigned int *) loaders[0].objdata.groups->v_ids, GL_STATIC_DRAW);
+    unbind_mesh_from_gl(mesh);
+
+//    tex_params_t p = default_tex_params();
+//    tex = make_texture_ub(("tex"), loaders[0].objdata.groups->mtl->tex_d, GL_TEXTURE_2D, &p);
+}
+
 
 //handler for all .obj
 ObjHandler::ObjHandler(){
@@ -148,6 +182,10 @@ void ObjHandler::addObj_withScale(string name, string filename, shader_ref shade
 void ObjHandler::addMeshObj(string name, mesh_ref mesh, shader_ref shader, texture_ref tex){
     objs.push_back(Obj(name, objs.size(), mesh, tex, shader));
 }
+void ObjHandler::makeObjFMS(vector<string> filenames, string name, shader_ref shader){
+    objs.push_back(Obj(name,objs.size(),filenames, shader));
+}
+
 
 Obj* ObjHandler::getObjByID(int id){
 
@@ -266,12 +304,19 @@ Building::Building(Obj *obj,Obj *selection_circle,Obj *upgrade_arrow, string nam
 
 {
 	settlement = true;
-	turret = false;
+    turret = false;
     selection_circle->mesh;
 	unit_count = 0;
     identifier = 'b';
     m_pos = vec2f(x,y);
 
+    vec3f tmp = obj->bb_min + obj->bb_max;
+    tmp *= m_size;
+    tmp /= 2;
+    m_center = tmp;
+    m_model.col_major[0 * 4 + 0] = m_size;
+    m_model.col_major[1 * 4 + 1] = m_size;
+    m_model.col_major[2 * 4 + 2] = m_size;
     m_model.col_major[3 * 4 + 0] = m_pos.x*render_settings::tile_size_x;
     m_model.col_major[3 * 4 + 1] = m_center.y + m_height;
     m_model.col_major[3 * 4 + 2] = m_pos.y*render_settings::tile_size_y;
@@ -292,6 +337,19 @@ Building::Building(Obj *obj,Obj *selection_circle,Obj *upgrade_arrow, string nam
     
     state = msg::building_state::construction_site;
 
+}
+
+void Building::change_size(int size){
+    m_size = size;
+    m_model.col_major[0 * 4 + 0] = m_size;
+    m_model.col_major[1 * 4 + 1] = m_size;
+    m_model.col_major[2 * 4 + 2] = m_size;
+
+    vec3f tmp = m_obj->bb_min + m_obj->bb_max;
+    tmp *= size;
+    tmp /= 2;
+    m_center = tmp;
+     m_model.col_major[3 * 4 + 1] = m_center.y + m_height;
 }
 
 void Building::update_unit_count(int count){
@@ -487,6 +545,7 @@ unsigned int Building::get_id(){
 void Building::draw_selection_circle(int size){
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+//    glDepthMask(GL_FALSE);
     vec3f color = get_player_color(m_owner);
     bind_shader(find_shader("selection_circle_shader"));
 
@@ -497,12 +556,12 @@ void Building::draw_selection_circle(int size){
 
 
 
-    tmp.col_major[0 * 4 + 0] =  m_model.col_major[0 * 4 + 0] * (render_settings::tile_size_x+2) * size;
-    tmp.col_major[1 * 4 + 1] =  m_model.col_major[1 * 4 + 1] * (render_settings::tile_size_x+2) * size;
-    tmp.col_major[2 * 4 + 2] =  m_model.col_major[2 * 4 + 2] * (render_settings::tile_size_y+2) * size;
-    tmp.col_major[3 * 4 + 0] =  m_pos.x * render_settings::tile_size_x - ((render_settings::tile_size_x+2) * size )/2.0f * m_center.x;
-    tmp.col_major[3 * 4 + 1] +=  0.0f;
-    tmp.col_major[3 * 4 + 2] =  m_pos.y * render_settings::tile_size_y - ((render_settings::tile_size_y+2) * size )/2.0f *  m_center.z;
+    tmp.col_major[0 * 4 + 0] =  /*m_model.col_major[0 * 4 + 0] **/ (render_settings::tile_size_x+2) * size;
+    tmp.col_major[1 * 4 + 1] =  /*m_model.col_major[1 * 4 + 1] * */(render_settings::tile_size_x+2) * size;
+    tmp.col_major[2 * 4 + 2] =  /*m_model.col_major[2 * 4 + 2] * */(render_settings::tile_size_y+2) * size;
+    tmp.col_major[3 * 4 + 0] =  m_pos.x * render_settings::tile_size_x - ((render_settings::tile_size_x+2) * size )/2.0f;
+    tmp.col_major[3 * 4 + 1] =  m_height+0.4;
+    tmp.col_major[3 * 4 + 2] =  m_pos.y * render_settings::tile_size_y - ((render_settings::tile_size_y+2) * size )/2.0f;
 
     int loc = glGetUniformLocation(gl_shader_object(find_shader("selection_circle_shader")), "proj");
     glUniformMatrix4fv(loc, 1, GL_FALSE, projection_matrix_of_cam(current_camera())->col_major);
@@ -529,6 +588,7 @@ void Building::draw_selection_circle(int size){
 
     unbind_texture(find_texture("selection_circle"));
     glDisable(GL_BLEND);
+//    glDepthMask(GL_TRUE);
 }
 
 void Building::change_owner(unsigned int owner){
@@ -545,6 +605,7 @@ UnitGroup::UnitGroup(Obj *obj, simple_heightmap *sh, string name, vec2f start, v
     m_unit_count(unit_count), m_sh(sh), m_id(m_id),
     m_time_to_reach_end(time_to_rech_end), m_spawned(0), m_start_b(start), m_end_b(end)
 {
+    m_another_timer.restart();
     m_modelmatrices = vector<matrix4x4f>();
     m_cur_heights = vector<float>();
     m_dest_heights = vector<float>();
@@ -576,10 +637,6 @@ void UnitGroup::force_position(vec2f pos){
     update_model_matrices();
 }
 
-int get_coooooords(int index, int size){
-    int k = size +1;
-    return k/2 + index;
-}
 
 
 
@@ -625,8 +682,8 @@ void UnitGroup::move_to(vec2f pos, float time_to_reach){
   //  force_position(m_end);
    // force_position(m_end);
 //	vec2f pos_1 = vec2f(m_model.col_major[3 * 4 + 0], m_model.col_major[3 * 4 + 2]);
-    cout <<"start: "<< m_start.x << ","<< m_start.y << endl;
-    cout <<"end: " <<m_end.x << ","<< m_end.y << endl;
+//    cout <<"start: "<< m_start.x << ","<< m_start.y << endl;
+//    cout <<"end: " <<m_end.x << ","<< m_end.y << endl;
     if(move){
         m_start = m_end;
         m_end = pos;
@@ -697,7 +754,45 @@ void UnitGroup::update_dest_heights(){
 
 }
 
-void UnitGroup::draw(){
+void UnitGroup::draw_mesh(){
+    for(int i =0; i < m_spawned; ++i){
+        bind_shader(m_obj->shader);
+
+        int loc = glGetUniformLocation(gl_shader_object(m_obj->shader), "proj");
+        glUniformMatrix4fv(loc, 1, GL_FALSE, projection_matrix_of_cam(current_camera())->col_major);
+
+        loc = glGetUniformLocation(gl_shader_object(m_obj->shader), "view");
+        glUniformMatrix4fv(loc, 1, GL_FALSE, gl_view_matrix_of_cam(current_camera())->col_major);
+
+        loc = glGetUniformLocation(gl_shader_object(m_obj->shader), "model");
+        glUniformMatrix4fv(loc, 1, GL_FALSE, m_units[i].getModel()->col_major);
+
+        loc = glGetUniformLocation(gl_shader_object(m_obj->shader), "light_dir");
+        glUniform3f(loc, 0.7, 1.2,0.3);
+        loc = glGetUniformLocation(gl_shader_object(m_obj->shader), "light_col");
+        glUniform3f(loc, 1,1,1);
+        loc = glGetUniformLocation(gl_shader_object(m_obj->shader), "time");
+        glUniform1f(loc, m_another_timer.look());
+        vec3f cam_pos;
+        extract_pos_vec3f_of_matrix(&cam_pos, lookat_matrix_of_cam(current_camera()));
+        loc = glGetUniformLocation(gl_shader_object(m_obj->shader), "eye_pos");
+        glUniform3f(loc, cam_pos.x, cam_pos.y, cam_pos.z);
+
+
+//        bind_texture(m_obj->tex, 0);
+//        loc = glGetUniformLocation(gl_shader_object(m_obj->shader), "diffuse_tex");
+//        glUniform1i(loc, 0);
+
+        bind_mesh_to_gl(m_obj->mesh);
+
+        draw_mesh_as(m_obj->mesh,GL_TRIANGLES);
+        unbind_mesh_from_gl(m_obj->mesh);
+        unbind_shader(m_obj->shader);
+
+    }
+}
+
+void UnitGroup::draw_drawelement(){
 
     for(int i = 0; i < m_spawned; ++i){
 
@@ -768,7 +863,11 @@ void Unit::update(vec2f new_pos, float height){
 //        cout << "newpos " << new_pos.x << " " << new_pos.y << endl;
     m_start = m_pos;
     m_end = new_pos;
-    m_view_dir = m_end - m_pos;
+    vec2f tmp = m_end - m_pos;
+    if(length_of_vec2f(&tmp) > 0.1) {
+        m_view_dir =  tmp;
+    }
+
 //    cout << length_of_vec2f(&m_view_dir) << endl;
     m_speed = BASE_SPEED + length_of_vec2f(&m_view_dir)/(1*render_settings::tile_size_x);
     normalize_vec2f(&m_view_dir);

@@ -136,9 +136,9 @@
 
 		float n_dot_l = max(0, dot(norm_wc, -light_dir));
 		out_col += vec4(color * light_col * n_dot_l, 0.);
-		out_col = vec4(color.r,color.g,color.b,1);
-		if(out_col.x <= 0.2 && out_col.y <= 0.2 &&out_col.z <= 0.2)
-			discard;
+//		out_col = vec4(color.r,color.g,color.b,1);
+//		if(out_col.x <= 0.2 && out_col.y <= 0.2 &&out_col.z <= 0.2)
+//			discard;
 	}
 }
 #:inputs (list "in_pos" "in_norm" "in_tc")>
@@ -184,6 +184,7 @@
 #:vertex-shader #{
 #version 400 core
         in vec3 in_pos;
+        in vec3 in_norm;
         uniform mat4 proj;
         uniform mat4 view;
         uniform mat4 model;
@@ -197,69 +198,52 @@
 #version 400 core
 
 
-        layout(vertices = 3) out;
+        layout(vertices = 4) out;
         in vec3 out_pos[];
         out vec3 tcPosition[];
-        uniform vec3 CamPos;
+
         uniform mat4 view;
         uniform mat4 model;
+        uniform float lod = 0.1;
         #define ID gl_InvocationID
-        vec3 ndc(vec3 world){
-                vec4 v =  view *model* vec4(world,1);
-                v /= v.w;
-                return v.xyz;
+
+        float level(float d){
+                return clamp(lod * 5000/d, 1, 64);
         }
-
-        //determine if is vertex is on the screen.  This is used to do culling.  My assumption is that if all vertices are off the screen then the patch should be discarded.
-        //Unfortunately this isn't true if you stand close to a patch and look at its center.  The extra stuff you see is an attempt to prevent culling of a patch if it is close to the eye.
-        bool offScreen(vec3 vertex){//vertex should be ndc
-                vertex = ndc(vertex);
-                float z = vertex.z * .5 + .5;
-
-                float w = 1 + (1-z) * 100;
-                return vertex.z < -1 || vertex.z > 1 || any(lessThan(vertex.xy, vec2(-w)) || greaterThan(vertex.xy, vec2(w)));
-        }
-
         void main()
         {
-            tcPosition[ID] = out_pos[ID];
-            vec3 pos = out_pos[ID];
-            float dis = length(view*model*vec4(pos,1));
-            if(offScreen(tcPosition[ID])){
-                gl_TessLevelInner[0] = 0;
-                gl_TessLevelOuter[0] = 0;
-                gl_TessLevelOuter[1] = 0;
-                gl_TessLevelOuter[2] = 0;
-            }
-            if (dis < 20) {
-                gl_TessLevelInner[0] = 8;
-                gl_TessLevelOuter[0] = 8;
-                gl_TessLevelOuter[1] = 8;
-                gl_TessLevelOuter[2] = 8;
-            } else if( dis < 50) {
-                gl_TessLevelInner[0] = 4;
-                gl_TessLevelOuter[0] = 4;
-                gl_TessLevelOuter[1] = 4;
-                gl_TessLevelOuter[2] = 4;
-            }else if( dis < 70) {
-                gl_TessLevelInner[0] = 2;
-                gl_TessLevelOuter[0] = 2;
-                gl_TessLevelOuter[1] = 2;
-                gl_TessLevelOuter[2] = 2;
-            } else {
-                gl_TessLevelInner[0] = 1;
-                gl_TessLevelOuter[0] = 1;
-                gl_TessLevelOuter[1] = 1;
-                gl_TessLevelOuter[2] = 1;
-            }
 
+            tcPosition[ID] = out_pos[ID];
+
+            vec3 pos = out_pos[ID];
+
+            if(ID == 0){
+//            float dis = length(view*model*vec4(tcPosition[0],1));
+
+            float d0 = length(view*model*vec4(tcPosition[0],1));
+            float d1 = length(view*model*vec4(tcPosition[1],1));
+            float d2 = length(view*model*vec4(tcPosition[2],1));
+            float d3 = length(view*model*vec4(tcPosition[3],1));
+
+
+
+                gl_TessLevelOuter[0] = level(mix(d3,d0,.5));
+                gl_TessLevelOuter[1] = level(mix(d0,d1,.5));
+                gl_TessLevelOuter[2] = level(mix(d1,d2,.5));
+                gl_TessLevelOuter[3] = level(mix(d2,d3,.5));
+                float l = max(max(gl_TessLevelOuter[0],gl_TessLevelOuter[1]),max(gl_TessLevelOuter[2],gl_TessLevelOuter[3]));
+                 gl_TessLevelInner[0] = l;
+                 gl_TessLevelInner[1] = l;
+
+
+        }
         }
 }
 #:tess-eval-shader #{
 #version 400 core
 
 
-        layout(triangles, fractional_even_spacing, ccw) in;
+        layout(quads, equal_spacing, ccw) in;
         in vec3 tcPosition[];
         out vec3 out_pos;
         out vec3 tePatchDistance;
@@ -269,15 +253,22 @@
         uniform mat4 model;
         uniform mat4 view;
         uniform sampler2D height_map;
+        vec3 interpolate(vec3 bl, vec3 br, vec3 tr, vec3 tl){
+                float u = gl_TessCoord.x;
+                float v = gl_TessCoord.y;
 
+                vec3 b = mix(bl,br,u);
+                vec3 t = mix(tl,tr,u);
+                return mix(b,t,v);
+        }
         void main()
         {
-            vec3 p0 = gl_TessCoord.x * tcPosition[0];
-            vec3 p1 = gl_TessCoord.y * tcPosition[1];
-            vec3 p2 = gl_TessCoord.z * tcPosition[2];
+//            vec3 p0 = gl_TessCoord.x * tcPosition[0];
+//            vec3 p1 = gl_TessCoord.y * tcPosition[1];
+//            vec3 p2 = gl_TessCoord.z * tcPosition[2];
             tePatchDistance = gl_TessCoord;
 
-            out_pos = p0 + p1 + p2;
+            out_pos = interpolate(tcPosition[0],tcPosition[1],tcPosition[2],tcPosition[3]);
             out_pos.y = texture(height_map,vec2(out_pos.z, out_pos.x));
             out_pos = (model*vec4(out_pos, 1)).xyz;
             gl_Position = proj * view * vec4(out_pos, 1);
@@ -295,7 +286,7 @@
         layout(triangle_strip, max_vertices = 3) out;
         in vec3 out_pos[3];
         in vec3 tePatchDistance[3];
-        smooth out vec3 gFacetNormal;
+         out vec3 gFacetNormal;
         out vec3 gPatchDistance;
         out vec3 gTriDistance;
         out vec3 pos;
@@ -316,17 +307,17 @@
             gl_Position = gl_in[0].gl_Position;
             pos = out_pos[0]; EmitVertex();
 
-            A = out_pos[0] - out_pos[1];
-            B = out_pos[2] - out_pos[1];
-            gFacetNormal = normal * normalize(cross(A, B));
+//            A = out_pos[0] - out_pos[1];
+//            B = out_pos[2] - out_pos[1];
+//            gFacetNormal = normal * normalize(cross(A, B));
             gPatchDistance = tePatchDistance[1];
             gTriDistance = vec3(0, 1, 0);
             gl_Position = gl_in[1].gl_Position;
             pos = out_pos[1]; EmitVertex();
 
-            A = out_pos[1] - out_pos[2];
-            B = out_pos[0] - out_pos[2];
-            gFacetNormal = normal * normalize(cross(A, B));
+//            A = out_pos[1] - out_pos[2];
+//            B = out_pos[0] - out_pos[2];
+//            gFacetNormal = normal * normalize(cross(A, B));
             gPatchDistance = tePatchDistance[2];
             gTriDistance = vec3(0, 0, 1);
             gl_Position = gl_in[2].gl_Position;
@@ -352,6 +343,13 @@
         uniform vec3 light_dir;
         uniform vec3 light_col;
         out vec4 out_col;
+
+        float amplify(float d, float scale, float offset){
+            d = scale*d + offset;
+            d = clamp(d,0,1);
+            d = 1-exp2(-2*d*d);
+            return d;
+        }
 
         void main() {
             float border_water = 0.0 * height_factor;
@@ -386,9 +384,14 @@
                      vec3 N = normalize(gFacetNormal);
                      vec3 L = light_dir;
                      float df = abs(dot(N, L));
+                     float d1 = min(min(gTriDistance.x, gTriDistance.y), gTriDistance.z);
+                     float d2 = min(min(gPatchDistance.x, gPatchDistance.y), gPatchDistance.z);
+                     vec3 color = df*light_col;
 
 
-                     out_col *= (df)*vec4(light_col,1);
+
+
+                     out_col *= (df)*vec4(color,1);
 
 
 
@@ -561,8 +564,57 @@
 #:inputs (list "in_pos" "in_norm" "in_tc")>
 
 
+#<make-shader "ip2-shader"
+#:vertex-shader #{
+#version 150 core
 
-#:inputs (list "in_pos" "in_tc")>
+        in vec3 in_pos_0;
+        in vec3 in_pos_1;
+        in vec2 in_tc;
+        in vec3 in_norm_0;
+        in vec3 in_norm_1;
+        uniform mat4 proj;
+        uniform mat4 view;
+        uniform mat4 model;
+        uniform float time;
+        out vec2 tc;
+        out vec3 norm_wc;
+        out vec4 pos_wc;
+        void main() {
+            float t = (sin(time/1000)+1)/2.0;
+            norm_wc = mix(in_norm_0,in_norm_1,t);
+//            vec3 pos = mix(in_pos_0,in_pos_1,t);
+//                    pos_wc = model * vec4(pos, 1.0);
+            pos_wc = model * vec4(in_pos_0, 1.0);
+                norm_wc = transpose(inverse(mat3x3(model))) * norm_wc;
+//                    norm_wc = (model_normal * vec4(in_norm,0)).xyz;
+                    tc = in_tc;
+                    gl_Position = proj * view * pos_wc;
+        }
+
+}
+#:fragment-shader #{
+#version 150 core
+
+        out vec4 out_col;
+        uniform sampler2D diffuse_tex;
+        uniform vec3 light_dir;
+        uniform vec3 light_col;
+        uniform vec3 eye_pos;
+        in vec4 pos_wc;
+        in vec3 norm_wc;
+        in vec2 tc;
+        void main() {
+                out_col = vec4(0.,0.,0.,1.);
+                vec3 color = texture(diffuse_tex, tc.st).rgb;
+
+                float n_dot_l = max(0, dot(norm_wc, -light_dir));
+                out_col += vec4(color * light_col * n_dot_l, 0.);
+//                out_col = vec4(1,1,1,1);
+        }
+}
+
+#:inputs (list "in_pos_1" "in_pos_2" "in_norm_1" "in_norm_2" "in_tc")>
 
 #<make-shader "count-shader"
 #:vertex-shader #{
