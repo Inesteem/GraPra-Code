@@ -184,6 +184,7 @@
 #:vertex-shader #{
 #version 400 core
         in vec3 in_pos;
+        in vec3 in_norm;
         uniform mat4 proj;
         uniform mat4 view;
         uniform mat4 model;
@@ -573,57 +574,53 @@
 #:vertex-shader #{
 #version 150 core
 
-        in vec3 in_pos;
+        in vec3 in_pos_1;
+        in vec3 in_pos_2;
         in vec2 in_tc;
+        in vec3 in_norm_1;
+        in vec3 in_norm_2;
         uniform mat4 proj;
         uniform mat4 view;
         uniform mat4 model;
+        uniform float time;
         out vec2 tc;
+        out vec3 norm_wc;
+        out vec4 pos_wc;
         void main() {
-                gl_Position = proj * view * model * vec4(in_pos, 1.);
-                float newy= in_tc.y -1;
-                if(newy < 0) newy=-newy;
-                vec2 texc = vec2(in_tc.x, newy);
-                tc = texc;
+            float t = (sin(time)+1)/2.0;
+            norm_wc = mix(in_norm_1,in_norm_2,t);
+                    pos_wc = model * vec4(mix(in_pos_1,in_pos_2, t), 1.0);
+                norm_wc = transpose(inverse(mat3x3(model))) * norm_wc;
+//                    norm_wc = (model_normal * vec4(in_norm,0)).xyz;
+                    tc = in_tc;
+                    gl_Position = proj * view * pos_wc;
         }
 
 }
 #:fragment-shader #{
 #version 150 core
 
-in vec2 tc;
-out vec4 out_col;
-uniform sampler2D tex;
-uniform float LifeLevel;
-uniform float down;
+        out vec4 out_col;
+        uniform sampler2D diffuse_tex;
+        uniform vec3 light_dir;
+        uniform vec3 light_col;
+        uniform vec3 eye_pos;
+        in vec4 pos_wc;
+        in vec3 norm_wc;
+        in vec2 tc;
+        void main() {
+                out_col = vec4(0.,0.,0.,1.);
+                vec3 color = texture(diffuse_tex, tc.st).rgb;
 
-                void main(){
+                float n_dot_l = max(0, dot(norm_wc, -light_dir));
+                out_col += vec4(color * light_col * n_dot_l, 0.);
+                out_col = vec4(color.r,color.g,color.b,1);
+                if(out_col.x <= 0.2 && out_col.y <= 0.2 &&out_col.z <= 0.2)
+                        discard;
+        }
+}
 
-                        out_col = texture2D(tex, tc );
-                        out_col.w = 0.3;
-
-                        if (out_col.x > 0.5 && out_col.y > 0.5 && out_col.z > 0.5)
-                                discard;
-
-                        else if(down == 0 && LifeLevel > 0){
-                                if (tc.y < LifeLevel && tc.x > 0.3 && tc.x < 0.7 && tc.y > 0.04 )
-                                        //out_col = vec4(0.2, 0.8, 0.2, .7); // Opaque green
-                                        out_col = vec4(1-tc.y, tc.y, 0., .7);
-                        }
-                        else if(down == 1 && LifeLevel < 0){
-                                float temp_ll = 1+LifeLevel;
-                                if (tc.y > temp_ll && tc.x > 0.3 && tc.x < 0.7 && tc.y < 0.96 )
-                                                out_col = vec4(tc.y, 1-tc.y, 0., .7);
-                        }
-
-                }
-
-
-
-
-                }
-
-#:inputs (list "in_pos" "in_tc")>
+#:inputs (list "in_pos_1" "in_pos_2" "in_norm_1" "in_norm_2" "in_tc")>
 
 #<make-shader "count-shader"
 #:vertex-shader #{

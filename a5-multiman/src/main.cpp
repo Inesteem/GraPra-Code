@@ -614,7 +614,11 @@ void actual_main() {
         objhandler->addObj("upgrade_arrow", "./render-data/models/cube.obj", find_shader("pos+norm+tc"));
         objhandler->addObj("house_pacman", "./render-data/models/siedlung.obj", find_shader("alpha-color-shader"));
         objhandler->addObj("turret_pacman", "./render-data/models/simple_tower_pacman.obj", find_shader("alpha-color-shader"));
-        objhandler->addObj("pacman", "./render-data/models/pacman.obj", find_shader("pos+norm+tc"));
+//        objhandler->addObj("pacman", "./render-data/models/pacman.obj", find_shader("pos+norm+tc"));
+        vector<string> filenames;
+        filenames.push_back("./render-data/models/pacman_01.obj");
+        filenames.push_back("./render-data/models/pacman_02.obj");
+        objhandler->makeObjFMS(filenames,"pacman",find_shader("ip2-shader"));
  //      objhandler->addObj("house_pacman", "./render-data/models/house_pacman.obj", find_shader("pos+norm+tc"));
 
 
