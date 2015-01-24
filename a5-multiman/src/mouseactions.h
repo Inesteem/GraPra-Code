@@ -65,6 +65,7 @@ namespace moac {
 		void upgrade_settlement();
 		void upgrade_turret();
 		void check_button_clicked(int x, int y, int state);
+		void update_iconbar();
 	
 	};	
 	

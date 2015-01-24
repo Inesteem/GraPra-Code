@@ -9,7 +9,7 @@ Ks 0.500000 0.500000 0.500000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd blends/textures/pacman_turret/MarbleNoisy0023_S.png
+map_Kd ./render-data/models/blends/textures/pacman_turret/MarbleNoisy0023_S.png
 
 newmtl Material_BrickOldRounded0236_7_L.png
 Ns 96.078431

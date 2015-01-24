@@ -15,6 +15,7 @@
 #include "game.h"
 #include "label.h"
 #include "messages.h"
+#include "gameobject.h"
 
 
 
@@ -115,6 +116,8 @@ public:
 
 class IconBar{
 	
+	Building *building;
+	
 	int loc = -1;
 	int button_pressed = -1;
 	
@@ -127,8 +130,9 @@ class IconBar{
 	
 	bool t_upgradeable = true;
 	bool s_upgradeable = true;
+	bool building_selected = false;
 	
-	float depth_background = 0.1;
+	float depth_background = 0.09;
 	float depth_button = 0.01;	
 	float depth_button_s = 0.001;	
 	float depth_acc_button_s = 0.0001;	
@@ -145,9 +149,9 @@ class IconBar{
 	texture_ref background;
 	texture_ref fraction[2];
 	texture_ref upgrade_button_turret[2];
-	texture_ref noupgrade_button_turret[2];
+	texture_ref noupgrade_button_turret[3];
 	texture_ref upgrade_button_settlement[2];
-	texture_ref noupgrade_button_settlement[2];
+	texture_ref noupgrade_button_settlement[3];
 	texture_ref picture[2];
 	
 	matrix4x4f *models[5];
@@ -173,6 +177,8 @@ public:
 	void draw();
 	int click(int x, int y, vec3f (*ptr)(int x, int y));
 	void scale_button(int b, bool greater);
+	void update(int type, int lvl,  bool upgradeable);
+	void selected_building(bool s);
 	
 	
 };

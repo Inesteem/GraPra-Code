@@ -109,12 +109,6 @@ void mouse_move(int x, int y) {
 void mouse(int button, int state, int x, int y) {
 	
 	if(render_menu){
-		//todo : simple return
-        if(state == GLUT_DOWN)
-			action->check_button_clicked(x,y, 0);
-		else
-			action->check_button_clicked(x,y, 1);
-			
 		return;
 	}
 	
@@ -124,7 +118,10 @@ void mouse(int button, int state, int x, int y) {
         if(button == GLUT_LEFT_BUTTON){ //eigene Gebaeude auswaehlen
             if(state == GLUT_DOWN){
                 action->handle_base_selection(x,y);
-            }
+				action->check_button_clicked(x,y, 0);
+            }else
+				action->check_button_clicked(x,y, 1);
+				
 
         }
 		else if(button == GLUT_RIGHT_BUTTON){
@@ -546,8 +543,7 @@ void loop() {
 			action->draw();
 		} 
 		if(render_menu){
-		//	menu->draw(false);
-			action->draw();
+			menu->draw(false);
 		}
 		render_timer.done_with("draw");
 
@@ -622,7 +618,7 @@ void actual_main() {
   //      objhandler->addObj_withScale("upgrade_arrow", "./render-data/models/cube.obj", find_shader("pos+norm+tc"), vec3f(0.99,0.99,0.99));
         objhandler->addObj("upgrade_arrow", "./render-data/models/cube.obj", find_shader("pos+norm+tc"));
         objhandler->addObj("house_pacman", "./render-data/models/siedlung.obj", find_shader("alpha-color-shader"));
-        objhandler->addObj("turret_pacman", "./render-data/models/simple_tower_pacman.obj", find_shader("alpha-color-shader"));
+        objhandler->addObj("turret_pacman", "./render-data/models/simple_tower_pacman.obj", find_shader("pos+norm+tc"));
 //        objhandler->addObj("pacman", "./render-data/models/pacman.obj", find_shader("pos+norm+tc"));
         vector<string> filenames;
         filenames.push_back("./render-data/models/cube_1.obj");
@@ -656,7 +652,7 @@ void actual_main() {
 	menu->set_mode(menu->GAMESTART); 
 
 
-    game = new Game(objhandler,sh, messageReader, menu);
+    game = new Game(objhandler,sh, messageReader,menu);
 
     messageReader = new client_message_reader(game);
 
@@ -669,6 +665,7 @@ void actual_main() {
 	glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
 
 	action = new Action(game, objhandler);
+	game->set_action(action);
 
 	init_framebuffer();
 

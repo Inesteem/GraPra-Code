@@ -96,7 +96,8 @@ public:
     float dist_to(vec3f &pos);
     void draw();
     void draw_selection_circle();
-    void draw_state_1();
+    void draw_state_house_1();
+    void draw_state_turret_1();
     void draw_selection_circle(int size);
     void change_size(int size);
 	unsigned int get_owner_id();
@@ -104,6 +105,8 @@ public:
 	void update_unit_count(int count);
 	int get_unit_count();
 	int get_state();
+	int get_type();
+	int get_level();
     void change_owner(unsigned int owner);
     bool check_for_upgrade(bool next, int state);
 

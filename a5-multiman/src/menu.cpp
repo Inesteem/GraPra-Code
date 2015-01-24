@@ -281,10 +281,12 @@ IconBar::IconBar(){
 	upgrade_button_turret[1] = 		find_texture("u_b_t2");
 	noupgrade_button_turret[0] = 	find_texture("nu_b_t1");
 	noupgrade_button_turret[1] = 	find_texture("nu_b_t2");
+	noupgrade_button_turret[2] = 	find_texture("terrain_hm");
 	upgrade_button_settlement[0] = 	find_texture("u_b_s2");
 	upgrade_button_settlement[1] = 	find_texture("u_b_s3");
 	noupgrade_button_settlement[0] =find_texture("nu_b_s2");
 	noupgrade_button_settlement[1] =find_texture("nu_b_s3");
+	noupgrade_button_settlement[2] =find_texture("terrain_hm");
 	picture[0] =					find_texture("terrain_hm");
 	picture[1] =					find_texture("dorf");
 	
@@ -358,7 +360,8 @@ void IconBar::draw(){
 	
 	draw_fraction();
 	draw_picture();	
-	draw_buttons();
+	if(building_selected)
+		draw_buttons();
 
 
 	unbind_mesh_from_gl(mesh);
@@ -414,7 +417,6 @@ void IconBar::draw_buttons(){
 		
 	loc = glGetUniformLocation(gl_shader_object(shader), "model");
 	glUniformMatrix4fv(loc, 1, GL_FALSE, model_button_t.col_major);	
-	
 
 	if(t_upgradeable)
 		bind_texture(upgrade_button_turret[t_level], 0);
@@ -541,6 +543,8 @@ void IconBar::scale_button(int b, bool greater){
 	switch(b){
 		//settlement
 		case 0 : 
+				if(!s_upgradeable) return;
+		
 				button_pressed = 0; 
 				model_button_s.row_col(0,0) += scale;
 				model_button_s.row_col(1,1) += scale;
@@ -549,6 +553,8 @@ void IconBar::scale_button(int b, bool greater){
 				break;
 		//turret
 		case 1 : 
+				if(!t_upgradeable) return;
+				
 				button_pressed = 1;
 				model_button_t.row_col(0,0) += scale;
 				model_button_t.row_col(1,1) += scale;
@@ -561,5 +567,50 @@ void IconBar::scale_button(int b, bool greater){
 	
 	if(greater)
 		button_pressed = -1;
+	
+}
+
+
+void IconBar::update(int type, int lvl, bool upgradeable){
+	
+	cout << "menu : " << type << " " << lvl << " " << upgradeable << endl; 
+	
+	//use carefully!
+	if(lvl < 0 || lvl > 2){
+		lvl = 2;
+	}
+	
+	
+	switch(type){
+		case 0 : 
+				s_upgradeable = upgradeable;
+				s_level = lvl;
+				
+				if(lvl == 2){
+					s_upgradeable = false;
+					
+				}
+				break;
+		
+		case 1 : 
+				t_upgradeable = upgradeable;
+				t_level = lvl;
+				
+				if(lvl == 2){
+					t_upgradeable = false;
+					
+				}
+				break;			
+	
+		default : 
+				cout << "menu : unknown type delivered" << endl;
+	}
+
+
+}
+
+void IconBar::selected_building(bool s){
+	
+	building_selected = s;
 	
 }

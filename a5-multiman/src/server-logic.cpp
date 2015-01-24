@@ -158,11 +158,11 @@ void GameStage::upgrade_building_turret(unsigned int buildingId){
     int units = 0;
 
     if(building->m_state == msg::building_state::construction_site || building->m_state == msg::building_state::house_lvl1 || building->m_state == msg::building_state::house_lvl2) {
-        units = msg::upgrade_cost::UpgradeToHouseLvl1;
+        units = msg::upgrade_cost::UpgradeToTurretLvl1;
         if(units > building->m_unitCount) return; // not enough units
         building->m_state = msg::building_state::turret_lvl1;
     } else if(building->m_state == msg::building_state::turret_lvl1) {
-        units = msg::upgrade_cost::UpgradeToHouseLvl2;
+        units = msg::upgrade_cost::UpgradeToTurretLvl2;
         if(units > building->m_unitCount) return; // not enough units
         building->m_state = msg::building_state::turret_lvl2;
     } else return;

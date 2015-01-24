@@ -12,6 +12,11 @@ Game::Game(ObjHandler *objhandler, simple_heightmap *sh, client_message_reader *
 	player_color = vec3f(0,0,1);
 }
 
+void Game::set_action(moac::Action *action){	
+	this->action = action;
+}
+
+
 void Game::add_building(string name, int size, int x, int y, unsigned int id){
     m_buildings.push_back(Building(m_objhandler->getObjByName(name), m_objhandler->getObjByName("selection_circle"),m_objhandler->getObjByName("upgrade_arrow"), name,x,y, -1 ,size, m_sh->get_height(x,y), id));
 		
@@ -37,7 +42,27 @@ void Game::change_building_owner(int building_id, int new_owner){
 void Game::update_building_unit_count(unsigned int id, unsigned int unit_count){
     for(int i = 0; i < m_buildings.size(); i++){
 		if(m_buildings[i].get_id() == id){
-			m_buildings[i].update_unit_count(unit_count);
+			
+			if(m_selected != nullptr && m_buildings[i].get_id() == m_selected->get_id()){
+				
+				bool updateable_1 = m_buildings[i].check_for_upgrade(true, -1);
+				bool updateable_2 = m_buildings[i].check_for_upgrade(false, -1);
+				
+				
+				m_buildings[i].update_unit_count(unit_count);
+
+				bool updateable_3 = m_buildings[i].check_for_upgrade(true, -1);
+				bool updateable_4 = m_buildings[i].check_for_upgrade(false, -1);
+				
+				if(updateable_1 != updateable_3 || updateable_2 != updateable_4)
+					action->update_iconbar();
+
+				
+			
+						
+			} else
+				m_buildings[i].update_unit_count(unit_count);
+
 			return;
 		}
 	}

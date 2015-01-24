@@ -365,6 +365,25 @@ int Building::get_state(){
 	return state;
 }
 
+int Building::get_type(){
+	
+	if(settlement)		
+		return 0;
+	return 1;
+	
+}
+
+int Building::get_level(){
+	
+	if(state == msg::building_state::house_lvl1 || state == msg::building_state::turret_lvl1)		
+		return 0;
+	else if(state == msg::building_state::house_lvl2 || state == msg::building_state::turret_lvl2)	
+		return 1;
+	else
+		return -1;
+	
+}
+
 
 void Building::upgrade(Obj *obj, int state){
 	m_obj = obj;
@@ -389,7 +408,6 @@ void Building::draw(){
 	if(rotation == std::numeric_limits<float>::max()-2)
 		rotation = 0;
 
-//    if(m_owner == -1){
         if(state <= msg::building_state::construction_site){
 		matrix4x4f shovel_model;
 		
@@ -413,7 +431,10 @@ void Building::draw(){
 		}
 		
     } else if (state == msg::building_state::house_lvl1) {
-		draw_state_1();
+		draw_state_house_1();
+		
+    } else if (state == msg::building_state::turret_lvl1) {
+		draw_state_turret_1();
 		
 	} else {
 		GameObject::draw();
@@ -427,7 +448,7 @@ void Building::draw(){
 		vec3f rot_vec = vec3f(0,1,0);
 		make_rotation_matrix4x4f(&arrow_model_2,&rot_vec, rotation/2);
 		arrow_model_2 =  arrow_model * arrow_model_2;		
-		    arrow_model_2.col_major[3 * 4 + 1] += sin( rotation/2 );
+		arrow_model_2.col_major[3 * 4 + 1] += sin( rotation/2 );
 		for (vector<drawelement*>::iterator it = upgrade_arrow->drawelements->begin(); it != upgrade_arrow->drawelements->end(); ++it) {
 		
 			drawelement *de = *it;
@@ -445,7 +466,23 @@ void Building::draw(){
     draw_selection_circle(3);
 }
 
-void Building::draw_state_1(){
+void Building::draw_state_turret_1(){
+
+	for (vector<drawelement*>::iterator it = m_obj->drawelements->begin(); it != m_obj->drawelements->end(); ++it) {
+			drawelement *de = *it;
+			de->Modelmatrix(&m_model);
+			de->bind();
+			setup_dir_light(m_shader);
+			de->apply_default_matrix_uniforms();
+			de->apply_default_tex_uniforms_and_bind_textures();
+			de->draw_em();
+			de->unbind();
+	}	
+	
+	
+}
+
+void Building::draw_state_house_1(){
 	shader_ref shader_t = find_shader("alpha-color-shader");
 	bind_shader(shader_t);
 
@@ -525,9 +562,20 @@ bool Building::check_for_upgrade(bool next, int state){
 			return false;		
 			
 		}
-	} else
-	return true;
+	} else {
+		if(settlement){
+			if(unit_count >= msg::upgrade_cost::UpgradeToTurretLvl1)
+				return true;
+		} else if(turret || this->state == msg::building_state::house_lvl1){
+			if(unit_count >= msg::upgrade_cost::UpgradeToTurretLvl2)
+				return true;
+		}
 		
+
+	}
+	
+	
+	return false;
 }
 
 
@@ -544,8 +592,9 @@ unsigned int Building::get_id(){
 
 void Building::draw_selection_circle(int size){
     glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-//    glDepthMask(GL_FALSE);
+   // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendFunc(GL_ONE, GL_ONE);
+    glDepthMask(GL_TRUE);
     vec3f color = get_player_color(m_owner);
     bind_shader(find_shader("selection_circle_shader"));
 

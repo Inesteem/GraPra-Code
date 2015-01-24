@@ -4,6 +4,7 @@
 #include "gameobject.h"
 #include "game.h"
 #include "menu.h"
+#include "messages.h"
 
 namespace moac {
 	
@@ -81,9 +82,9 @@ namespace moac {
         if(ob_set && game->m_player_id == own_building->get_owner_id() && own_building->check_for_upgrade(true,own_building->get_state()+1)){
 				
             msg::building_upgrade_house buc = make_message<msg::building_upgrade_house>();
-			// TODO use own player id
 			buc.buildingId = own_building->get_id();
 			game->m_messageReader->send_message(buc);
+			update_iconbar();
 				
 	      
 		} else 
@@ -92,14 +93,18 @@ namespace moac {
 	}
 	
 	void Action::upgrade_turret(){
+		bool next = false;
+		if(own_building->get_type() == 1)
+			next = true;
 
         
-        if(ob_set && game->m_player_id == own_building->get_owner_id() && own_building->check_for_upgrade(true,own_building->get_state()+1 )){
+        if(ob_set && game->m_player_id == own_building->get_owner_id() && own_building->check_for_upgrade(next,own_building->get_state()+1)){
 				
             msg::building_upgrade_turret buc = make_message<msg::building_upgrade_turret>();
 			// TODO use own player id
 			buc.buildingId = own_building->get_id();
 			game->m_messageReader->send_message(buc);
+			update_iconbar();
 				 
 		} else 
 			cout << '\a';
@@ -116,6 +121,7 @@ namespace moac {
 			eb_set = false;
        //     ob_set = false;
 			game->set_selected(nullptr);
+			iconbar->selected_building(false);
             prepare_attack = false;
 			return false;
         }
@@ -149,7 +155,8 @@ namespace moac {
 		ob_set = true;
 		own_building = building;
 		game->set_selected(building);
-		
+		update_iconbar();
+		iconbar->selected_building(true);
 		return true;
 	}
 	
@@ -185,8 +192,6 @@ namespace moac {
         if(render_status_bar)
 			iconbar->draw();
   
-  //      if(render_status_bar)
-  //          statusbar->render_statusbar();
 	}
 	
 
@@ -194,6 +199,8 @@ namespace moac {
 		if(prepare_attack)
 			slidebar->update_mouse_pos(x,y);	
 	}
+	
+	//iconbar
 	
 	void Action::check_button_clicked(int x, int y, int state){
 		
@@ -207,13 +214,43 @@ namespace moac {
 		switch(button){
 			//settlement
 			case 0 :iconbar->scale_button(button, false);  
+					upgrade_settlement(); 
 					break;
 			//turret
 			case 1 :iconbar->scale_button(button, false);   
+					upgrade_turret();
 					break;
 			
 			default : return;
 		}
+		
+		
+	}
+
+
+	void Action::update_iconbar(){
+		
+		int type = own_building -> get_type();
+		int level = own_building->get_level();
+		
+		cout << type << " " << level << endl;
+
+		bool updateable_1 = own_building->check_for_upgrade(true, -1);
+		bool updateable_2 = own_building->check_for_upgrade(false, -1);
+
+		
+		if(type == 0){
+
+			iconbar->update(0, level, updateable_1);
+			iconbar->update(1, 0, updateable_2);
+
+		} else if(type == 1){
+			
+			iconbar->update(0, level, updateable_1);
+			iconbar->update(1, 0, updateable_2);	
+			
+		}
+		
 		
 		
 	}

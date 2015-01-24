@@ -85,8 +85,10 @@
             vec4 tex_col = texture(tex,tc);
 
 
-          if(tex_col.r >= 0.5 && tex_col.g >= 0.5 && tex_col.b >= 0.5)
-                out_col = vec4(color,0.7);
+          if(tex_col.r >= 0.5 && tex_col.g >= 0.5 && tex_col.b >= 0.5){
+                out_col = vec4(color,0.5);
+				gl_FragDepth = 0.1;
+          }
             else if(!(tex_col.r >= 0.9 || tex_col.g <= 0.1 || tex_col.b >= 0.9))  {
                 out_col = tex_col;
           } else {
@@ -886,7 +888,7 @@ uniform float down;
 
                        void main(){
 
-                               gl_FragDepth = 0.001;
+                               gl_FragDepth = 0.01;
 
                                if(texture(tex, tc).r >= 0.5 || texture(tex, tc).g >= 0.5 || texture(tex, tc).b >= 0.5)
                                        out_col = vec4(color.r,color.g,color.b, 1.);

@@ -24,6 +24,7 @@ public:
     void upgrade_building(unsigned int buildingId, unsigned int state);
     
     void set_selected(Building *building);
+    void set_action(moac::Action *action);
 
     void init(string filename, int widht, int height, int id);
     Building* get_building_at(vec3f pos);
@@ -47,7 +48,8 @@ public:
     int m_player_id;
     vec3f player_color;
     vector<vec3f> planes;
-    Menu *menu;                      
+    Menu *menu; 
+    moac::Action *action;                      
                                     
 private:
 

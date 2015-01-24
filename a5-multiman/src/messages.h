@@ -19,11 +19,11 @@
 namespace msg {
     namespace building_state {
         enum {
-            construction_site = 1,
-            house_lvl1,
-            house_lvl2,
-            turret_lvl1,
-            turret_lvl2         
+            construction_site = -1,
+            house_lvl1 = 0,
+            house_lvl2 = 1,
+            turret_lvl1 = 2,
+            turret_lvl2 = 3         
         };
     }
 
