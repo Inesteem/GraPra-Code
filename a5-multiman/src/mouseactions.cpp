@@ -78,8 +78,7 @@ namespace moac {
 
 	void Action::upgrade_settlement(){
  
-		
-        if(ob_set && game->m_player_id == own_building->get_owner_id() && own_building->check_for_upgrade(true,own_building->get_state()+1)){
+        if(ob_set && game->m_player_id == own_building->get_owner_id() && own_building->check_for_upgrade_settlement(own_building->get_state()+1)){
 				
             msg::building_upgrade_house buc = make_message<msg::building_upgrade_house>();
 			buc.buildingId = own_building->get_id();
@@ -93,12 +92,11 @@ namespace moac {
 	}
 	
 	void Action::upgrade_turret(){
-		bool next = false;
-		if(own_building->get_type() == 1)
-			next = true;
-
+		bool upgradeable = own_building->check_for_upgrade_turret(own_building->get_state()+1);
+		if(own_building->get_state() == msg::building_state::house_lvl1)
+			upgradeable = own_building->check_for_upgrade_turret(msg::building_state::turret_lvl1);
         
-        if(ob_set && game->m_player_id == own_building->get_owner_id() && own_building->check_for_upgrade(next,own_building->get_state()+1)){
+        if(ob_set && game->m_player_id == own_building->get_owner_id() && upgradeable){
 				
             msg::building_upgrade_turret buc = make_message<msg::building_upgrade_turret>();
 			// TODO use own player id
@@ -121,7 +119,7 @@ namespace moac {
 			eb_set = false;
        //     ob_set = false;
 			game->set_selected(nullptr);
-			iconbar->selected_building(false);
+			iconbar->selected_building(nullptr);
             prepare_attack = false;
 			return false;
         }
@@ -155,8 +153,8 @@ namespace moac {
 		ob_set = true;
 		own_building = building;
 		game->set_selected(building);
+		iconbar->selected_building(building);
 		update_iconbar();
-		iconbar->selected_building(true);
 		return true;
 	}
 	
@@ -228,31 +226,9 @@ namespace moac {
 	}
 
 
+
 	void Action::update_iconbar(){
-		
-		int type = own_building -> get_type();
-		int level = own_building->get_level();
-		
-		cout << type << " " << level << endl;
-
-		bool updateable_1 = own_building->check_for_upgrade(true, -1);
-		bool updateable_2 = own_building->check_for_upgrade(false, -1);
-
-		
-		if(type == 0){
-
-			iconbar->update(0, level, updateable_1);
-			iconbar->update(1, 0, updateable_2);
-
-		} else if(type == 1){
-			
-			iconbar->update(0, level, updateable_1);
-			iconbar->update(1, 0, updateable_2);	
-			
-		}
-		
-		
-		
+		iconbar->update();	
 	}
 
 }

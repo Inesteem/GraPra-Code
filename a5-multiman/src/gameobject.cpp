@@ -375,10 +375,12 @@ int Building::get_type(){
 
 int Building::get_level(){
 	
-	if(state == msg::building_state::house_lvl1 || state == msg::building_state::turret_lvl1)		
+	if(		state == msg::building_state::house_lvl1 || state == msg::building_state::turret_lvl1)		
 		return 0;
 	else if(state == msg::building_state::house_lvl2 || state == msg::building_state::turret_lvl2)	
 		return 1;
+	else if(state == msg::building_state::house_lvl3 || state == msg::building_state::turret_lvl3)	
+		return 2;		
 	else
 		return -1;
 	
@@ -389,11 +391,11 @@ void Building::upgrade(Obj *obj, int state){
 	m_obj = obj;
 	this->state = state;
 	
-	if(state == msg::building_state::turret_lvl1 || state == msg::building_state::turret_lvl2){
+	if(state == msg::building_state::turret_lvl1 || state == msg::building_state::turret_lvl2 || state == msg::building_state::turret_lvl3 ){
 		settlement = false;
 		turret = true;
 	} 
-	else if(state == msg::building_state::house_lvl1 || state == msg::building_state::house_lvl2){
+	else if(state == msg::building_state::house_lvl1 || state == msg::building_state::house_lvl2 || state == msg::building_state::house_lvl3){
 		settlement = true;
 		turret = false;
 	}
@@ -443,7 +445,13 @@ void Building::draw(){
 	label->update_gui_texture_int(unit_count);
 	label->render_gui_overlay();
 	
-	if(check_for_upgrade(true, state+1) && PLAYER_ID == m_owner){
+	bool upgradeable = check_for_upgrade_settlement(state+1);
+	if(turret)
+		upgradeable = check_for_upgrade_turret(state+1);
+	
+	
+	
+	if(upgradeable && PLAYER_ID == m_owner){
 		matrix4x4f arrow_model_2;
 		vec3f rot_vec = vec3f(0,1,0);
 		make_rotation_matrix4x4f(&arrow_model_2,&rot_vec, rotation/2);
@@ -546,40 +554,71 @@ float Building::dist_to(vec3f &pos){
 
 }
 
+bool Building::check_for_upgrade_turret(int state){
 
-bool Building::check_for_upgrade(bool next, int state){
-	if(next){
-		if(settlement){
-			if(this->state == msg::building_state::construction_site && unit_count >= msg::upgrade_cost::UpgradeToHouseLvl1 )
+	using namespace msg::building_state;
+	using namespace msg::upgrade_cost;
+	
+	if(settlement){
+		
+		if(state == turret_lvl1){
+			if(this->state == house_lvl1 && unit_count >= UpgradeToTurretLvl1)
 				return true;
-			if(this->state == msg::building_state::house_lvl1 && unit_count >= msg::upgrade_cost::UpgradeToHouseLvl2)
+			
+			if(this->state > house_lvl1 && unit_count >= RebuildingToTurretLvl1)
 				return true;
-			return false;
-		}
-		else if(turret){
-			if(this->state == msg::building_state::turret_lvl1 && unit_count >= msg::upgrade_cost::UpgradeToTurretLvl2)
-				return true;
-			return false;		
 			
 		}
-	} else {
-		if(settlement){
-			if(unit_count >= msg::upgrade_cost::UpgradeToTurretLvl1)
-				return true;
-		} else if(turret || this->state == msg::building_state::house_lvl1){
-			if(unit_count >= msg::upgrade_cost::UpgradeToTurretLvl2)
-				return true;
-		}
-		
-
 	}
 	
+	else if(turret){
+		
+		if(this->state >= state){
+			cout << "turret has at least this state : " << state << endl;
+			return false;
+		}		
+		
+		if(this->state == turret_lvl1 && state == turret_lvl2 && unit_count >= UpgradeToTurretLvl2)
+			return true;
+
+		if(this->state == turret_lvl2 && state == turret_lvl3 && unit_count >= UpgradeToTurretLvl3)
+			return true;
+	}	
 	
 	return false;
+	
 }
 
+bool Building::check_for_upgrade_settlement(int state){
+
+	using namespace msg::building_state;
+	using namespace msg::upgrade_cost;	
 
 
+	if(settlement){
+		
+		if(this->state >= state){
+			cout << "settlement has at least this state : " << state << endl;
+			return false;
+		}		
+		
+		if(this->state == construction_site && 	state == house_lvl1 && unit_count >= UpgradeToHouseLvl1)
+			return true;
+
+		if(this->state == house_lvl1 		&&	state == house_lvl2 && unit_count >= UpgradeToHouseLvl2)
+			return true;
+
+		if(this->state == house_lvl2 		&&	state == house_lvl3 && unit_count >= UpgradeToHouseLvl3)
+			return true;
+	}
+	else if(turret){
+		if(state == house_lvl1 && unit_count >= RebuildingToHouseLvl1)
+			return true;
+	}
+		
+	return false;		
+		
+}
 
 
 unsigned int Building::get_owner_id(){

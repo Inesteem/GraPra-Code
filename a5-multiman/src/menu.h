@@ -1,5 +1,6 @@
 #include <shader.h>
 #include <camera.h>
+
 #include <mesh.h>
 #include <texture.h>
 #include <libmcm/vectors.h>
@@ -116,7 +117,7 @@ public:
 
 class IconBar{
 	
-	Building *building;
+	Building *building = nullptr;
 	
 	int loc = -1;
 	int button_pressed = -1;
@@ -177,8 +178,8 @@ public:
 	void draw();
 	int click(int x, int y, vec3f (*ptr)(int x, int y));
 	void scale_button(int b, bool greater);
-	void update(int type, int lvl,  bool upgradeable);
-	void selected_building(bool s);
+	void update();
+	void selected_building(Building *building);
 	
 	
 };

@@ -108,22 +108,25 @@ public:
 	int get_type();
 	int get_level();
     void change_owner(unsigned int owner);
-    bool check_for_upgrade(bool next, int state);
+    bool check_for_upgrade_turret(int state);
+    bool check_for_upgrade_settlement(int state);
 
 
     int m_size;
 
 
 private:
-    int m_owner;
-    unsigned int unit_count;
-    int state;
     Obj *selection_circle;
     Obj *upgrade_arrow;
     matrix4x4f arrow_model;
     Label *label;
+    
     bool settlement, turret;
+    
+    unsigned int unit_count;
     unsigned int id;
+    int m_owner;
+    int state;
     
 };
 

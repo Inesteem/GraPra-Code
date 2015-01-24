@@ -41,27 +41,12 @@ void Game::change_building_owner(int building_id, int new_owner){
 
 void Game::update_building_unit_count(unsigned int id, unsigned int unit_count){
     for(int i = 0; i < m_buildings.size(); i++){
-		if(m_buildings[i].get_id() == id){
-			
-			if(m_selected != nullptr && m_buildings[i].get_id() == m_selected->get_id()){
-				
-				bool updateable_1 = m_buildings[i].check_for_upgrade(true, -1);
-				bool updateable_2 = m_buildings[i].check_for_upgrade(false, -1);
-				
-				
-				m_buildings[i].update_unit_count(unit_count);
+		if(m_buildings[i].get_id() == id){					
 
-				bool updateable_3 = m_buildings[i].check_for_upgrade(true, -1);
-				bool updateable_4 = m_buildings[i].check_for_upgrade(false, -1);
-				
-				if(updateable_1 != updateable_3 || updateable_2 != updateable_4)
-					action->update_iconbar();
+			m_buildings[i].update_unit_count(unit_count);
 
-				
-			
-						
-			} else
-				m_buildings[i].update_unit_count(unit_count);
+			if(m_selected != nullptr && m_buildings[i].get_id() == m_selected->get_id())
+				action->update_iconbar();	
 
 			return;
 		}

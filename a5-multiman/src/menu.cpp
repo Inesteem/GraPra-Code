@@ -571,46 +571,44 @@ void IconBar::scale_button(int b, bool greater){
 }
 
 
-void IconBar::update(int type, int lvl, bool upgradeable){
+void IconBar::update(){
 	
-	cout << "menu : " << type << " " << lvl << " " << upgradeable << endl; 
-	
-	//use carefully!
-	if(lvl < 0 || lvl > 2){
-		lvl = 2;
-	}
-	
-	
-	switch(type){
-		case 0 : 
-				s_upgradeable = upgradeable;
-				s_level = lvl;
-				
-				if(lvl == 2){
-					s_upgradeable = false;
-					
-				}
-				break;
+		if(building == nullptr)
+			return;
 		
-		case 1 : 
-				t_upgradeable = upgradeable;
-				t_level = lvl;
-				
-				if(lvl == 2){
-					t_upgradeable = false;
-					
-				}
-				break;			
-	
-		default : 
-				cout << "menu : unknown type delivered" << endl;
-	}
+		int type  = building->get_type();
+		int level = building->get_level();
+		int state = building->get_state();
 
-
+		using namespace msg::building_state;
+		
+		//settlement
+		if(type == 0){
+			s_upgradeable	= building->check_for_upgrade_settlement(state+1);
+			s_level		 	= level;
+			t_level 		= 0;
+			t_upgradeable 	= building->check_for_upgrade_turret(turret_lvl1);
+		} 
+		//turret
+		else if (type == 1){
+			t_upgradeable 	= building->check_for_upgrade_turret(state+1);
+			t_level 		= level;
+			s_level 		= 0;
+			s_upgradeable 	= building->check_for_upgrade_settlement(house_lvl1);
+		}
+		else {
+			cout << "menu : unknown type delivered" << endl;
+			t_upgradeable = false;
+			s_upgradeable = false;
+		}
+		
 }
 
-void IconBar::selected_building(bool s){
-	
-	building_selected = s;
+void IconBar::selected_building(Building *building){
+	this->building = building;
+	if(building == nullptr)
+		building_selected = false;
+	else
+		building_selected = true;
 	
 }

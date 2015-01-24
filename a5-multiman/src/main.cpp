@@ -251,7 +251,7 @@ void menu_keyhandler(unsigned char key, int state){
 							str += level;
 							str += " $*; echo '-- '; echo 'press return to close this terminal'; read";
 
-							execl("/usr/bin/xterm","/usr/bin/xterm", "-geometry", "200x100+0+900", "-e", str.c_str(),NULL);
+							execl("/usr/bin/xterm","/usr/bin/xterm", "-geometry", "200x100+0+900", "-e", str.c_str(), NULL);
 							
 						}
 						else if (pID < 0){// failed to fork

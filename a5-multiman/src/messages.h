@@ -22,16 +22,22 @@ namespace msg {
             construction_site = -1,
             house_lvl1 = 0,
             house_lvl2 = 1,
-            turret_lvl1 = 2,
-            turret_lvl2 = 3         
+            house_lvl3 = 2,
+            turret_lvl1 = 3,
+            turret_lvl2 = 4,         
+            turret_lvl3 = 5         
         };
     }
 
     namespace upgrade_cost {
         const unsigned int UpgradeToHouseLvl1 = 10;
         const unsigned int UpgradeToHouseLvl2 = 30;
+        const unsigned int UpgradeToHouseLvl3 = 100;
         const unsigned int UpgradeToTurretLvl1 = 20;
         const unsigned int UpgradeToTurretLvl2 = 50;
+        const unsigned int UpgradeToTurretLvl3 = 150;
+        const unsigned int RebuildingToHouseLvl1 = 30;
+        const unsigned int RebuildingToTurretLvl1 = 50;
     }
 
 	namespace code {
@@ -152,7 +158,7 @@ namespace msg {
 
     struct building_upgrade_turret : public message {
         building_upgrade_turret() : message(code::building_upgrade_turret) {}
-        uint8_t buildingId;
+        uint16_t buildingId;
     } __attribute__((aligned(8)));
 }
 

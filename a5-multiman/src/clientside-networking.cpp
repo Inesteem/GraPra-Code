@@ -133,7 +133,7 @@ void client_message_reader::handle_message(msg::building_unit_generated *m)
 
 void client_message_reader::handle_message(msg::building_upgrade *m) {
 
-    cout << "Upgraded Building " << (unsigned int) m->buildingId << endl;
+    cout << "Upgraded Building " << (unsigned int) m->buildingId << " to state : " << (unsigned int) m->state << endl;
     game->upgrade_building(m->buildingId, m->state);
 }
 
