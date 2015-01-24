@@ -112,7 +112,60 @@ public:
 	void reset_menu();
 
 };
+/*
+class MenuEntry {
+	
+	int pos;
+	int max_pos;
+	int id;
+	Label *label;
+	vec3f choosen_color;
+	vec3f normal_color;
+	vec2f choosen_size;
+	vec2f normal_size;
+	vector<const char*> entry_names;
+	vector<vec3f> colors;
+	bool choosen, use_color;
 
+public:	
+	MenuEntry(int id, std::vector<const char*> entry_names, Label *label);
+	void increase_row();
+	void decrease_row();
+	void update_label();
+	void choose(bool s);
+	void draw();
+	void reset();
+	void set_colors(vector<vec3f> colors);
+	int get_id(){return id;}
+};
+
+template< typename T > 
+class ChooseEntry : public MenuEntry {
+	vector< T > entries;
+
+public:	
+	ChooseEntry(int id, vector<const char*> entry_names, Label *label, vector< T > entries):
+		MenuEntry(id, entry_names,label), entries(entries) {}
+	
+	T get_choosen_entry(){
+		return entries[pos];
+	}
+	
+	
+	
+};
+
+class EntryManager{
+	int pos = 0;
+	vector<MenuEntry*> entry_list;
+	
+	template < typename T > 
+	void add_entry(std::vector<const char*> entry_names, vector< T > entries, vector<vec3f> colors, Label *label, int id);
+	MenuEntry *next_entry();
+	MenuEntry *previous_entry();	
+	
+};
+*/
 
 
 class IconBar{
@@ -134,7 +187,7 @@ class IconBar{
 	bool building_selected = false;
 	
 	float depth_background = 0.09;
-	float depth_button = 0.01;	
+	float depth_button = 0.02;	
 	float depth_button_s = 0.001;	
 	float depth_acc_button_s = 0.0001;	
 	float depth_button_t = 0.0001;
@@ -148,6 +201,7 @@ class IconBar{
 	float scale_button_y = 0.05 * fovy;
 	
 	texture_ref background;
+	texture_ref button;
 	texture_ref fraction[2];
 	texture_ref upgrade_button_turret[2];
 	texture_ref noupgrade_button_turret[3];
@@ -155,17 +209,19 @@ class IconBar{
 	texture_ref noupgrade_button_settlement[3];
 	texture_ref picture[2];
 	
-	matrix4x4f *models[5];
+	matrix4x4f *models[6];
 	
 	matrix4x4f  model_background;
 	matrix4x4f  model_fraction;
 	matrix4x4f  model_button_t;
 	matrix4x4f  model_button_s;
+	matrix4x4f  model_button_u;
 	matrix4x4f  model_picture;
 
 	shader_ref 	shader;
 	camera_ref 	cam;
 	mesh_ref 	mesh;
+	Label		*label;
 	
 	void init_modelmatrices();
 	void draw_fraction();

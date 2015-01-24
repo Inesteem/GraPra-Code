@@ -268,6 +268,130 @@ void Menu::reset_menu(){
 	enter = false;
 	row = 0;
 }
+/*
+//label must be fully initialized, inclusive camera and shader
+MenuEntry::MenuEntry(int id, vector<const char*> entry_names, Label *label ) : id(id), label(label), entry_names(entry_names){
+	reset();
+}
+	
+	
+void MenuEntry::increase_row(){
+	if(pos >= max_pos -1)
+		return;
+		
+	pos++;
+	update_label();
+	
+}
+void MenuEntry::decrease_row(){
+	if(pos <= 0)
+		return;
+		
+	pos--;
+	update_label();
+	
+}
+void MenuEntry::update_label(){
+	
+	if(max_pos == 0)
+		return;
+	
+	std::stringstream s;
+	if(pos != 0)
+		s << "< ";
+	else
+		s << "    ";	
+	
+	s << entry_names[pos];
+	
+	if(pos < max_pos -1)	
+		s << " >";
+	
+	if(choosen){
+		label->set_color(choosen_color); 
+		if(use_color && pos != 0)
+			label->set_color(colors[pos]); 
+		
+		label->set_size(choosen_size);
+	}
+	else{
+		if(!use_color || pos == 0)
+			label->set_color(normal_color);
+		label->set_size(normal_size);	
+	}
+	label->update_gui_texture_string(&s); 
+}
+void MenuEntry::choose(bool s){
+	choosen = s;
+	update_label();
+}
+void MenuEntry::draw(){
+	label->render_gui_overlay();
+}
+void MenuEntry::reset(){
+		
+	pos = 0;
+	max_pos = entry_names.size();
+	choosen = false;
+	choosen_color = vec3f(0.7,0.7,0.7);
+	normal_color = vec3f(1.,1.,1.);
+	choosen_size = vec2f(20,3);
+	normal_size = vec2f(19,2);	
+	use_color = false;
+	update_label();	
+}
+
+
+void MenuEntry::set_colors(vector<vec3f> colors){
+	if(colors.size() != max_pos)
+		return;
+	
+	use_color = true;
+	this->colors = colors;
+	
+}
+
+
+
+
+template < typename T > 
+void EntryManager::add_entry(std::vector<const char*> entry_names, vector< T > entries, vector<vec3f> colors, Label *label, int id){
+	
+	MenuEntry *entry;
+	
+//	if(entries.size() != 0)
+//		entry = new ChooseEntry(id,entry_names, label, entries);
+//	else
+//		entry = new MenuEntry(id,entry_names, label);
+		
+//	entry->set_colors(colors);
+//	entry_list.push_back(entry);
+}
+
+
+MenuEntry *EntryManager::next_entry(){
+	if(pos < entry_list.size()-1){
+		entry_list[pos]->choose(false);
+		pos++;
+		entry_list[pos]->choose(true);
+	}
+	
+	
+	return entry_list[pos];
+}
+MenuEntry *EntryManager::previous_entry(){
+	if(pos > 0){
+		entry_list[pos]->choose(false);
+		pos--;
+		entry_list[pos]->choose(true);
+	}
+	return entry_list[pos];	
+	
+}	
+
+*/
+
+
 
 IconBar::IconBar(){
 	
@@ -275,6 +399,7 @@ IconBar::IconBar(){
 	cam = make_orthographic_cam((char*)"gui cam", &cam_pos, &cam_dir, &cam_up, fovy, 0, 50, 0, near, far);	
 	
 	background = 					find_texture("iconbar");
+	button		 = 					find_texture("button");
 	fraction[0] = 					find_texture("pacman");
 	fraction[1] = 					find_texture("terrain_hm");
 	upgrade_button_turret[0] = 		find_texture("u_b_t1");
@@ -305,6 +430,15 @@ IconBar::IconBar(){
 	add_vertex_buffer_to_mesh(mesh, "in_tc", GL_FLOAT, 4, 2, (float *) tc, GL_STATIC_DRAW);
 	add_index_buffer_to_mesh(mesh, 6, idx, GL_STATIC_DRAW);
 	unbind_mesh_from_gl(mesh);	
+	
+//	label = new Label();	
+//	label->set_nChars(13);	
+	label = new Label(9, 13, "text-shader");
+	label->setup_display();
+	label->set_camera(cam);
+	label->set_size(vec2f(11,1));
+	label->set_color(vec3f(0.678, 0.956, 0.928));	
+	label->update_label_pos(model_button_u.row_col(0,3) + 13*offset_button_y, -1000, model_button_u.row_col(1,3)+3*offset_button_y);
 }
 
 
@@ -359,12 +493,15 @@ void IconBar::draw(){
 
 	
 	draw_fraction();
-	draw_picture();	
-	if(building_selected)
+	if(building_selected){
+		draw_picture();	
 		draw_buttons();
+		label->render_gui_overlay();
+	}
 
 
 	unbind_mesh_from_gl(mesh);
+	
 	
 	unbind_shader(shader);
 	use_camera(old_cam);
@@ -386,6 +523,22 @@ void IconBar::draw_fraction(){
 }
 
 void IconBar::draw_buttons(){
+
+	//label_button
+	
+	loc = glGetUniformLocation(gl_shader_object(shader), "model");
+	glUniformMatrix4fv(loc, 1, GL_FALSE, model_button_u.col_major);	
+
+
+	bind_texture(button, 0);
+	loc = glGetUniformLocation(gl_shader_object(shader), "tex");	
+	glUniform1i(loc, 0);	
+	
+	draw_mesh(mesh);	
+
+	unbind_texture(button);
+
+	
 
 	//settlement_button
 
@@ -452,14 +605,14 @@ void IconBar::draw_picture(){
 void IconBar::init_modelmatrices(){
 	
 
-	
 	models[0] = &model_background;
 	models[1] = &model_button_t;
 	models[2] = &model_button_s;
-	models[3] = &model_picture;
-	models[4] = &model_fraction;
+	models[3] = &model_button_u;
+	models[4] = &model_picture;
+	models[5] = &model_fraction;
 
-	for(int i = 0; i < 5; i++){
+	for(int i = 0; i < 6; i++){
 		make_unit_matrix4x4f(models[i]);
 		models[i]->row_col(1,1) = scale_button_y;
 		models[i]->row_col(1,3) = offset_button_y;
@@ -491,6 +644,11 @@ void IconBar::init_modelmatrices(){
 
 	model_button_t.row_col(0,0) = 0.12 * fovy;
 	model_button_t.row_col(0,3) = x_offset;
+	
+	x_offset += model_button_t.row_col(0,0) + offset_button_y;
+	
+	model_button_u.row_col(0,0) = 0.12 * fovy;
+	model_button_u.row_col(0,3) = x_offset;	
 	
 	//PICTURE
 	
@@ -579,7 +737,12 @@ void IconBar::update(){
 		int type  = building->get_type();
 		int level = building->get_level();
 		int state = building->get_state();
-
+		int unit_count = building->get_unit_count();
+		
+		std::stringstream s;
+		s << "units : " << unit_count;
+		label->update_gui_texture_string(&s);
+		
 		using namespace msg::building_state;
 		
 		//settlement

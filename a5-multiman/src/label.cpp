@@ -148,7 +148,8 @@ void Label::do_cairo_stuff(std::string displayed, vec3f color, std::string name)
 		
 		
 		cairo_set_font_size(cairo, fontSize);
-		cairo_select_font_face(cairo, "DejaVu Serif", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);	
+//		cairo_select_font_face(cairo, "DejaVu Serif", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);	
+		cairo_select_font_face(cairo, "Trebuchet MS Bold Italic", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);	
 		cairo_move_to(cairo, 0, fontSize);
 		cairo_set_source_rgb(cairo, 0, 0, 0);
 		cairo_paint(cairo);
@@ -169,7 +170,8 @@ void Label::do_update_cairo_stuff(texture_ref &texture, std::string displayed, v
 	texture = find_texture(name.c_str());
 
 	cairo_set_font_size(cairo, fontSize);
-	cairo_select_font_face(cairo, "DejaVu Serif", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);	
+//	cairo_select_font_face(cairo, "DejaVu Serif", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);	
+	cairo_select_font_face(cairo, "Trebuchet MS Bold Italic", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);	
 	cairo_move_to(cairo, 0, fontSize);
 	cairo_set_source_rgb(cairo, 0, 0, 0);
 	cairo_paint(cairo);
