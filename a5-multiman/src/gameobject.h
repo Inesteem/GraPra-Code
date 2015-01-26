@@ -72,6 +72,8 @@ public:
     vec2f get_pos(){
         return m_pos;
     }
+	matrix4x4f get_model(){return m_model;}
+	Obj *get_obj(){return m_obj;}
 
 protected:
     GameObject(Obj *obj, std::string name, shader_ref shader, float height);

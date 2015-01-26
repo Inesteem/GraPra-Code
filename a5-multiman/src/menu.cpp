@@ -490,16 +490,13 @@ void IconBar::draw(){
 
 	glDisable(GL_BLEND);
 
-
 	color = vec3f(-1,-1,-1);
 	loc = glGetUniformLocation(gl_shader_object(shader), "color");
 	glUniform3fv(loc, 1,(float *)&color);	
-
-	buttons[0].draw(shader, mesh);
 	
 	if(building_selected){
-		draw_buttons_2();
 		draw_picture();	
+		draw_buttons_2();
 		label_1->render_gui_overlay();
 		label_2->render_gui_overlay();
 	}
@@ -509,7 +506,84 @@ void IconBar::draw(){
 	
 	
 	unbind_shader(shader);
+
+	
+//	if(building_selected)
+//		draw_building();
+		
+	use_camera(old_cam);	
+	
+}
+
+void IconBar::draw_building(){
+	camera_ref old_cam = current_camera();
+	vec3f cam_pos = {0,0,0}, cam_dir = {0,0,-1}, cam_up = {0,1,0};
+	camera_ref buildingcam = make_perspective_cam((char*)"a cam", &cam_pos, &cam_dir, &cam_up,  45, 1, 1, 100);
+
+	use_camera(buildingcam);
+
+	vec3f light_dir = { 1.f, -0.6f, -0.4f };
+	vec3f pos, right, up;
+	extract_dir_vec3f_of_matrix(&light_dir, lookat_matrix_of_cam(buildingcam));
+	extract_pos_vec3f_of_matrix(&pos, lookat_matrix_of_cam(cam));
+	extract_right_vec3f_of_matrix(&pos, lookat_matrix_of_cam(buildingcam));
+	extract_up_vec3f_of_matrix(&pos, lookat_matrix_of_cam(buildingcam));
+	normalize_vec3f(&light_dir);
+
+	vec3f b_pos = pos + (light_dir*3);// + right*3;
+
+	shader_ref shader = find_shader("pos+norm+tc");
+
+	bind_shader(shader);
+
+	static float rotation = 0;
+	rotation += 0.007;
+	if(rotation == std::numeric_limits<float>::max()-2)
+		rotation = 0;
+
+
+	matrix4x4f model = building->get_model();
+//	model.row_col(0,3) = 0.9 * fovy;
+	model.row_col(0,3) = b_pos.x;
+//	model.row_col(1,3) = 0.2 * fovy;
+	model.row_col(1,3) = b_pos.y;
+//	model.row_col(2,3) = 0.1;
+	model.row_col(2,3) = b_pos.z;
+	model.row_col(0,0) = 2;
+	model.row_col(1,1) = 2;
+
+	matrix4x4f rot;
+	
+	vec3f rot_vec = vec3f(0,1,0);
+	make_rotation_matrix4x4f(&rot,&rot_vec, rotation);
+	model =  model * rot;
+
+	
+	for (vector<drawelement*>::iterator it = building->get_obj()->drawelements->begin(); it != building->get_obj()->drawelements->end(); ++it) {
+		drawelement *de = *it;
+
+		de->Modelmatrix(&model);
+		
+		int loc = glGetUniformLocation(gl_shader_object(shader), "light_dir");
+		glUniform3f(loc, light_dir.x, light_dir.y, light_dir.z);
+		
+		loc = glGetUniformLocation(gl_shader_object(shader), "light_col");
+		glUniform3f(loc, 0.6f, 0.7f, 0.8f);		
+		
+		
+		de->apply_default_matrix_uniforms(shader);
+
+		loc = glGetUniformLocation(gl_shader_object(shader), "model");
+		glUniformMatrix4fv(loc, 1, GL_FALSE, model.col_major);	
+
+		de->apply_default_tex_uniforms_and_bind_textures(shader);
+		
+		de->draw_em();
+	}	
+
+	unbind_shader(shader);
 	use_camera(old_cam);
+
 }
 
 void IconBar::draw_buttons_2(){
