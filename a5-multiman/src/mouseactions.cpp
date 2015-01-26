@@ -202,21 +202,19 @@ namespace moac {
 	
 	void Action::check_button_clicked(int x, int y, int state){
 		
-		if(state != 0){
-				iconbar->scale_button(state, true);
+		int button = iconbar->click(x,y,ClickWorldPosition);
+		if(state == 0){//down
+				iconbar->scale_button(button+1, true);
 				return;
 		}
 		
-		
-		int button = iconbar->click(x,y,ClickWorldPosition);
-		switch(button){
+		int button_pressed = iconbar->scale_button(button+1, false);
+		switch(button_pressed){
 			//settlement
-			case 0 :iconbar->scale_button(button, false);  
-					upgrade_settlement(); 
+			case 0 : upgrade_settlement(); 
 					break;
 			//turret
-			case 1 :iconbar->scale_button(button, false);   
-					upgrade_turret();
+			case 1 : upgrade_turret();
 					break;
 			
 			default : return;

@@ -65,8 +65,8 @@ class Label {
 		
 		
 		// Intern helper functions
-		void do_cairo_stuff(std::string display, vec3f color, std::string name);
-		void do_update_cairo_stuff(texture_ref &texture, std::string display, vec3f color, std::string name);
+		void do_cairo_stuff(std::string display);
+		void do_update_cairo_stuff(std::string display);
 		cairo_t* create_cairo_context(int width, int height, int channels, cairo_surface_t **surf, unsigned char **buffer);
 		// End GUI
 
