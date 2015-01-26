@@ -508,8 +508,8 @@ void IconBar::draw(){
 	unbind_shader(shader);
 
 	
-	if(building_selected)
-		draw_building();
+//	if(building_selected)
+//		draw_building();
 		
 	use_camera(old_cam);	
 	
