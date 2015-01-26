@@ -666,6 +666,7 @@ int IconBar::click(int x, int y, vec3f (*ptr)(int x, int y)){
 	use_camera(cam);
 	
 	vec3f pos = ptr(x,y);
+    use_camera(old_camera);
 
 	float rel_depth=(pos.z-near)/(far-near);
 
@@ -678,7 +679,6 @@ int IconBar::click(int x, int y, vec3f (*ptr)(int x, int y)){
 		return 1;
 		cout << "click_turret" << endl;
 	}
-	use_camera(old_camera);	
 
 	return -1;
 	
