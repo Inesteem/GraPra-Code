@@ -236,6 +236,7 @@
                 norm_wc = (model_normal * vec4(in_norm,0)).xyz;
                 tc = in_tc;
                 gl_Position = proj * view * pos_wc;
+
         }
 }
 #:fragment-shader #{
