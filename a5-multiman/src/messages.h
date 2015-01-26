@@ -100,6 +100,7 @@ namespace msg {
         uint8_t sourceId;
         uint8_t destinationId;
         uint16_t unitCount;
+        uint8_t frac;
     } __attribute__((aligned(8)));
 
     struct next_troup_destination : public message {
@@ -121,12 +122,14 @@ namespace msg {
         int8_t oldOwner;
         int8_t newOwner;
         uint16_t newUnitCount;
+        uint8_t frac;
     } __attribute__((aligned(8)));
 
     struct building_upgrade : public message {
         building_upgrade() : message(code::building_upgrade) {}
         int8_t buildingId;
         uint8_t state;
+        uint8_t frac;
     } __attribute__((aligned(8)));
 
     struct building_unit_generated : public message {

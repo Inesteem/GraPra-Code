@@ -102,7 +102,7 @@ void client_message_reader::handle_message(msg::init_done *m)
 void client_message_reader::handle_message(msg::spawn_troup_server *m) {
 
     cout << "Spawning new troup..." << endl;
-    game->add_unit_group(m->sourceId, m->destinationId, m->unitCount, m->troupId);
+    game->add_unit_group(m->sourceId, m->destinationId, m->unitCount, m->troupId,BOMB,m->playerId);
 }
 
 

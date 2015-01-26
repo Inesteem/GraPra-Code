@@ -124,6 +124,7 @@ Obj::Obj(string name, int id, mesh_ref mesh, texture_ref tex, shader_ref shader)
 Obj::Obj(string name, int id, vector<string> filenames, shader_ref shader):name(name), id(id), shader(shader){
     vector<ObjLoader> loaders;
     mesh = make_mesh(name.c_str(),filenames.size()*2 + 1);
+      bind_mesh_to_gl(mesh);
     for(int i = 0; i < filenames.size(); ++i){
         loaders.push_back( ObjLoader(filenames[i].c_str(),filenames[i].c_str()));
         loaders[i].TranslateToOrigin();
@@ -136,33 +137,33 @@ Obj::Obj(string name, int id, vector<string> filenames, shader_ref shader):name(
         inpos  += to_string(i);
 //        innorm += to_string(i);
 //        cout << inpos << innorm << endl;
-        bind_mesh_to_gl(mesh);
+
         add_vertex_buffer_to_mesh(mesh, inpos.c_str(), GL_FLOAT, loaders[i].objdata.vertices, 3, (float*) loaders[i].objdata.vertex_data , GL_STATIC_DRAW);
 //        add_vertex_buffer_to_mesh(mesh, innorm.c_str(), GL_FLOAT, loaders[i].objdata.vertices, 3, (float *) loaders[i].objdata.normal_data, GL_STATIC_DRAW);
-        unbind_mesh_from_gl(mesh);
+
 
     }
-    for(int i = 0; i < filenames.size(); ++i){
-//        loaders.push_back( ObjLoader(filenames[i].c_str(),filenames[i].c_str()));
+//    for(int i = 0; i < filenames.size(); ++i){
+////        loaders.push_back( ObjLoader(filenames[i].c_str(),filenames[i].c_str()));
 
-        string innorm = "in_norm_";
+//        string innorm = "in_norm_";
 
-//        inpos  += to_string(i);
-        innorm += to_string(i);
-//        cout << inpos << innorm << endl;
-        bind_mesh_to_gl(mesh);
-//        add_vertex_buffer_to_mesh(mesh, inpos.c_str(), GL_FLOAT, loaders[i].objdata.vertices, 3, (float*) loaders[i].objdata.vertex_data , GL_STATIC_DRAW);
-        add_vertex_buffer_to_mesh(mesh, innorm.c_str(), GL_FLOAT, loaders[i].objdata.vertices, 3, (float *) loaders[i].objdata.normal_data, GL_STATIC_DRAW);
-        unbind_mesh_from_gl(mesh);
+////        inpos  += to_string(i);
+//        innorm += to_string(i);
+//        cout << innorm << endl;
 
-    }
+////        add_vertex_buffer_to_mesh(mesh, inpos.c_str(), GL_FLOAT, loaders[i].objdata.vertices, 3, (float*) loaders[i].objdata.vertex_data , GL_STATIC_DRAW);
+//        add_vertex_buffer_to_mesh(mesh, innorm.c_str(), GL_FLOAT, loaders[i].objdata.vertices, 3, (float *) loaders[i].objdata.normal_data, GL_STATIC_DRAW);
+
+
+//    }
     vec3f min, max;
     loaders[0].BoundingBox(min,max);
     bb_min = min;
     bb_max = max;
 
 
-    bind_mesh_to_gl(mesh);
+
     add_vertex_buffer_to_mesh(mesh, "in_tc", GL_FLOAT, loaders[0].objdata.vertices, 2, (float *) loaders[0].objdata.texcoord_data, GL_STATIC_DRAW);
     add_index_buffer_to_mesh(mesh, loaders[0].objdata.groups->triangles * 3, (unsigned int *) loaders[0].objdata.groups->v_ids, GL_STATIC_DRAW);
     unbind_mesh_from_gl(mesh);
@@ -279,8 +280,9 @@ void GameObject::draw(){
         setup_dir_light(m_shader);
         de->apply_default_matrix_uniforms();
         de->apply_default_tex_uniforms_and_bind_textures();
-       // int loc = glGetUniformLocation(gl_shader_object(m_shader), "proj");
-        //glUniformMatrix4fv(loc, 1, GL_FALSE, projection_matrix_of_cam(current_camera())->col_major);
+//        int loc = glGetUniformLocation(gl_shader_object(m_shader), "p_color");
+//        vec3f color = get_player_color(PLAYER_ID);
+//        glUniform3f(loc,color.x,color.y,color.z);
 
 //        loc = glGetUniformLocation(gl_shader_object(m_shader), "view");
 //        glUniformMatrix4fv(loc, 1, GL_FALSE, gl_view_matrix_of_cam(current_camera())->col_major);
@@ -918,6 +920,12 @@ void UnitGroup::draw(){
 
             loc = glGetUniformLocation(gl_shader_object(m_obj->shader), "light_dir");
             glUniform3f(loc, 0.7, 1.2,0.3);
+
+            vec3f color = get_player_color(m_owner);
+
+            loc = glGetUniformLocation(gl_shader_object(m_obj->shader), "color");
+            glUniform3f(loc, color.x, color.y, color.z);
+
             loc = glGetUniformLocation(gl_shader_object(m_obj->shader), "light_col");
             glUniform3f(loc, 1,1,1);
             loc = glGetUniformLocation(gl_shader_object(m_obj->shader), "time");
@@ -947,6 +955,11 @@ void UnitGroup::draw(){
 
             de->Modelmatrix(m_units[i].getModel());
 			de->bind();
+            vec3f color = get_player_color(m_owner);
+
+            int loc = glGetUniformLocation(gl_shader_object(m_obj->shader), "p_color");
+            glUniform3f(loc, color.x, color.y, color.z);
+
 			setup_dir_light(m_shader);
 			de->apply_default_matrix_uniforms();
 			de->apply_default_tex_uniforms_and_bind_textures();
