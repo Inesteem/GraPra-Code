@@ -241,12 +241,12 @@
 	void main() {
 
 
-            gl_FragDepth = 0.001;
+        gl_FragDepth = 0.001;
 
-                if(texture(tex, tc).r >= 0.5 || texture(tex, tc).g >= 0.5 || texture(tex, tc).b >= 0.5)
-                        out_col = vec4(color.x, color.y, color.z, 1.);
-                else
-                        discard;
+        if(texture(tex, tc).r >= 0.5 || texture(tex, tc).g >= 0.5 || texture(tex, tc).b >= 0.5)
+             out_col = vec4(color.x, color.y, color.z, 1.);
+         else
+             discard;
 		
 	}
 }
@@ -971,3 +971,45 @@ uniform float down;
 
          #:inputs (list "in_pos" "in_tc")>
 
+
+
+#<make-shader "menu-building-shader"
+#:vertex-shader #{
+#version 150 core
+	in vec3 in_pos;
+	in vec3 in_norm;
+	in vec2 in_tc;
+	uniform mat4 proj;
+	uniform mat4 view;
+	uniform mat4 model;
+	uniform mat4 model_normal;
+	out vec4 pos_wc;
+	out vec3 norm_wc;
+	out vec2 tc;
+	void main() {
+		gl_Position = proj * view * model * vec4(in_pos, 1.);	
+		norm_wc = (model_normal * vec4(in_norm,0)).xyz;
+		tc = in_tc;		
+		pos_wc = model * vec4(in_pos, 1.0);
+		gl_Position = proj * view * pos_wc;		
+	}
+}
+#:fragment-shader #{
+#version 150 core
+	out vec4 out_col;
+	uniform sampler2D diffuse_tex;
+	uniform vec3 light_dir;
+	uniform vec3 light_col;
+	uniform vec3 eye_pos;
+	in vec4 pos_wc;
+	in vec3 norm_wc;
+	in vec2 tc;
+	void main() {
+		out_col = vec4(0.,0.,0.,1.);
+		vec3 color = texture(diffuse_tex, tc.st).rgb;
+
+		float n_dot_l = max(0, dot(norm_wc, -light_dir));
+		out_col += vec4(color * light_col * n_dot_l, 0.);
+	}
+}
+#:inputs (list "in_pos" "in_norm" "in_tc")>

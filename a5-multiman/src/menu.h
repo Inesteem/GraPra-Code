@@ -267,6 +267,7 @@ class IconBar{
 	void init_buttons();
 	void draw_buttons();
 	void draw_buttons_2();
+	void draw_building();
 	void draw_picture();
 	
 public: 
