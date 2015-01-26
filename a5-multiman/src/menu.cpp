@@ -7,6 +7,8 @@
 #define FRAKTION_ID 1
 
 #include "menu.h"
+#include "game.h"
+#include "rendering.h"
 #include "mouseactions.h"
 
 #include <GL/glew.h>
@@ -394,6 +396,8 @@ IconBar::IconBar(){
 	vec3f cam_pos = {0,0,0}, cam_dir = {0,0,-1}, cam_up = {0,1,0};
 	cam = make_orthographic_cam((char*)"gui cam", &cam_pos, &cam_dir, &cam_up, fovy, 0, 50, 0, near, far);	
 	
+	player_color = get_player_color(PLAYER_ID);
+	
 	background = 					find_texture("iconbar");
 	picture[0] =					find_texture("terrain_hm");
 	picture[1] =					find_texture("dorf");
@@ -434,6 +438,7 @@ IconBar::IconBar(){
 void IconBar::draw(){
 	
 
+	player_color = get_player_color(PLAYER_ID);
 	camera_ref old_cam = current_camera();
 	use_camera(cam);
 	bind_shader(shader);
@@ -455,6 +460,8 @@ void IconBar::draw(){
 	loc = glGetUniformLocation(gl_shader_object(shader), "color");
 	glUniform3fv(loc, 1,(float *)&color);		
 
+	loc = glGetUniformLocation(gl_shader_object(shader), "p_color");
+	glUniform3fv(loc, 1,(float *)&player_color);	
 
 	bind_texture(background, 0);
 	loc = glGetUniformLocation(gl_shader_object(shader), "tex");
@@ -508,8 +515,8 @@ void IconBar::draw(){
 	unbind_shader(shader);
 
 	
-//	if(building_selected)
-//		draw_building();
+	if(building_selected)
+		draw_building();
 		
 	use_camera(old_cam);	
 	
@@ -580,6 +587,8 @@ void IconBar::draw_building(){
 
 		loc = glGetUniformLocation(gl_shader_object(shader), "model");
 		glUniformMatrix4fv(loc, 1, GL_FALSE, model.col_major);	
+		
+			
 
 		de->apply_default_tex_uniforms_and_bind_textures(shader);
 		
@@ -633,10 +642,12 @@ void IconBar::draw_buttons_2(){
 	loc = glGetUniformLocation(gl_shader_object(shader), "model");
 	glUniformMatrix4fv(loc, 1, GL_FALSE, buttons[1].model.col_major);	
 
-	bind_texture(buttons[1].textures[buttons[1].state], 0);
+	bind_texture(buttons[1].textures[buttons[1].state], 0);	
 
 	loc = glGetUniformLocation(gl_shader_object(shader), "tex");	
 	glUniform1i(loc, 0);	
+	
+	
 	
 	draw_mesh(mesh);	
 	
@@ -655,6 +666,7 @@ void IconBar::draw_buttons_2(){
 	
 	loc = glGetUniformLocation(gl_shader_object(shader), "tex");
 	glUniform1i(loc, 0);
+
 	
 	draw_mesh(mesh);	
 	

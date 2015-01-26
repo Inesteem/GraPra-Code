@@ -144,11 +144,13 @@ int main(int argc, char **argv)
 	//parse_cmdline(argc, argv);
 
     if(argc != 3) {
-        cout << "Usage: ./multiman_server <num players> <levelname>" << endl;
+        cout << "Usage: ./multiman_server <num players> <levelname> [fraction]" << endl;
         exit(0);
     }
 
     int numPlayers = atoi(argv[1]);
+  
+
 
     if(numPlayers < 1) {
         cout << "Usage: ./multiman_server <num players> <levelname>" << endl;

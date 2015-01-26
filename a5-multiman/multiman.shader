@@ -683,6 +683,7 @@
                 float n_dot_l = max(0, dot(norm_wc, -light_dir));
                 out_col += vec4(color * light_col * n_dot_l, 0.);
 //                out_col = vec4(0,1,1,1);
+				out_col = vec4(norm_wc,1);
         }
 }
 
@@ -900,6 +901,7 @@ uniform float down;
 	in vec2 tc;
 	out vec4 out_col;
 	uniform vec3 color;
+	uniform vec3 p_color = vec3(1,1,1);
 	uniform sampler2D tex;
 	uniform float depth;
 	void main() {
@@ -914,7 +916,7 @@ uniform float down;
 				tex_col.z >= (color.z-0.3) && tex_col.z <= (color.z+0.3)){
 					discard;
 			} else
-				out_col = tex_col;
+				out_col = tex_col * vec4(p_color.x,p_color.y, p_color.z,1);
 		}
 		
 	}

@@ -36,7 +36,7 @@
 (texture-from-file "black_screen" "Menu/black_screen.png" 'tex2d #t)
 
 (texture-from-file "pacman" "pacman.png" 'tex2d #t)
-(texture-from-file "iconbar" "Menu/bar.png" 'tex2d #t)
+(texture-from-file "iconbar" "Menu/bar_2.png" 'tex2d #t)
 (texture-from-file "nu_b_s2" "Menu/noupgrade_button_settlement2.png" 'tex2d #t)
 (texture-from-file "nu_b_s3" "Menu/noupgrade_button_settlement3.png" 'tex2d #t)
 (texture-from-file "u_b_s2" "Menu/upgrade_button_settlement2.png" 'tex2d #t)

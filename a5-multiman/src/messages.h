@@ -55,6 +55,7 @@ namespace msg {
             building_upgrade,
             building_upgrade_house,
             building_upgrade_turret,
+            client_settings,
             game_over
 		};
 	}
@@ -160,6 +161,13 @@ namespace msg {
         building_upgrade_turret() : message(code::building_upgrade_turret) {}
         uint16_t buildingId;
     } __attribute__((aligned(8)));
+    
+    struct client_settings : public message {
+        client_settings() : message(code::client_settings) {}
+        uint16_t playerId;
+        uint8_t frac;
+        uint8_t colorId;
+    } __attribute__((aligned(8)));
 }
 
 template<typename M> M make_message() {
@@ -205,6 +213,7 @@ protected:
     virtual void handle_message(msg::building_upgrade_house *m) { warn(m); }
     virtual void handle_message(msg::building_upgrade_turret *m) { warn(m); }
     virtual void handle_message(msg::game_over *m) { warn(m); }
+    virtual void handle_message(msg::client_settings *m) { warn(m); }
 };
 
 

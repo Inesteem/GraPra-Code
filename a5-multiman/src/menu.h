@@ -219,6 +219,9 @@ struct Button {
 
 class IconBar{
 	
+	vec3f player_color = {1,1,1};
+	vec3f no_color = {1,1,1};
+	
 	Building *building = nullptr;
 	vector <Button> buttons;
 	

@@ -11,8 +11,15 @@ unsigned int GameStage::s_nextTroup = 0;
 
 void GameStage::init(unsigned int x, unsigned int y)
 {
+	for(int i = 0; i < 10; i++)
+		player_frac.push_back(0);
+		
     m_mapX = x;
     m_mapY = y;
+}
+
+void GameStage::handle_client_settings(unsigned int playerId, unsigned int colorId, unsigned int frac ){
+	player_frac[playerId] = frac;
 }
 
 void GameStage::Update()
@@ -192,6 +199,7 @@ void GameStage::upgrade_building_house(unsigned int buildingId){
     } else return;
 
     bu.state = building->m_state;
+    bu.frac = player_frac[building->m_player];
     broadcast(&bu);
 		
 	m_buildings[buildingId]->KillUnits(units);
@@ -218,6 +226,7 @@ void GameStage::upgrade_building_turret(unsigned int buildingId){
     } else return;
 
     bu.state = building->m_state;
+    bu.frac = player_frac[building->m_player];
     broadcast(&bu);
 
     m_buildings[buildingId]->KillUnits(units);
