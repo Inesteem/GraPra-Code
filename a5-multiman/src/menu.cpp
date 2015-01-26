@@ -465,7 +465,7 @@ void IconBar::draw(){
 
 
 	bind_mesh_to_gl(mesh);
-	draw_mesh(mesh);
+//	draw_mesh(mesh);
 	
 	unbind_texture(background);
 	
@@ -495,7 +495,7 @@ void IconBar::draw(){
 	glUniform3fv(loc, 1,(float *)&color);	
 	
 	if(building_selected){
-		draw_picture();	
+//		draw_picture();	
 		draw_buttons_2();
 		label_1->render_gui_overlay();
 		label_2->render_gui_overlay();
@@ -516,6 +516,7 @@ void IconBar::draw(){
 }
 
 void IconBar::draw_building(){
+//	glDepthMask(GL_FALSE);
 	camera_ref old_cam = current_camera();
 	vec3f cam_pos = {0,0,0}, cam_dir = {0,0,-1}, cam_up = {0,1,0};
 	camera_ref buildingcam = make_perspective_cam((char*)"a cam", &cam_pos, &cam_dir, &cam_up,  45, 1, 1, 100);
@@ -524,13 +525,17 @@ void IconBar::draw_building(){
 
 	vec3f light_dir = { 1.f, -0.6f, -0.4f };
 	vec3f pos, right, up;
-	extract_dir_vec3f_of_matrix(&light_dir, lookat_matrix_of_cam(buildingcam));
+	extract_dir_vec3f_of_matrix(&light_dir, lookat_matrix_of_cam(cam));
 	extract_pos_vec3f_of_matrix(&pos, lookat_matrix_of_cam(cam));
-	extract_right_vec3f_of_matrix(&pos, lookat_matrix_of_cam(buildingcam));
-	extract_up_vec3f_of_matrix(&pos, lookat_matrix_of_cam(buildingcam));
+	extract_right_vec3f_of_matrix(&pos, lookat_matrix_of_cam(cam));
+	extract_up_vec3f_of_matrix(&pos, lookat_matrix_of_cam(cam));
 	normalize_vec3f(&light_dir);
 
-	vec3f b_pos = pos + (light_dir*3);// + right*3;
+	matrix4x4f scale ;		
+	vec3f s = vec3f(0.5,0.5, 0.5);
+	make_scale_matrix4x4f(&scale, &s);
+
+	vec3f b_pos = pos + (light_dir*2);
 
 	shader_ref shader = find_shader("pos+norm+tc");
 
@@ -544,9 +549,9 @@ void IconBar::draw_building(){
 
 	matrix4x4f model = building->get_model();
 //	model.row_col(0,3) = 0.9 * fovy;
-	model.row_col(0,3) = b_pos.x;
+	model.row_col(0,3) = b_pos.x + 2;
 //	model.row_col(1,3) = 0.2 * fovy;
-	model.row_col(1,3) = b_pos.y;
+	model.row_col(1,3) = b_pos.y - 2;
 //	model.row_col(2,3) = 0.1;
 	model.row_col(2,3) = b_pos.z;
 	model.row_col(0,0) = 2;
@@ -556,7 +561,7 @@ void IconBar::draw_building(){
 	
 	vec3f rot_vec = vec3f(0,1,0);
 	make_rotation_matrix4x4f(&rot,&rot_vec, rotation);
-	model =  model * rot;
+//	model =  model * rot;
 
 	
 	for (vector<drawelement*>::iterator it = building->get_obj()->drawelements->begin(); it != building->get_obj()->drawelements->end(); ++it) {
@@ -582,7 +587,9 @@ void IconBar::draw_building(){
 	}	
 
 	unbind_shader(shader);
-	use_camera(old_cam);
+//	use_camera(old_cam);
+
+	glDepthMask(GL_TRUE);
 
 }
 
