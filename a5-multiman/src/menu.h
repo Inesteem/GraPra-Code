@@ -266,6 +266,7 @@ class IconBar{
 	void init_modelmatrices();
 	void init_buttons();
 	void draw_buttons();
+	void draw_buttons_2();
 	void draw_picture();
 	
 public: 

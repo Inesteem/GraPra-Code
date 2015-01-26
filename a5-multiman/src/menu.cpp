@@ -421,13 +421,13 @@ IconBar::IconBar(){
 	label_2->setup_display();
 	label_1->set_camera(cam);
 	label_2->set_camera(cam);
-	label_1->set_size(vec2f(6,2));
-	label_2->set_size(vec2f(6,2));
+	label_1->set_size(vec2f(4,2));
+	label_2->set_size(vec2f(4,2));
 	label_1->set_color(vec3f(0.678, 0.956, 0.928));	
 	label_2->set_color(vec3f(0.678, 0.956, 0.928));	
 	//label_1->update_label_pos(buttons[3].model.row_col(0,3) + 13*offset_button_y, -1000, buttons[3].model.row_col(1,3)+3*offset_button_y);
-	label_1->update_label_pos(buttons[3].model.row_col(0,3) + 20*offset_button_y, -1000, buttons[3].model.row_col(1,3)+2.7*offset_button_y);
-	label_2->update_label_pos(buttons[4].model.row_col(0,3) + 13*offset_button_y, -1000, buttons[4].model.row_col(1,3)+3*offset_button_y);
+	label_1->update_label_pos(buttons[3].model.row_col(0,3) + 10.5*offset_button_y, -1000, buttons[3].model.row_col(1,3)+2.4*offset_button_y);
+	label_2->update_label_pos(buttons[4].model.row_col(0,3) + 10.5*offset_button_y, -1000, buttons[4].model.row_col(1,3)+2.4*offset_button_y);
 }
 
 
@@ -475,6 +475,19 @@ void IconBar::draw(){
 	loc = glGetUniformLocation(gl_shader_object(shader), "depth");
 	glUniform1f(loc,depth_button);	
 
+	//fraction
+	
+	loc = glGetUniformLocation(gl_shader_object(shader), "model");
+	glUniformMatrix4fv(loc, 1, GL_FALSE, buttons[0].model.col_major);	
+	
+	bind_texture(buttons[0].textures[buttons[0].state], 0);
+	loc = glGetUniformLocation(gl_shader_object(shader), "tex");
+	glUniform1i(loc, 0);
+
+	draw_mesh(mesh);
+
+	unbind_texture(buttons[0].textures[buttons[0].state]);
+
 	glDisable(GL_BLEND);
 
 
@@ -485,8 +498,8 @@ void IconBar::draw(){
 	buttons[0].draw(shader, mesh);
 	
 	if(building_selected){
+		draw_buttons_2();
 		draw_picture();	
-		draw_buttons();
 		label_1->render_gui_overlay();
 		label_2->render_gui_overlay();
 	}
@@ -497,6 +510,76 @@ void IconBar::draw(){
 	
 	unbind_shader(shader);
 	use_camera(old_cam);
+}
+
+void IconBar::draw_buttons_2(){
+	
+	//unit_count
+	
+	vec3f color = vec3f(-1,-1,-1);
+	loc = glGetUniformLocation(gl_shader_object(shader), "color");
+	glUniform3fv(loc, 1,(float *)&color);			
+	
+	loc = glGetUniformLocation(gl_shader_object(shader), "model");
+	glUniformMatrix4fv(loc, 1, GL_FALSE, buttons[3].model.col_major);	
+	
+	bind_texture(buttons[3].textures[buttons[3].state], 0);
+	loc = glGetUniformLocation(gl_shader_object(shader), "tex");
+	glUniform1i(loc, 0);
+
+	draw_mesh(mesh);
+
+	unbind_texture(buttons[3].textures[buttons[3].state]);
+	
+	//defence/production
+	
+	loc = glGetUniformLocation(gl_shader_object(shader), "model");
+	glUniformMatrix4fv(loc, 1, GL_FALSE, buttons[4].model.col_major);	
+	
+	bind_texture(buttons[4].textures[buttons[4].state], 0);
+	loc = glGetUniformLocation(gl_shader_object(shader), "tex");
+	glUniform1i(loc, 0);
+
+	draw_mesh(mesh);
+
+	unbind_texture(buttons[4].textures[buttons[4].state]);
+	
+	//settlement_button
+
+	loc = glGetUniformLocation(gl_shader_object(shader), "depth");
+	glUniform1f(loc,depth_button_s);	
+
+	loc = glGetUniformLocation(gl_shader_object(shader), "model");
+	glUniformMatrix4fv(loc, 1, GL_FALSE, buttons[1].model.col_major);	
+
+	bind_texture(buttons[1].textures[buttons[1].state], 0);
+
+	loc = glGetUniformLocation(gl_shader_object(shader), "tex");	
+	glUniform1i(loc, 0);	
+	
+	draw_mesh(mesh);	
+	
+	unbind_texture(buttons[1].textures[buttons[1].state]);
+	
+	//turret_button	
+
+	loc = glGetUniformLocation(gl_shader_object(shader), "depth");
+	glUniform1f(loc,depth_button_t);	
+		
+	loc = glGetUniformLocation(gl_shader_object(shader), "model");
+	glUniformMatrix4fv(loc, 1, GL_FALSE, buttons[2].model.col_major);	
+
+
+	bind_texture(buttons[2].textures[buttons[2].state], 0);
+	
+	loc = glGetUniformLocation(gl_shader_object(shader), "tex");
+	glUniform1i(loc, 0);
+	
+	draw_mesh(mesh);	
+	
+	unbind_texture(buttons[2].textures[buttons[2].state]);	
+		
+	
 }
 
 void IconBar::draw_buttons(){
@@ -652,17 +735,6 @@ int IconBar::click(int x, int y, vec3f (*ptr)(int x, int y)){
 	use_camera(cam);
 	vec3f pos = ptr(x,y);
 	use_camera(old_camera);	
-
-//	if(!(pos.y <= 3 && pos.y >=0.5))
-	//	return -1;
-
-//	if(pos.x >=4 && pos.x <= 10)
-//		return 1;
-//		
-//	else if(pos.x >=10.3 && pos.x <= 16.5)
-//		return 2;
-	//
-//	else return false;
 
 	//TODO find the fucking error 
 
