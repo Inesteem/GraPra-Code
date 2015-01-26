@@ -636,6 +636,7 @@ void actual_main() {
         objhandler->addObj("house_pacman", "./render-data/models/siedlung.obj", find_shader("alpha-color-shader"));
         objhandler->addObj("turret_pacman", "./render-data/models/simple_tower_pacman.obj", find_shader("pos+norm+tc"));
 //        objhandler->addObj("pacman", "./render-data/models/pacman.obj", find_shader("pos+norm+tc"));
+        objhandler->addObj("bomberman","./render-data/models/bbm-nolegs.obj",find_shader("unit-shader"));
         vector<string> filenames;
         filenames.push_back("./render-data/models/pacman_1.obj");
         filenames.push_back("./render-data/models/pacman_2.obj");

@@ -11,13 +11,17 @@
 class client_message_reader;
 class moac::Action;
 
+enum FRACTIONS {
+    PAC, BOMB
+};
+
 class Game
 {
 public:
     Game(ObjHandler *objhandler, simple_heightmap *sh, client_message_reader *messageReader, Menu *menu);
     void add_tree(int x, int y, int type);
     void add_building(string name, int size, int x, int y, unsigned int id);
-    void add_unit_group(unsigned int sourceId, unsigned int destinationId, unsigned int count, unsigned int troupId);
+    void add_unit_group(unsigned int sourceId, unsigned int destinationId, unsigned int count, unsigned int troupId, FRACTIONS frac, int owner);
 
     void change_building_owner(int building_id, int new_owner);
     void update_unit_group(unsigned int x, unsigned int y, unsigned int troupId, unsigned int time);
@@ -64,4 +68,5 @@ private:
 };
 
 extern int PLAYER_ID;
+extern int FRACTION;
 #endif // GAME_H

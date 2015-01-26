@@ -6,6 +6,7 @@
 #include "rendering.h"
 
 int PLAYER_ID;
+int FRACTION;
 
 Game::Game(ObjHandler *objhandler, simple_heightmap *sh, client_message_reader *message_reader, Menu *menu): m_objhandler(objhandler), m_sh(sh), m_messageReader(message_reader),menu(menu)
 {
@@ -109,14 +110,18 @@ void Game::update_unit_group(unsigned int x, unsigned int y, unsigned int troupI
 		}
 	}	
 }
-void Game::add_unit_group(unsigned int sourceId, unsigned int destinationId, unsigned int count, unsigned int troupId){
+void Game::add_unit_group(unsigned int sourceId, unsigned int destinationId, unsigned int count, unsigned int troupId, FRACTIONS frac, int owner){
 	Building *source = getBuilding(sourceId);
 	Building *destination = getBuilding(destinationId);
     vec2f start = source->get_pos();
     vec2f end = destination->get_pos();
 
     cout << "spawning enemies at: " << start.x << "," << start.y << " count: " << count << endl;
-    m_unitgroups.push_back(UnitGroup(m_objhandler->getObjByName("pacman"),m_sh,"bomb",start,end,0,count, 10000, m_sh->get_height(start.x, start.y), troupId, 0.5f,true));
+    if(frac == PAC ){
+        m_unitgroups.push_back(UnitGroup(m_objhandler->getObjByName("pacman"),m_sh,"pacman",start,end,owner,count, 10000, m_sh->get_height(start.x, start.y), troupId, 0.5f,true));
+    } else if(frac == BOMB) {
+        m_unitgroups.push_back(UnitGroup(m_objhandler->getObjByName("bomberman"),m_sh,"bomberman",start,end,owner,count,10000,m_sh->get_height(start.x, start.y), troupId, 0.5f, false));
+    }
 }
 
 void Game::upgrade_building(unsigned int buildingId, unsigned int state){
