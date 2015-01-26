@@ -93,6 +93,13 @@ void Game::init(string filename, int widht, int height, int id){
     if(color.x != -1){
 		set_player_color(id,color);
 	}
+	
+	msg::client_settings cs = make_message<msg::client_settings>();
+	cs.playerId = id;
+	cs.frac = FRACTION;
+	cs.colorId = 0;
+	m_messageReader->send_message(cs);  
+        
     
     m_sh->init(filename, widht, height);
 }
@@ -170,6 +177,10 @@ void Game::set_selected(Building *building){
 	m_selected = building;
 	
 }
+
+void Game::set_fraction(unsigned int frac){
+	FRACTION = frac;
+}	
 
 
 void Game::draw(){

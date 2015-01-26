@@ -29,6 +29,7 @@ public:
     
     void set_selected(Building *building);
     void set_action(moac::Action *action);
+    void set_fraction(unsigned int frac);
 
     void init(string filename, int widht, int height, int id);
     Building* get_building_at(vec3f pos);

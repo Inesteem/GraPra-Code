@@ -123,7 +123,6 @@ class GameStage
     bool m_gameOver;
 
     vector<Army*> m_armies;
-    vector<int> player_frac;
 public:
     static unsigned int s_nextBuilding;
     static unsigned int s_nextTroup;
@@ -148,4 +147,5 @@ public:
     unordered_map<unsigned int, Troup*> m_troups;
 };
 
+   extern int player_frac[10];
 #endif

@@ -244,6 +244,8 @@ void menu_keyhandler(unsigned char key, int state){
 		//Enter	
 				  //host game
 		case 13 : if(menu->get_row() == 0){
+					   game->set_fraction(menu->get_frac());
+			
 					   pid_t pID = fork();
 					 
 					   int numplayers = menu->get_num_players();

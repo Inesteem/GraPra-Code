@@ -9,10 +9,13 @@ using namespace std;
 unsigned int GameStage::s_nextBuilding = 0;
 unsigned int GameStage::s_nextTroup = 0;
 
+
+int player_frac[10];
+
 void GameStage::init(unsigned int x, unsigned int y)
 {
 	for(int i = 0; i < 10; i++)
-		player_frac.push_back(0);
+		player_frac[i] = 0;
 		
     m_mapX = x;
     m_mapY = y;
@@ -349,6 +352,7 @@ void Building::IncomingTroup(Troup *troup)
             boc.buildingId = dest->m_id;
             boc.oldOwner = dest->m_player;
             boc.newOwner = src->m_player;
+            boc.frac = player_frac[m_player];
 
             dest->m_player = src->m_player;
             dest->m_unitCount = troup->m_unitCount - dest->m_unitCount;

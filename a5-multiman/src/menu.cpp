@@ -254,6 +254,11 @@ vec3f Menu::get_player_color(){
 	return player_colors[COLOR-1];
 }
 
+int Menu::get_frac(){
+		
+	return FRAKTION;
+}
+
 void Menu::set_mode(Mode mode){ 
 	this->mode = mode;
 	if(mode == GAMESTART)
