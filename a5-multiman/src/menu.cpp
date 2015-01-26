@@ -808,9 +808,9 @@ int IconBar::click(int x, int y, vec3f (*ptr)(int x, int y)){
 	camera_ref old_camera = current_camera();
 	use_camera(cam);
 	vec3f pos = ptr(x,y);
-	use_camera(old_camera);	
 
-	//TODO find the fucking error 
+    use_camera(old_camera);
+
 
 	float rel_depth=(pos.z-near)/(far-near);
 	
@@ -825,7 +825,6 @@ int IconBar::click(int x, int y, vec3f (*ptr)(int x, int y)){
 			cout << "click_turret" << endl;
 			return 1;
 	}
-	use_camera(old_camera); 
 
 	return -1;
 
