@@ -7,7 +7,13 @@
 #include "messages.h"
 
 namespace moac {
-	
+
+    void Action::reset(){
+        ptr();
+    }
+
+
+
 	void getScreenpos(vec2f* in,vec2f* out){
 
 		float w = (float)render_settings::screenres_x;
@@ -58,8 +64,10 @@ namespace moac {
         return vec3f(outX, outY, outZ);
     }
 
-	Action::Action(Game *game, ObjHandler *objhandler){
+    Action::Action(Game *game, ObjHandler *objhandler, void (*ptr)()){
 		
+        this->ptr = ptr;
+
 		this->game = game;
 		this->statusbar = statusbar;
 		eb_set = false;

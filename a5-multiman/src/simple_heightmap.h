@@ -3,7 +3,7 @@
 
 
 #include "drawelement.h"
-
+#include "rendering.h"
 
 #include <mesh.h>
 #include <libmcm/vectors.h>
@@ -28,6 +28,9 @@ public:
 //    void re_init( vector<vec3f> *planes);
     void update();
     void draw();
+    vec2f get_size(){
+        return vec2f(m_g_width*render_settings::tile_size_x,m_g_height*render_settings::tile_size_y);
+    }
 
    // void add_units(int count, int x, int y);
 

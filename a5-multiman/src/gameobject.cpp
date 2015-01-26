@@ -3,7 +3,7 @@
 
 #include "game.h"
 #include "gameobject.h"
-#include "rendering.h"
+
 #include "label.h"
 #include "limits"
 #include <cmath>
@@ -737,6 +737,14 @@ UnitGroup::UnitGroup(Obj *obj, simple_heightmap *sh, string name, vec2f start, v
     m_unit_count(unit_count), m_sh(sh), m_id(m_id),
     m_time_to_reach_end(time_to_rech_end), m_spawned(0), m_start_b(start), m_end_b(end),m_scale(scale), draw_as_mesh(draw_as_mesh)
 {
+    matrix4x4f arto;
+    make_unit_matrix4x4f(&arto);
+    if(obj->name == "bomberman"){
+
+        vec3f axis;
+        float angle = M_PI;
+        make_rotation_matrix4x4f(&arto, &axis, angle);
+    }
     m_another_timer.restart();
 //    m_modelmatrices = vector<matrix4x4f>();
 //    m_cur_heights = vector<float>();
@@ -767,9 +775,7 @@ UnitGroup::UnitGroup(Obj *obj, simple_heightmap *sh, string name, vec2f start, v
     m_model.col_major[3 * 4 + 0] = m_pos.x*render_settings::tile_size_x;
     m_model.col_major[3 * 4 + 1] = m_center.y + m_height;
     m_model.col_major[3 * 4 + 2] = m_pos.y*render_settings::tile_size_y;
-    m_model.col_major[0 * 4 + 0] = m_scale;
-    m_model.col_major[1 * 4 + 1] = m_scale;
-    m_model.col_major[2 * 4 + 2] = m_scale;
+
 //    matrix4x4f testUnit;
 //    make_unit_matrix4x4f(&testUnit);
 //    m_modelmatrices.push_back(testUnit);
@@ -974,6 +980,12 @@ void UnitGroup::spawn_unit_row(unsigned int size){
     m_row_size.push_back(size);
 
     int new_size = size;
+    float rot = -M_PI/2;
+    bool is_pac = true;
+    if(m_obj->name == "bomberman"){
+        rot = M_PI/2;
+        is_pac = false;
+    }
     if(new_size%2 == 1){
         for(int i = -(new_size/2); i <= (new_size)/2; ++i){
 
@@ -988,13 +1000,14 @@ void UnitGroup::spawn_unit_row(unsigned int size){
             vec2f end = vec2f(m_end.x + ortho.x * (float) i -  m_view_dir.x * (float) m_rows,m_end.y + ortho.y * (float) i -  m_view_dir.y * (float) m_rows) ;
 
 
+
             m_units.push_back(Unit(pos
                                   ,m_view_dir
                                    , vec2f(i,m_rows)
                                    ,start
                                    ,end
                                    ,m_sh
-                                  , m_center.y, m_scale));
+                                  , m_center.y, m_scale,rot, is_pac));
             m_spawned++;
 
         }
@@ -1018,7 +1031,7 @@ void UnitGroup::spawn_unit_row(unsigned int size){
                                    ,start
                                    ,end
                                    ,m_sh
-                                  , m_center.y, m_scale));
+                                  , m_center.y, m_scale, rot, is_pac));
             m_spawned++;
 
         }
@@ -1029,7 +1042,7 @@ void UnitGroup::spawn_unit_row(unsigned int size){
 
 // UNIT
 
-Unit::Unit(vec2f pos, vec2f view_dir, vec2f pos_group, vec2f start, vec2f end, simple_heightmap *sh, float base_height, float scale): m_pos(pos), m_view_dir(view_dir), m_pos_group(pos_group), m_start(start), m_end(end), m_sh(sh), m_base_height(base_height){
+Unit::Unit(vec2f pos, vec2f view_dir, vec2f pos_group, vec2f start, vec2f end, simple_heightmap *sh, float base_height, float scale, float rot_angle, bool is_pac): m_pos(pos), m_view_dir(view_dir),is_pac(is_pac), m_pos_group(pos_group), m_start(start), m_end(end), m_sh(sh), m_base_height(base_height){
     make_unit_matrix4x4f(&m_model);
     m_model.col_major[0 * 4 + 0] = scale;
     m_model.col_major[1 * 4 + 1] = scale;
@@ -1037,7 +1050,7 @@ Unit::Unit(vec2f pos, vec2f view_dir, vec2f pos_group, vec2f start, vec2f end, s
     m_model.col_major[3 * 4 + 1] = base_height + sh->get_height(pos.x, pos.y);
     matrix4x4f rot;
     vec3f axis(0,1,0);
-    float angle = -M_PI/2;
+    float angle = rot_angle;
     make_rotation_matrix4x4f(&rot,&axis,angle);
     m_model = m_model*rot;
     movement_timer.restart();
@@ -1099,7 +1112,12 @@ void Unit::update(vec2f new_pos, float height){
     m_up_speed = ( m_dest_height - m_cur_height ) /5;
 
     m_model.col_major[3 * 4 + 0] = m_pos.x * render_settings::tile_size_x;
-    m_model.col_major[3 * 4 + 1] = m_base_height + m_sh->get_height(m_pos.x,m_pos.y);
+    if(is_pac){
+        m_model.col_major[3 * 4 + 1] = m_base_height + m_sh->get_height(m_pos.x,m_pos.y);
+    } else{
+        float x = wobble_timer.look()/500 + rand_start;
+        m_model.col_major[3 * 4 + 1] = m_base_height + m_sh->get_height(m_pos.x,m_pos.y) + 0.6 + 0.6*sin(x)*cos(x);
+    }
     m_model.col_major[3 * 4 + 2] = m_pos.y * render_settings::tile_size_y;
     m_model = m_model*rot;
     }

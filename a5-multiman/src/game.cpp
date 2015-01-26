@@ -231,6 +231,7 @@ void Game::game_over(int winner_id){
 		menu->set_mode(menu->GAMEWON);
 	else
 		menu->set_mode(menu->GAMELOOSE);
+    action->reset();
 	menu->set_render_menu(true);
 	
 }

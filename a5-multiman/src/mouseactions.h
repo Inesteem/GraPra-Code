@@ -51,11 +51,12 @@ namespace moac {
 		StatusBar *statusbar;
 		IconBar *iconbar;
 		Game *game;
+        void (*ptr)();
 		
 		
 		camera_ref orthocam;
 		
-		Action(Game *game, ObjHandler *objhandler);
+        Action(Game *game, ObjHandler *objhandler,void (*ptr)());
 		bool handle_base_selection(float x, float y);
 		bool handle_enemys_base(float x, float y);
 		void start(float x, float y);
@@ -66,6 +67,7 @@ namespace moac {
 		void upgrade_turret();
 		void check_button_clicked(int x, int y, int state);
 		void update_iconbar();
+        void reset( );
 	
 	};	
 	
