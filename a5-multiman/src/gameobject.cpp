@@ -387,7 +387,7 @@ int Building::get_level(){
 		return 0;
 	else if(state == msg::building_state::house_lvl2 || state == msg::building_state::turret_lvl2)	
 		return 1;
-	else if(state == msg::building_state::house_lvl3 || state == msg::building_state::turret_lvl3)	
+    else if(state == msg::building_state::house_lvl3)
 		return 2;		
 	else
 		return -1;
@@ -399,7 +399,7 @@ void Building::upgrade(Obj *obj, int state){
 	m_obj = obj;
 	this->state = state;
 	
-	if(state == msg::building_state::turret_lvl1 || state == msg::building_state::turret_lvl2 || state == msg::building_state::turret_lvl3 ){
+    if(state == msg::building_state::turret_lvl1 || state == msg::building_state::turret_lvl2){
 		settlement = false;
 		turret = true;
 	} 
@@ -590,9 +590,6 @@ bool Building::check_for_upgrade_turret(int state){
 		}		
 		
 		if(this->state == turret_lvl1 && state == turret_lvl2 && unit_count >= UpgradeToTurretLvl2)
-			return true;
-
-		if(this->state == turret_lvl2 && state == turret_lvl3 && unit_count >= UpgradeToTurretLvl3)
 			return true;
 	}	
 	
