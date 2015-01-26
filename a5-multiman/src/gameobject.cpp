@@ -974,30 +974,56 @@ void UnitGroup::spawn_unit_row(unsigned int size){
     m_row_size.push_back(size);
 
     int new_size = size;
+    if(new_size%2 == 1){
+        for(int i = -(new_size/2); i <= (new_size)/2; ++i){
 
-    for(int i = -(new_size/2); i <= new_size/2; ++i){
+            m_view_dir = m_end - m_start;
+         //   if(length_of_vec2f(&m_view_dir) < 0.0001) break;
+            vec2f ortho = vec2f(m_view_dir.y, -m_view_dir.x);
 
-        m_view_dir = m_end - m_start;
-     //   if(length_of_vec2f(&m_view_dir) < 0.0001) break;
-        vec2f ortho = vec2f(m_view_dir.y, -m_view_dir.x);
-
-        normalize_vec2f(&ortho);
-        normalize_vec2f(&m_view_dir);
-        vec2f pos = vec2f(m_pos.x + ortho.x *  i -  m_view_dir.x *  m_rows , m_pos.y + ortho.y *  i -  m_view_dir.y *  m_rows) ;
-        vec2f start = vec2f(m_start.x + ortho.x * (float) i -  m_view_dir.x * (float) m_rows,m_start.y + ortho.y * (float) i -  m_view_dir.y * (float) m_rows) ;
-        vec2f end = vec2f(m_end.x + ortho.x * (float) i -  m_view_dir.x * (float) m_rows,m_end.y + ortho.y * (float) i -  m_view_dir.y * (float) m_rows) ;
+            normalize_vec2f(&ortho);
+            normalize_vec2f(&m_view_dir);
+            vec2f pos = vec2f(m_pos.x + ortho.x *  i -  m_view_dir.x *  m_rows , m_pos.y + ortho.y *  i -  m_view_dir.y *  m_rows) ;
+            vec2f start = vec2f(m_start.x + ortho.x * (float) i -  m_view_dir.x * (float) m_rows,m_start.y + ortho.y * (float) i -  m_view_dir.y * (float) m_rows) ;
+            vec2f end = vec2f(m_end.x + ortho.x * (float) i -  m_view_dir.x * (float) m_rows,m_end.y + ortho.y * (float) i -  m_view_dir.y * (float) m_rows) ;
 
 
-        m_units.push_back(Unit(pos
-                              ,m_view_dir
-                               , vec2f(i,m_rows)
-                               ,start
-                               ,end
-                               ,m_sh
-                              , m_center.y, m_scale));
-        m_spawned++;
+            m_units.push_back(Unit(pos
+                                  ,m_view_dir
+                                   , vec2f(i,m_rows)
+                                   ,start
+                                   ,end
+                                   ,m_sh
+                                  , m_center.y, m_scale));
+            m_spawned++;
 
+        }
+    } else {
+        for(int i = -(new_size/2); i < (new_size)/2; ++i){
+
+            m_view_dir = m_end - m_start;
+         //   if(length_of_vec2f(&m_view_dir) < 0.0001) break;
+            vec2f ortho = vec2f(m_view_dir.y, -m_view_dir.x);
+
+            normalize_vec2f(&ortho);
+            normalize_vec2f(&m_view_dir);
+            vec2f pos = vec2f(m_pos.x + ortho.x *  i -  m_view_dir.x *  m_rows , m_pos.y + ortho.y *  i -  m_view_dir.y *  m_rows) ;
+            vec2f start = vec2f(m_start.x + ortho.x * (float) i -  m_view_dir.x * (float) m_rows,m_start.y + ortho.y * (float) i -  m_view_dir.y * (float) m_rows) ;
+            vec2f end = vec2f(m_end.x + ortho.x * (float) i -  m_view_dir.x * (float) m_rows,m_end.y + ortho.y * (float) i -  m_view_dir.y * (float) m_rows) ;
+
+
+            m_units.push_back(Unit(pos
+                                  ,m_view_dir
+                                   , vec2f(i,m_rows)
+                                   ,start
+                                   ,end
+                                   ,m_sh
+                                  , m_center.y, m_scale));
+            m_spawned++;
+
+        }
     }
+
 }
 
 

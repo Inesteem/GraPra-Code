@@ -6,7 +6,6 @@
 #include "rendering.h"
 
 int PLAYER_ID;
-int FRACTION;
 
 Game::Game(ObjHandler *objhandler, simple_heightmap *sh, client_message_reader *message_reader, Menu *menu): m_objhandler(objhandler), m_sh(sh), m_messageReader(message_reader),menu(menu)
 {
@@ -27,11 +26,11 @@ void Game::add_building(string name, int size, int x, int y, unsigned int id){
 
 }
 
-void Game::change_building_owner(int building_id, int new_owner){
+void Game::change_building_owner(int building_id, int new_owner, FRACTIONS frac){
     for(int i = 0; i < m_buildings.size(); i++){
         if(m_buildings[i].get_id() == building_id){
             if(m_buildings[i].get_owner_id() == -1 && new_owner != -1) {
-                this->upgrade_building(i, msg::building_state::house_lvl1);
+                this->upgrade_building(i, msg::building_state::house_lvl1,frac);
             }
             m_buildings[i].change_owner(new_owner);
 
@@ -131,7 +130,7 @@ void Game::add_unit_group(unsigned int sourceId, unsigned int destinationId, uns
     }
 }
 
-void Game::upgrade_building(unsigned int buildingId, unsigned int state){
+void Game::upgrade_building(unsigned int buildingId, unsigned int state, FRACTIONS frac){
     for(int i = 0; i < m_buildings.size(); i++){
 		if(m_buildings[i].get_id() == buildingId){
 			//TODO: const names

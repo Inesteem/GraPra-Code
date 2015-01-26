@@ -430,11 +430,11 @@
                      float border_grass_rock = 0.4 * height_factor;
                      float border_rock = 0.6 * height_factor;
                      float border_rock_snow = 0.85 * height_factor;
-
-                     vec4 color_water = vec4(texture(water, vec2(pos.z,pos.x)).rgb, 1.0);
-                     vec4 color_grass = vec4(texture(grass, vec2(pos.z,pos.x)).rgb, 1.0);
-                     vec4 color_rock = vec4(texture(stone,vec2(pos.z,pos.x)).rgb, 1.0);
-                     vec4 color_snow = vec4(texture(snow, vec2(pos.z,pos.x)).rgb, 1.0);
+                     vec2 tc = vec2(pos.z/4,pos.x/4);
+                     vec4 color_water = vec4(texture(water, tc).rgb, 1.0);
+                     vec4 color_grass = vec4(texture(grass, tc).rgb, 1.0);
+                     vec4 color_rock = vec4(texture(stone,tc).rgb, 1.0);
+                     vec4 color_snow = vec4(texture(snow, tc).rgb, 1.0);
 
 
                      if (pos.y <= border_water) {

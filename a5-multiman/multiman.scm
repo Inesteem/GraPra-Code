@@ -20,8 +20,8 @@
 
 (texture-from-file "terrain_hm" "eire.png" 'tex2d #t)
 (texture-from-file "terrain_0" "terrain_0_water.png" 'tex2d #t)
-(texture-from-file "terrain_1" "terrain_1.png" 'tex2d #t)
-(texture-from-file "terrain_2" "terrain_2.png" 'tex2d #t)
+(texture-from-file "terrain_1" "Grass0100_7_S.png" 'tex2d #t)
+(texture-from-file "terrain_2" "ConcreteRough0009_2_S.png" 'tex2d #t)
 (texture-from-file "terrain_3" "terrain_3.png" 'tex2d #t)
 (texture-from-file "selection_circle" "selection_circle.png" 'tex2d #t)
 (texture-from-file "slidebar2" "slidebar_2.png" 'tex2d #t)
