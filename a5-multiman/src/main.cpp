@@ -555,7 +555,7 @@ void loop() {
 
 		if(messageReader->m_init_done) {
             game->draw();
-            //action->draw();
+            action->draw();
             testEffect->Render();
         }
 		if(render_menu){

@@ -451,7 +451,7 @@ void IconBar::draw(){
 	glDepthMask(GL_TRUE);
 
 
-	vec3f color = vec3f(0.1,0.1,0.1);
+	vec3f color = vec3f(0.8,0.2,0.8);
 	loc = glGetUniformLocation(gl_shader_object(shader), "color");
 	glUniform3fv(loc, 1,(float *)&color);		
 
@@ -662,7 +662,7 @@ void IconBar::init_modelmatrices(){
 	//BACKGROUND
 	make_unit_matrix4x4f(&model_background);
 	model_background.row_col(0,0) = fovy;
-	model_background.row_col(1,1) = 0.77 * fovy;
+	model_background.row_col(1,1) = 0.18 * fovy;
 	model_background.row_col(0,3) = 0.f;
 	model_background.row_col(1,3) = 0.f;
 	
