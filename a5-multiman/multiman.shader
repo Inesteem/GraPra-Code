@@ -280,7 +280,7 @@
         #define ID gl_InvocationID
 
         float level(float d){
-                return clamp(lod * 5000/d, 1, 64);
+                return clamp(lod *2000/d, 1, 64);
         }
         void main()
         {
@@ -351,7 +351,7 @@
 #:geometry-shader #{
 #version 400 core
 
-
+        //used to calculate normals
         uniform mat4 model;
         uniform mat4 view;
         layout(triangles) in;
@@ -456,8 +456,8 @@
                      vec3 N = normalize(gFacetNormal);
                      vec3 L = light_dir;
                      float df = abs(dot(N, L));
-                     float d1 = min(min(gTriDistance.x, gTriDistance.y), gTriDistance.z);
-                     float d2 = min(min(gPatchDistance.x, gPatchDistance.y), gPatchDistance.z);
+//                     float d1 = min(min(gTriDistance.x, gTriDistance.y), gTriDistance.z);
+//                     float d2 = min(min(gPatchDistance.x, gPatchDistance.y), gPatchDistance.z);
                      vec3 color = df*light_col;
 
 
@@ -642,9 +642,9 @@
 
         in vec3 in_pos_0;
         in vec3 in_pos_1;
-        in vec2 in_tc;
         in vec3 in_norm_0;
         in vec3 in_norm_1;
+        in vec2 in_tc;
         uniform mat4 proj;
         uniform mat4 view;
         uniform mat4 model;
@@ -653,15 +653,15 @@
         out vec3 norm_wc;
         out vec4 pos_wc;
         void main() {
-            float t = (sin(time/1000)+1)/2.0;
+            float t = (sin(time/100)+1)/2.0;
             norm_wc = mix(in_norm_0,in_norm_1,t);
-//            vec3 pos = mix(in_pos_0,in_pos_1,t);
-//                    pos_wc = model * vec4(pos, 1.0);
-            pos_wc = model * vec4(in_pos_0, 1.0);
-                norm_wc = transpose(inverse(mat3x3(model))) * norm_wc;
-//                    norm_wc = (model_normal * vec4(in_norm,0)).xyz;
-                    tc = in_tc;
-                    gl_Position = proj * view * pos_wc;
+            vec3 pos = mix(in_pos_0,in_pos_1,t);
+            pos_wc = model * vec4(pos, 1.0);
+            //            pos_wc = model * vec4(in_pos_1, 1.0);
+            norm_wc = transpose(inverse(mat3x3(model))) * norm_wc;
+//            norm_wc = (model_normal * vec4(in_norm,0)).xyz;
+            tc = in_tc;
+            gl_Position = proj * view * pos_wc;
         }
 
 }
@@ -679,14 +679,14 @@
         void main() {
                 out_col = vec4(0.,0.,0.,1.);
                 vec3 color = texture(diffuse_tex, tc.st).rgb;
-
+//                out_col = vec4(norm_wc,1);
                 float n_dot_l = max(0, dot(norm_wc, -light_dir));
                 out_col += vec4(color * light_col * n_dot_l, 0.);
-//                out_col = vec4(1,1,1,1);
+//                out_col = vec4(0,1,1,1);
         }
 }
 
-#:inputs (list "in_pos_1" "in_pos_2" "in_norm_1" "in_norm_2" "in_tc")>
+#:inputs (list "in_pos_0" "in_pos_1" "in_norm_0" "in_norm_1"  "in_tc")>
 
 #<make-shader "count-shader"
 #:vertex-shader #{

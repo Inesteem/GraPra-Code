@@ -145,7 +145,7 @@ private:
 class Unit {
 
 public:
-    Unit(vec2f pos, vec2f view_dir, vec2f pos_group, vec2f start, vec2f end, simple_heightmap *sh, float base_height);
+    Unit(vec2f pos, vec2f view_dir, vec2f pos_group, vec2f start, vec2f end, simple_heightmap *sh, float base_height, float scale);
     matrix4x4f *getModel();
     void update(vec2f new_pos,float height);
         vec2f m_pos_group;
@@ -155,14 +155,14 @@ private:
 //    wall_time_timer rotations_timer;
     simple_heightmap* m_sh;
     vec2f m_pos, m_view_dir, m_start, m_end;
-
+    float m_angle = 0;
     float m_speed;
     const float BASE_SPEED = 0.1;
     float m_base_height;
     float m_up_speed;
     float m_dest_height;
     float m_cur_height;
-
+    float m_rot_speed;
     bool last_step;
 
     matrix4x4f m_model;
@@ -173,16 +173,16 @@ private:
 class UnitGroup: public GameObject{
 public:
 
-    UnitGroup(Obj *obj,simple_heightmap *sh, string name, vec2f start, vec2f end, unsigned int owner, unsigned int unit_count, float time_to_rech_end, float height, unsigned m_id);
+    UnitGroup(Obj *obj,simple_heightmap *sh, string name, vec2f start, vec2f end, unsigned int owner, unsigned int unit_count, float time_to_rech_end, float height, unsigned m_id, float scale, bool draw_as_mesh);
     void update();
-    void draw_drawelement();
-    void draw_mesh();
+    void draw();
+//    void draw_mesh();
     void move_to(vec2f pos, float time_to_reach);
     void force_position(vec2f pos);
     float get_height(float x, float y){
         m_sh->get_height(x,y);
     }
-
+    bool draw_as_mesh;
     unsigned int m_id;
     unsigned int m_unit_count;
 
@@ -214,7 +214,7 @@ private:
     vector<float> m_dest_heights;
     vector<float> m_cur_heights;
     vector<float> m_up_speed;
-
+    float m_scale;
     vector<Unit> m_units;
 
 };

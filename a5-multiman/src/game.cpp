@@ -116,7 +116,7 @@ void Game::add_unit_group(unsigned int sourceId, unsigned int destinationId, uns
     vec2f end = destination->get_pos();
 
     cout << "spawning enemies at: " << start.x << "," << start.y << " count: " << count << endl;
-    m_unitgroups.push_back(UnitGroup(m_objhandler->getObjByName("pacman"),m_sh,"bomb",start,end,0,count, 10000, m_sh->get_height(start.x, start.y), troupId));
+    m_unitgroups.push_back(UnitGroup(m_objhandler->getObjByName("pacman"),m_sh,"bomb",start,end,0,count, 10000, m_sh->get_height(start.x, start.y), troupId, 0.5f,true));
 }
 
 void Game::upgrade_building(unsigned int buildingId, unsigned int state){
@@ -170,17 +170,18 @@ void Game::set_selected(Building *building){
 void Game::draw(){
 	m_sh->draw();
 
-    for(int i = 0; i < m_buildings.size(); ++i){
-        m_buildings[i].draw();
-    }
 
     for(int i = 0; i < m_trees.size(); ++i){
         m_trees[i].draw();
     }
 
     for(int i = 0; i < m_unitgroups.size(); ++i){
-        m_unitgroups[i].draw_mesh();
+        m_unitgroups[i].draw();
     }
+    for(int i = 0; i < m_buildings.size(); ++i){
+        m_buildings[i].draw();
+    }
+
 
     if (m_selected != 0 && m_selected != nullptr){
        m_selected->draw_selection_circle(m_selected->m_size);
