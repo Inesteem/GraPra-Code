@@ -101,13 +101,32 @@ public:
     bool Update();
 };
 
+class Army : public GameObject
+{
+    unsigned int m_spawnTime = 1000;
+    wall_time_timer m_spawnTimer;
+
+    const static unsigned int s_maxTroupSize = 6;
+
+    vector<Troup*> m_toSpawn;
+
+    Troup* spawnTroup();
+
+public:
+    Army(GameStage *gameStage, Building *sourceBuilding, Building *destinationBuilding, unsigned int unitCount);
+    bool Update();
+};
+
 class GameStage
 {
+
+    bool m_gameOver;
+
+    vector<Army*> m_armies;
+public:
     static unsigned int s_nextBuilding;
     static unsigned int s_nextTroup;
 
-    bool m_gameOver;
-public:
     int m_mapX, m_mapY;
     bool **m_map;
 
@@ -116,10 +135,12 @@ public:
     void init(unsigned int x, unsigned int y);
     void Update();
     Building* spawnHouse(unsigned int x, unsigned int y);
-    Troup* spawnTroup(unsigned int sourceBuildingID, unsigned int destinationBuildingID, unsigned int unitCount);
     void upgrade_building_house(unsigned int buildingId);
     void upgrade_building_turret(unsigned int buildingId);
     int checkGameOver();
+
+    void addArmy(unsigned int sourceBuildingID, unsigned int destinationBuildingID, unsigned int unitCount);
+    void addTroup(Troup *troup);
 
     unordered_map<unsigned int, Building*> m_buildings;
     unordered_map<unsigned int, Troup*> m_troups;

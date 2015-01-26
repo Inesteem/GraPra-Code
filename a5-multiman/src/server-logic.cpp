@@ -59,6 +59,11 @@ void GameStage::Update()
         m_troups.erase(troupToDelete);
         delete(t);
     }
+
+    for(int i = 0; i < m_armies.size(); i++) {
+        m_armies[i]->Update();
+        // TODO delete armies if update returns true
+    }
 }
 
 int GameStage::checkGameOver() {
@@ -83,6 +88,56 @@ int GameStage::checkGameOver() {
     return winningPlayer;
 }
 
+void GameStage::addArmy(unsigned int sourceBuildingID, unsigned int destinationBuildingID, unsigned int unitCount)
+{
+    Building *a = m_buildings[sourceBuildingID];
+    Building *b = m_buildings[destinationBuildingID];
+
+    Army *army = new Army(this, a, b, unitCount);
+    m_armies.push_back(army);
+}
+
+Army::Army(GameStage *gameStage, Building *sourceBuilding, Building *destinationBuilding, unsigned int unitCount)
+    : GameObject(gameStage, 0, 0, 0)
+{
+    int unitsLeft = unitCount;
+
+    for(;;) {
+        int troupUnits = unitsLeft > s_maxTroupSize ? s_maxTroupSize : unitsLeft;
+        cout << "creating troup, size: " << troupUnits << endl;
+        unitsLeft -= s_maxTroupSize;
+        Troup *t = new Troup(gameStage, sourceBuilding, destinationBuilding, troupUnits, GameStage::s_nextTroup++);
+        m_toSpawn.push_back(t);
+
+        if(unitsLeft <= 0) break;
+    }
+
+    m_spawnTimer.start();
+
+    Troup *t = m_toSpawn[0];
+    m_toSpawn.erase(m_toSpawn.begin());
+
+    m_gameStage->addTroup(t);
+}
+
+bool Army::Update()
+{
+    if(m_toSpawn.size() == 0) return true;
+
+    if(m_spawnTimer.look() < wall_time_timer::msec(m_spawnTime)) return false;
+
+    cout << "spawning a troup in army" << endl;
+
+    m_spawnTimer.restart();
+
+    Troup *t = m_toSpawn[0];
+    m_toSpawn.erase(m_toSpawn.begin());
+
+    m_gameStage->addTroup(t);
+
+    if(m_toSpawn.size() == 0) return true;
+}
+
 Building* GameStage::spawnHouse(unsigned int x, unsigned int y)
 {
     Building *b = new Building(this, x,y, GameStage::s_nextBuilding);
@@ -98,28 +153,23 @@ void Building::KillUnits(unsigned int unitCount){
         broadcast(&bug);
 }
 
-Troup* GameStage::spawnTroup(unsigned int sourceBuildingID, unsigned int destinationBuildingID, unsigned int unitCount)
+void GameStage::addTroup(Troup *troup)
 {
-    Building *a = m_buildings[sourceBuildingID];
-    a->KillUnits(unitCount);
+    troup->m_source->KillUnits(troup->m_unitCount);
 
-    Building *b = m_buildings[destinationBuildingID];
-    Troup *t = new Troup(this, a, b, unitCount, s_nextTroup);
-    m_troups[s_nextTroup++] = t;
+    m_troups[troup->m_id] = troup;
 
-    cout << "Troup starting at (" << a->m_x << ", " << a->m_y << "), dest (" << b->m_x << ", " << b->m_y << ")" << endl;
+    cout << "Troup starting at (" << troup->m_source->m_x << ", " << troup->m_source->m_y << "), dest (" << troup->m_destination->m_x << ", " << troup->m_destination->m_y << ")" << endl;
 
     msg::spawn_troup_server sts = make_message<msg::spawn_troup_server>();
-    sts.destinationId = destinationBuildingID;
+    sts.destinationId = troup->m_destination->m_id;
     sts.playerId = 0;
-    sts.sourceId = sourceBuildingID;
-    sts.troupId = t->m_id;
-    sts.unitCount = unitCount;
+    sts.sourceId = troup->m_source->m_id;
+    sts.troupId = troup->m_id;
+    sts.unitCount = troup->m_unitCount;
     broadcast(&sts);
 
-    t->NextDestination();
-
-    return t;
+    troup->NextDestination();
 }
 void GameStage::upgrade_building_house(unsigned int buildingId){
     Building *building = m_buildings[buildingId];

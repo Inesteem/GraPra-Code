@@ -909,9 +909,9 @@ uniform float down;
 		
 		else{
             vec4 tex_col = vec4(texture(tex,tc).x,texture(tex,tc).y,texture(tex,tc).z,1);
-			if(	tex_col.x > color.x-0.1 && tex_col.x < color.x+0.1 &&
-				tex_col.y > color.y-0.1 && tex_col.y < color.y+0.1 &&
-				tex_col.z > color.z-0.1 && tex_col.z < color.z+0.1){
+			if(	tex_col.x >= (color.x-0.3) && tex_col.x <= (color.x+0.3) &&
+				tex_col.y >= (color.y-0.3) && tex_col.y <= (color.y+0.3) &&
+				tex_col.z >= (color.z-0.3) && tex_col.z <= (color.z+0.3)){
 					discard;
 			} else
 				out_col = tex_col;

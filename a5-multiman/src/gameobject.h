@@ -112,6 +112,8 @@ public:
 	int get_state();
 	int get_type();
 	int get_level();
+	int get_defence_value(){ return get_type();}
+	int get_unit_production(){return 1-get_type();}
     void change_owner(unsigned int owner);
     bool check_for_upgrade_turret(int state);
     bool check_for_upgrade_settlement(int state);

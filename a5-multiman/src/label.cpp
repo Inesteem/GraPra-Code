@@ -136,46 +136,32 @@ cairo_t* Label::create_cairo_context(int width, int height, int channels, cairo_
 	return cr;
 }
 
-void Label::do_cairo_stuff(std::string displayed, vec3f color, std::string name){
+void Label::do_cairo_stuff(std::string displayed){
+		fontSize +=2;
 		cairo = create_cairo_context(nChars * fontSize, fontSize, 4, &cairo_surface, &cairo_surface_data);
 
 		if (!valid_texture_ref(texture)) {
 			tex_params_t p = default_fbo_tex_params();
 			p.wrap_s = GL_CLAMP_TO_EDGE;
 			p.wrap_t = GL_CLAMP_TO_EDGE;
-			texture = make_empty_texture(name.c_str(), nChars * fontSize, fontSize, GL_TEXTURE_2D, GL_RGBA8, GL_UNSIGNED_BYTE, GL_RGBA, &p);
+			texture = make_empty_texture(texture_name.c_str(), nChars * fontSize, fontSize, GL_TEXTURE_2D, GL_RGBA8, GL_UNSIGNED_BYTE, GL_RGBA, &p);
 		}
 		
-		
-		cairo_set_font_size(cairo, fontSize);
-//		cairo_select_font_face(cairo, "DejaVu Serif", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);	
-		cairo_select_font_face(cairo, "Trebuchet MS Bold Italic", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);	
-		cairo_move_to(cairo, 0, fontSize);
-		cairo_set_source_rgb(cairo, 0, 0, 0);
-		cairo_paint(cairo);
-		cairo_set_source_rgb(cairo, color.z, color.y, color.x);
-		cairo_show_text(cairo, displayed.c_str());
-	
-		bind_texture(texture, 0);
-		data = cairo_image_surface_get_data(cairo_surface);
-		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, texture_width(texture), texture_height(texture), GL_RGBA, GL_UNSIGNED_BYTE, data);
-		unbind_texture(texture);
+	do_update_cairo_stuff(" 1000 ");
 
 }
 
-void Label::do_update_cairo_stuff(texture_ref &texture, std::string displayed, vec3f color, std::string name){
+void Label::do_update_cairo_stuff(std::string displayed){
 
-
-
-	texture = find_texture(name.c_str());
 
 	cairo_set_font_size(cairo, fontSize);
 //	cairo_select_font_face(cairo, "DejaVu Serif", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);	
-	cairo_select_font_face(cairo, "Trebuchet MS Bold Italic", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);	
-	cairo_move_to(cairo, 0, fontSize);
+//	cairo_select_font_face(cairo, "Trebuchet MS Bold Italic", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);	
+	cairo_select_font_face(cairo, "Impact", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);	
+	cairo_move_to(cairo, 0, fontSize-2);
 	cairo_set_source_rgb(cairo, 0, 0, 0);
 	cairo_paint(cairo);
-	cairo_set_source_rgb(cairo, color.z, color.y, color.x);
+	cairo_set_source_rgb(cairo, 1, 1, 1);
 	cairo_show_text(cairo, displayed.c_str());
 	
 	bind_texture(texture, 0);
@@ -184,43 +170,30 @@ void Label::do_update_cairo_stuff(texture_ref &texture, std::string displayed, v
 	unbind_texture(texture);
 }
 
+	
 
 void Label::make_gui_texture() {
-	
 	std::stringstream stream;
 	stream << 0;
 	std::string sn = stream.str();
-	do_cairo_stuff(sn, texture_color, texture_name);
+	do_cairo_stuff(sn);
 	
 }
 
 
 void Label::update_gui_texture_int(int n){
-	
-	free(cairo_surface_data);
-	free(cairo_surface);
-	free(cairo);
-//	free(data);
-		
+
 	std::stringstream stream;
 	stream << n;
 	std::string sn = stream.str();
-//	do_update_cairo_stuff(texture, sn, texture_color, texture_name);
-	
-	do_cairo_stuff(sn, texture_color, texture_name);	
-
+	do_update_cairo_stuff(sn);
+//	do_cairo_stuff(sn, texture_color, texture_name);
 }
 
 
 void Label::update_gui_texture_string(std::stringstream *stream){
-	free(cairo_surface_data);
-	free(cairo_surface);
-	free(cairo);
-//	free(data);
-	
 	std::string sn = stream->str();
-//	do_update_cairo_stuff(texture, sn, texture_color, texture_name);
-	do_cairo_stuff(sn, texture_color, texture_name);
+	do_update_cairo_stuff(sn);
 }
 
 
@@ -292,6 +265,9 @@ void Label::render_gui_overlay() {
 	glUniformMatrix4fv(loc, 1, GL_FALSE, model.col_major);
 
 	bind_texture(texture, 0);
+	unsigned char *data = cairo_image_surface_get_data(cairo_surface);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, texture_width(texture), texture_height(texture), GL_RGBA, GL_UNSIGNED_BYTE, data);
+	
 	loc = glGetUniformLocation(gl_shader_object(label_shader), "tex");
 	glUniform1i(loc, 0);
 	
