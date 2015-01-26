@@ -5,10 +5,13 @@
 #include "simple_heightmap.h"
 #include "objloader.h"
 #include "wall-timer.h"
+#include "effect.h"
+
 #include <vector>
 #include <string>
 #include <iostream>
 #include <unordered_map>
+
 
 using namespace std;
 
@@ -92,6 +95,8 @@ public:
 class Building:public GameObject{
 public:
     Building(Obj *obj, Obj *selection_circle, Obj *upgrade_arrow, string name, int x, int y, unsigned int owner, int size, float height, unsigned int id);
+    ~Building();
+
     void upgrade(Obj *obj, int state);
     float dist_to(vec3f &pos);
     void draw();
@@ -130,6 +135,8 @@ private:
     int m_owner;
     int state;
     
+    // upgrade effect for building
+    UpgradeEffect *m_upgradeEffect;
 };
 
 

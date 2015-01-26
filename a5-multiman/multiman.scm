@@ -49,6 +49,8 @@
 (texture-from-file "pacman_units" "Menu/pacman_units_2.png" 'tex2d #t)
 (texture-from-file "pacman_unit_production" "Menu/pacman_production_2.png" 'tex2d #t)
 
+(texture-from-file "test" "explosions-04.png" 'tex2d #t)
+
 
 (set-move-factor! 1)
 

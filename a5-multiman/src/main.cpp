@@ -20,6 +20,9 @@
 #include "label.h"
 #include "menu.h"
 
+// TODO REMOVE
+#include "effect.h"
+
 #include <framebuffer.h>
 #include <texture.h>
 #include <cstdio>
@@ -59,6 +62,9 @@ char hostname[1024];
 
 Action *action;
 Menu *menu;
+
+// TODO REVMOVE
+UpgradeEffect *testEffect;
 
 #define doc(X)
 
@@ -107,6 +113,11 @@ void mouse_move(int x, int y) {
 }
 
 void mouse(int button, int state, int x, int y) {
+    // TODO REMOVE
+    if(button == GLUT_MIDDLE_BUTTON && state == GLUT_DOWN) {
+        testEffect->Start();
+
+    }
 	
 	if(render_menu){
 		return;
@@ -457,8 +468,9 @@ void loop() {
 		// 
 		// update logic
 		//
+        testEffect->Update();
 		if(messageReader->m_init_done) {
-			game->update();
+            game->update();
 		}
 		render_timer.done_with("updates");
 
@@ -542,9 +554,10 @@ void loop() {
 
 
 		if(messageReader->m_init_done) {
-			game->draw();
-			action->draw();
-		} 
+            game->draw();
+            //action->draw();
+            testEffect->Render();
+        }
 		if(render_menu){
 			menu->draw(false);
 		}
@@ -669,6 +682,11 @@ void actual_main() {
 
 	action = new Action(game, objhandler);
 	game->set_action(action);
+
+    // TODO REMOVE
+    vec3f o = vec3f(0,10,0);
+    vec3f c = vec3f(0, 1, 0);
+    testEffect = new UpgradeEffect(o, c);
 
 	init_framebuffer();
 

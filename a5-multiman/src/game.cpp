@@ -168,7 +168,6 @@ void Game::set_selected(Building *building){
 
 
 void Game::draw(){
-
 	m_sh->draw();
 
     for(int i = 0; i < m_buildings.size(); ++i){
@@ -186,7 +185,6 @@ void Game::draw(){
     if (m_selected != 0 && m_selected != nullptr){
        m_selected->draw_selection_circle(m_selected->m_size);
     }
-
 
 }
 

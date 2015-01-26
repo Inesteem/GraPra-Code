@@ -57,6 +57,76 @@
 }
 #:inputs (list "in_pos" "in_norm")>
 
+#<make-shader "particle-flare-shader"
+#:vertex-shader #{
+#version 150 core
+        in vec3 in_pos;
+        in float in_lifetime;
+        uniform mat4 proj;
+        uniform mat4 view;
+        uniform vec2 screenres;
+        uniform float particle_size;
+        uniform float max_lifetime;
+        uniform vec2 near_far;
+        out float factor;
+// 	out float depth;
+
+        float compute_pointsize(float light_radius, vec4 position)
+        {
+                // see bf::splats.
+
+                float d = position.z;
+
+                mat4 m = proj;
+                vec4 v = vec4(light_radius, light_radius, d, 1.0);
+
+                vec4 tmp = vec4(v.x*m[0].x, v.y*m[1].y, v.z*m[2].z+m[3].z, -v.z);
+                vec3 tmp2 = tmp.xyz / tmp.w;
+                tmp2.x = tmp2.x * screenres.x;
+                tmp2.y = tmp2.y * screenres.y;
+
+                float size = tmp2.x * 1.15;
+                return size;
+        }
+
+        void main() {
+                vec4 pos_ec = view * vec4(in_pos,1.0);
+// 		depth = (-pos_ec.z - near_far.x) / (near_far.y - near_far.x);
+                gl_Position = proj * pos_ec;
+                if (in_lifetime <= 0.0)
+                        gl_PointSize = 0.0;
+                else
+                        gl_PointSize = compute_pointsize(particle_size, pos_ec);
+                factor = max(0.0 , in_lifetime / max_lifetime);
+        }
+}
+#:fragment-shader #{
+#version 150 core
+        in float factor;
+// 	in float depth;
+        out vec4 out_col;
+        uniform sampler2D depthtex;
+        uniform vec2 screenres;
+        uniform vec2 near_far;
+        uniform vec3 color;
+        float LinearDepth(in float depth, in float near, in float far) { return (2.0 * near) / (far + near - depth * (far - near)); }
+        void main() {
+            //out_col = vec4(1,0,0,1);
+
+                vec2 pos = (gl_PointCoord.xy-vec2(0.5,0.5)) * 2.0;
+                float val = length(pos);
+                out_col = max(0., 1. - val) * vec4(color, 1.);
+                out_col *= max(0., pow(16. , -val));
+                //float d = texture(depthtex, gl_FragCoord.st/screenres).r;
+                //d = LinearDepth(d, near_far.x, near_far.y);
+                //float depth = LinearDepth(gl_FragCoord.z, near_far.x, near_far.y);
+                const float fade_dist = 0.005;
+                //float dist = clamp(d-depth, 0, fade_dist);
+                //out_col = mix(vec4(0,0,0,0), out_col, dist/fade_dist);
+                //gl_FragDepth = depth;
+        }
+}
+#:inputs (list "in_pos" "in_lifetime")>
 
 #<make-shader "selection_circle_shader"
 #:vertex-shader #{
