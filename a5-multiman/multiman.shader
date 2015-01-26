@@ -653,15 +653,15 @@
         out vec3 norm_wc;
         out vec4 pos_wc;
         void main() {
-            float t = (sin(time/1000)+1)/2.0;
+            float t = (sin(time/100)+1)/2.0;
             norm_wc = mix(in_norm_0,in_norm_1,t);
-//            vec3 pos = mix(in_pos_0,in_pos_1,t);
-//                    pos_wc = model * vec4(pos, 1.0);
-            pos_wc = model * vec4(in_pos_0, 1.0);
-                norm_wc = transpose(inverse(mat3x3(model))) * norm_wc;
-//                    norm_wc = (model_normal * vec4(in_norm,0)).xyz;
-                    tc = in_tc;
-                    gl_Position = proj * view * pos_wc;
+            vec3 pos = mix(in_pos_0,in_pos_1,t);
+            pos_wc = model * vec4(pos, 1.0);
+            //            pos_wc = model * vec4(in_pos_1, 1.0);
+            norm_wc = transpose(inverse(mat3x3(model))) * norm_wc;
+//            norm_wc = (model_normal * vec4(in_norm,0)).xyz;
+            tc = in_tc;
+            gl_Position = proj * view * pos_wc;
         }
 
 }
@@ -686,7 +686,7 @@
         }
 }
 
-#:inputs (list "in_pos_1" "in_pos_2" "in_norm_1" "in_norm_2" "in_tc")>
+#:inputs (list "in_pos_0" "in_pos_1" "in_norm_0" "in_norm_1"  "in_tc")>
 
 #<make-shader "count-shader"
 #:vertex-shader #{

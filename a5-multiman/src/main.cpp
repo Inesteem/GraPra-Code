@@ -634,8 +634,8 @@ void actual_main() {
         objhandler->addObj("turret_pacman", "./render-data/models/simple_tower_pacman.obj", find_shader("pos+norm+tc"));
 //        objhandler->addObj("pacman", "./render-data/models/pacman.obj", find_shader("pos+norm+tc"));
         vector<string> filenames;
-        filenames.push_back("./render-data/models/cube_1.obj");
-        filenames.push_back("./render-data/models/cube_2.obj");
+        filenames.push_back("./render-data/models/pacman_1.obj");
+        filenames.push_back("./render-data/models/pacman_2.obj");
         objhandler->makeObjFMS(filenames,"pacman",find_shader("ip2-shader"));
  //      objhandler->addObj("house_pacman", "./render-data/models/house_pacman.obj", find_shader("pos+norm+tc"));
 

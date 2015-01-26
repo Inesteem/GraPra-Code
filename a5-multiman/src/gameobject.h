@@ -151,14 +151,14 @@ private:
 //    wall_time_timer rotations_timer;
     simple_heightmap* m_sh;
     vec2f m_pos, m_view_dir, m_start, m_end;
-
+    float m_angle = 0;
     float m_speed;
     const float BASE_SPEED = 0.1;
     float m_base_height;
     float m_up_speed;
     float m_dest_height;
     float m_cur_height;
-
+    float m_rot_speed;
     bool last_step;
 
     matrix4x4f m_model;
@@ -169,7 +169,7 @@ private:
 class UnitGroup: public GameObject{
 public:
 
-    UnitGroup(Obj *obj,simple_heightmap *sh, string name, vec2f start, vec2f end, unsigned int owner, unsigned int unit_count, float time_to_rech_end, float height, unsigned m_id);
+    UnitGroup(Obj *obj,simple_heightmap *sh, string name, vec2f start, vec2f end, unsigned int owner, unsigned int unit_count, float time_to_rech_end, float height, unsigned m_id, float scale);
     void update();
     void draw_drawelement();
     void draw_mesh();
@@ -210,7 +210,7 @@ private:
     vector<float> m_dest_heights;
     vector<float> m_cur_heights;
     vector<float> m_up_speed;
-
+    float m_scale;
     vector<Unit> m_units;
 
 };

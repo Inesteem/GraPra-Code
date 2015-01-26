@@ -134,25 +134,41 @@ Obj::Obj(string name, int id, vector<string> filenames, shader_ref shader):name(
         string innorm = "in_norm_";
 
         inpos  += to_string(i);
-        innorm += to_string(i);
-        cout << inpos << innorm << endl;
+//        innorm += to_string(i);
+//        cout << inpos << innorm << endl;
         bind_mesh_to_gl(mesh);
         add_vertex_buffer_to_mesh(mesh, inpos.c_str(), GL_FLOAT, loaders[i].objdata.vertices, 3, (float*) loaders[i].objdata.vertex_data , GL_STATIC_DRAW);
+//        add_vertex_buffer_to_mesh(mesh, innorm.c_str(), GL_FLOAT, loaders[i].objdata.vertices, 3, (float *) loaders[i].objdata.normal_data, GL_STATIC_DRAW);
+        unbind_mesh_from_gl(mesh);
+
+    }
+    for(int i = 0; i < filenames.size(); ++i){
+//        loaders.push_back( ObjLoader(filenames[i].c_str(),filenames[i].c_str()));
+
+        string innorm = "in_norm_";
+
+//        inpos  += to_string(i);
+        innorm += to_string(i);
+//        cout << inpos << innorm << endl;
+        bind_mesh_to_gl(mesh);
+//        add_vertex_buffer_to_mesh(mesh, inpos.c_str(), GL_FLOAT, loaders[i].objdata.vertices, 3, (float*) loaders[i].objdata.vertex_data , GL_STATIC_DRAW);
         add_vertex_buffer_to_mesh(mesh, innorm.c_str(), GL_FLOAT, loaders[i].objdata.vertices, 3, (float *) loaders[i].objdata.normal_data, GL_STATIC_DRAW);
         unbind_mesh_from_gl(mesh);
 
     }
-
-
-    loaders[0].BoundingBox(bb_min,bb_max);
+    vec3f min, max;
+    loaders[0].BoundingBox(min,max);
+    bb_min = min;
+    bb_max = max;
+    cout << min << " " << max << endl;
 
     bind_mesh_to_gl(mesh);
     add_vertex_buffer_to_mesh(mesh, "in_tc", GL_FLOAT, loaders[0].objdata.vertices, 2, (float *) loaders[0].objdata.texcoord_data, GL_STATIC_DRAW);
     add_index_buffer_to_mesh(mesh, loaders[0].objdata.groups->triangles * 3, (unsigned int *) loaders[0].objdata.groups->v_ids, GL_STATIC_DRAW);
     unbind_mesh_from_gl(mesh);
 
-//    tex_params_t p = default_tex_params();
-//    tex = make_texture_ub(("tex"), loaders[0].objdata.groups->mtl->tex_d, GL_TEXTURE_2D, &p);
+    tex_params_t p = default_tex_params();
+    tex = make_texture_ub(("tex"), loaders[0].objdata.groups->mtl->tex_d, GL_TEXTURE_2D, &p);
 }
 
 
@@ -284,7 +300,17 @@ void GameObject::draw(){
 Tree::Tree(Obj *obj, string name, int x, int y, float height): GameObject(obj,name, find_shader("pos+norm+tc"), height){
     identifier = 't';
     m_pos = vec2f(x,y);
-
+    vec2f add= vec2f(random_float()*0.2,random_float()*0.2);
+    m_pos = m_pos+add;
+    matrix4x4f scale;
+    make_unit_matrix4x4f(&scale);
+    float scale_factor = (random_float()*0.5)+0.5;
+    scale.col_major[0 * 4 + 0] =  scale_factor;
+    scale.col_major[1 * 4 + 1] =  scale_factor;
+    scale.col_major[2 * 4 + 2] =  scale_factor;
+    vec4f t = vec4f(m_center.x,m_center.y,m_center.z,0);
+    t = scale * t;
+    m_center = vec3f(t.x,t.y,t.z);
     m_model.col_major[3 * 4 + 0] = m_pos.x*render_settings::tile_size_x;
     m_model.col_major[3 * 4 + 1] = m_center.y + m_height;
     m_model.col_major[3 * 4 + 2] = m_pos.y*render_settings::tile_size_y;
@@ -292,9 +318,10 @@ Tree::Tree(Obj *obj, string name, int x, int y, float height): GameObject(obj,na
     matrix4x4f tmp;
     make_unit_matrix4x4f(&tmp);
     vec3f axis = vec3f(0,1,0);
-    make_rotation_matrix4x4f(&tmp,&axis,2*random_float());
+    make_rotation_matrix4x4f(&tmp,&axis,M_PI*random_float());
 
-    m_model = m_model*tmp;
+
+    m_model = m_model*tmp*scale;
 }
 
 //BUILDINGS
@@ -701,11 +728,11 @@ void Building::change_owner(unsigned int owner){
 
 //UNITGROUP
 
-UnitGroup::UnitGroup(Obj *obj, simple_heightmap *sh, string name, vec2f start, vec2f end, unsigned int owner, unsigned int unit_count, float time_to_rech_end, float height, unsigned int m_id):
+UnitGroup::UnitGroup(Obj *obj, simple_heightmap *sh, string name, vec2f start, vec2f end, unsigned int owner, unsigned int unit_count, float time_to_rech_end, float height, unsigned int m_id, float scale):
     GameObject(obj,name,find_shader("pos+norm+tc"), height),
     m_owner(owner), m_start(start), m_end(end),
     m_unit_count(unit_count), m_sh(sh), m_id(m_id),
-    m_time_to_reach_end(time_to_rech_end), m_spawned(0), m_start_b(start), m_end_b(end)
+    m_time_to_reach_end(time_to_rech_end), m_spawned(0), m_start_b(start), m_end_b(end),m_scale(scale)
 {
     m_another_timer.restart();
     m_modelmatrices = vector<matrix4x4f>();
@@ -716,14 +743,18 @@ UnitGroup::UnitGroup(Obj *obj, simple_heightmap *sh, string name, vec2f start, v
     m_pos = vec2f(start.x, start.y);
     move = false;
     identifier = 'u';
+
     vec3f tmp = obj->bb_min + obj->bb_max;
     tmp /= 2;
+    m_center = tmp;
     m_view_dir = vec2f(end.x - start.x, end.y - start.y);
     normalize_vec2f(&m_view_dir);
     m_model.col_major[3 * 4 + 0] = m_pos.x*render_settings::tile_size_x;
     m_model.col_major[3 * 4 + 1] = m_center.y + m_height;
     m_model.col_major[3 * 4 + 2] = m_pos.y*render_settings::tile_size_y;
-
+    m_model.col_major[0 * 4 + 0] = m_scale;
+    m_model.col_major[1 * 4 + 1] = m_scale;
+    m_model.col_major[2 * 4 + 2] = m_scale;
 //    matrix4x4f testUnit;
 //    make_unit_matrix4x4f(&testUnit);
 //    m_modelmatrices.push_back(testUnit);
@@ -822,7 +853,7 @@ void UnitGroup::update(){
 //            }
 
             while(m_spawned < m_unit_count ){
-                spawn_unit_row(std::min((unsigned int) 5, m_unit_count-m_spawned));
+                spawn_unit_row(std::min((unsigned int) 3, m_unit_count-m_spawned));
                 m_rows++;
             }
             //        cout << "start: " << m_start.x << "," << m_start.y << endl;
@@ -881,9 +912,9 @@ void UnitGroup::draw_mesh(){
         glUniform3f(loc, cam_pos.x, cam_pos.y, cam_pos.z);
 
 
-//        bind_texture(m_obj->tex, 0);
-//        loc = glGetUniformLocation(gl_shader_object(m_obj->shader), "diffuse_tex");
-//        glUniform1i(loc, 0);
+        bind_texture(m_obj->tex, 0);
+        loc = glGetUniformLocation(gl_shader_object(m_obj->shader), "diffuse_tex");
+        glUniform1i(loc, 0);
 
         bind_mesh_to_gl(m_obj->mesh);
 
@@ -966,9 +997,30 @@ void Unit::update(vec2f new_pos, float height){
     m_start = m_pos;
     m_end = new_pos;
     vec2f tmp = m_end - m_pos;
-    if(length_of_vec2f(&tmp) > 0.1) {
+    float angle = 0;
+     matrix4x4f rot;
+     make_unit_matrix4x4f(&rot);
+
+     vec2f ref_view_dir = vec2f(1,0);
+    if(length_of_vec2f(&tmp) > 0.4) {
+
+        normalize_vec2f(&tmp);
+        normalize_vec2f(&m_view_dir);
+        float cur_ang = acos(dot_vec2f(&ref_view_dir, &tmp));
+        if(tmp.y > 0) cur_ang = 2 * M_PI - cur_ang;
+
+        float d_angle = cur_ang - m_angle;
+        if(d_angle < 0.001) d_angle = 0;
+        m_angle = cur_ang;
+
+
+        vec3f axis = vec3f(0,1,0);
+
+         make_rotation_matrix4x4f(&rot,&axis,d_angle);
+         tmp = m_end - m_pos;
         m_view_dir =  tmp;
     }
+
 
 //    cout << length_of_vec2f(&m_view_dir) << endl;
     m_speed = BASE_SPEED + length_of_vec2f(&m_view_dir)/(1*render_settings::tile_size_x);
@@ -988,6 +1040,7 @@ void Unit::update(vec2f new_pos, float height){
     m_model.col_major[3 * 4 + 0] = m_pos.x * render_settings::tile_size_x;
     m_model.col_major[3 * 4 + 1] = m_base_height + m_sh->get_height(m_pos.x,m_pos.y);
     m_model.col_major[3 * 4 + 2] = m_pos.y * render_settings::tile_size_y;
+    m_model = m_model*rot;
     }
 //    movement_timer.restart();
 

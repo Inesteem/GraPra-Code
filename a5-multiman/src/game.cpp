@@ -116,7 +116,7 @@ void Game::add_unit_group(unsigned int sourceId, unsigned int destinationId, uns
     vec2f end = destination->get_pos();
 
     cout << "spawning enemies at: " << start.x << "," << start.y << " count: " << count << endl;
-    m_unitgroups.push_back(UnitGroup(m_objhandler->getObjByName("pacman"),m_sh,"bomb",start,end,0,count, 10000, m_sh->get_height(start.x, start.y), troupId));
+    m_unitgroups.push_back(UnitGroup(m_objhandler->getObjByName("pacman"),m_sh,"bomb",start,end,0,count, 10000, m_sh->get_height(start.x, start.y), troupId, 0.5f));
 }
 
 void Game::upgrade_building(unsigned int buildingId, unsigned int state){
