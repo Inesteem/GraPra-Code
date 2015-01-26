@@ -12,8 +12,11 @@ class client_message_reader;
 class moac::Action;
 
 enum FRACTIONS {
-    PAC, BOMB
+    PAC = 0,
+    BOMB = 1
 };
+
+
 
 class Game
 {
@@ -23,9 +26,9 @@ public:
     void add_building(string name, int size, int x, int y, unsigned int id);
     void add_unit_group(unsigned int sourceId, unsigned int destinationId, unsigned int count, unsigned int troupId, FRACTIONS frac, int owner);
 
-    void change_building_owner(int building_id, int new_owner);
+    void change_building_owner(int building_id, int new_owner, FRACTIONS frac);
     void update_unit_group(unsigned int x, unsigned int y, unsigned int troupId, unsigned int time);
-    void upgrade_building(unsigned int buildingId, unsigned int state);
+    void upgrade_building(unsigned int buildingId, unsigned int state, FRACTIONS frac);
     
     void set_selected(Building *building);
     void set_action(moac::Action *action);
@@ -68,5 +71,5 @@ private:
 };
 
 extern int PLAYER_ID;
-extern int FRACTION;
+
 #endif // GAME_H
