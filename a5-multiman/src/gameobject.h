@@ -143,7 +143,7 @@ private:
 class Unit {
 
 public:
-    Unit(vec2f pos, vec2f view_dir, vec2f pos_group, vec2f start, vec2f end, simple_heightmap *sh, float base_height);
+    Unit(vec2f pos, vec2f view_dir, vec2f pos_group, vec2f start, vec2f end, simple_heightmap *sh, float base_height, float scale);
     matrix4x4f *getModel();
     void update(vec2f new_pos,float height);
         vec2f m_pos_group;
@@ -171,16 +171,16 @@ private:
 class UnitGroup: public GameObject{
 public:
 
-    UnitGroup(Obj *obj,simple_heightmap *sh, string name, vec2f start, vec2f end, unsigned int owner, unsigned int unit_count, float time_to_rech_end, float height, unsigned m_id, float scale);
+    UnitGroup(Obj *obj,simple_heightmap *sh, string name, vec2f start, vec2f end, unsigned int owner, unsigned int unit_count, float time_to_rech_end, float height, unsigned m_id, float scale, bool draw_as_mesh);
     void update();
-    void draw_drawelement();
-    void draw_mesh();
+    void draw();
+//    void draw_mesh();
     void move_to(vec2f pos, float time_to_reach);
     void force_position(vec2f pos);
     float get_height(float x, float y){
         m_sh->get_height(x,y);
     }
-
+    bool draw_as_mesh;
     unsigned int m_id;
     unsigned int m_unit_count;
 
