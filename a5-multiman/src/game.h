@@ -72,5 +72,6 @@ private:
 };
 
 extern int PLAYER_ID;
+extern int FRACTION;
 
 #endif // GAME_H

@@ -173,10 +173,11 @@ void GameStage::addTroup(Troup *troup)
 
     msg::spawn_troup_server sts = make_message<msg::spawn_troup_server>();
     sts.destinationId = troup->m_destination->m_id;
-    sts.playerId = 0;
+    sts.playerId = troup->m_source->m_player;
     sts.sourceId = troup->m_source->m_id;
     sts.troupId = troup->m_id;
     sts.unitCount = troup->m_unitCount;
+    sts.frac = player_frac[troup->m_source->m_player];
     broadcast(&sts);
 
     troup->NextDestination();

@@ -6,6 +6,7 @@
 #include "rendering.h"
 
 int PLAYER_ID;
+int FRACTION;
 
 Game::Game(ObjHandler *objhandler, simple_heightmap *sh, client_message_reader *message_reader, Menu *menu): m_objhandler(objhandler), m_sh(sh), m_messageReader(message_reader),menu(menu)
 {
@@ -122,7 +123,7 @@ void Game::add_unit_group(unsigned int sourceId, unsigned int destinationId, uns
     vec2f start = source->get_pos();
     vec2f end = destination->get_pos();
 
-    cout << "spawning enemies at: " << start.x << "," << start.y << " count: " << count << endl;
+    cout << "spawning enemies at: " << start.x << "," << start.y << " count: " << count << " frac : " << frac  << endl;
     if(frac == PAC ){
         m_unitgroups.push_back(UnitGroup(m_objhandler->getObjByName("pacman"),m_sh,"pacman",start,end,owner,count, 10000, m_sh->get_height(start.x, start.y), troupId, 0.5f,true));
     } else if(frac == BOMB) {
