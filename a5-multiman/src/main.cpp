@@ -245,13 +245,16 @@ void menu_keyhandler(unsigned char key, int state){
 					        char resolved_path[100]; 
 							realpath(".", resolved_path); 
 							std::string str = resolved_path;
+							std::string str_2 = resolved_path;
 							str += "/src/multiman_server ";
+							str_2 += "/src/multiman_server";
 							str += s;
 							str += " ";
 							str += level;
 							str += " $*; echo '-- '; echo 'press return to close this terminal'; read";
 
-							execl("/usr/bin/xterm","/usr/bin/xterm", "-geometry", "200x100+0+900", "-e", str.c_str(), NULL);
+							//execl("/usr/bin/xterm","/usr/bin/xterm", "-geometry", "200x100+0+900", "-e", str.c_str(), NULL);
+							execl(str_2.c_str(),str_2.c_str(), s.c_str(), level, NULL);
 							
 						}
 						else if (pID < 0){// failed to fork

@@ -167,10 +167,60 @@ class EntryManager{
 };
 */
 
+struct Button {
+	matrix4x4f model;
+	float depth, depth_acc;
+	int state;
+	vector<texture_ref> textures;
+	vec3f alphacolor;
+	bool use_alpha, clickable;
+	
+	Button(matrix4x4f model, float depth, float depth_acc, vec3f alphacolor, bool use_alpha, bool clickable):
+		model(model), depth(depth), depth_acc(depth_acc), alphacolor(alphacolor), use_alpha(use_alpha), clickable(clickable){
+		state = 0;
+	}
+	
+	void draw(shader_ref shader, mesh_ref mesh){
+		
+		if(use_alpha){
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_ONE, GL_ONE);			
+		}
+		glDepthMask(GL_TRUE);
+		
+		int loc = glGetUniformLocation(gl_shader_object(shader), "color");
+		glUniform3fv(loc, 1,(float *)&(alphacolor));		
+
+		loc = glGetUniformLocation(gl_shader_object(shader), "model");
+		glUniformMatrix4fv(loc, 1, GL_FALSE, model.col_major);	
+
+		bind_texture(textures[state], 0);
+
+		loc = glGetUniformLocation(gl_shader_object(shader), "tex");	
+		glUniform1i(loc, 0);
+
+		draw_mesh(mesh);
+
+		loc = glGetUniformLocation(gl_shader_object(shader), "depth");
+		glUniform1f(loc,depth);		
+		
+		glDisable(GL_BLEND);
+		
+		unbind_texture(textures[state]);	
+		
+	}
+
+	void add_texture(const char *name){
+		textures.push_back(find_texture(name));
+	}
+
+};
+
 
 class IconBar{
 	
 	Building *building = nullptr;
+	vector <Button> buttons;
 	
 	int loc = -1;
 	int button_pressed = -1;
@@ -201,30 +251,20 @@ class IconBar{
 	float scale_button_y = 0.05 * fovy;
 	
 	texture_ref background;
-	texture_ref button;
-	texture_ref fraction[2];
-	texture_ref upgrade_button_turret[2];
-	texture_ref noupgrade_button_turret[3];
-	texture_ref upgrade_button_settlement[2];
-	texture_ref noupgrade_button_settlement[3];
 	texture_ref picture[2];
 	
-	matrix4x4f *models[6];
-	
+
 	matrix4x4f  model_background;
-	matrix4x4f  model_fraction;
-	matrix4x4f  model_button_t;
-	matrix4x4f  model_button_s;
-	matrix4x4f  model_button_u;
 	matrix4x4f  model_picture;
 
 	shader_ref 	shader;
 	camera_ref 	cam;
 	mesh_ref 	mesh;
-	Label		*label;
+	Label		*label_1;
+	Label		*label_2;
 	
 	void init_modelmatrices();
-	void draw_fraction();
+	void init_buttons();
 	void draw_buttons();
 	void draw_picture();
 	
@@ -233,7 +273,7 @@ public:
 	IconBar();
 	void draw();
 	int click(int x, int y, vec3f (*ptr)(int x, int y));
-	void scale_button(int b, bool greater);
+	int scale_button(int b, bool smaller);
 	void update();
 	void selected_building(Building *building);
 	
