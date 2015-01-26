@@ -10,7 +10,7 @@ using namespace std;
 namespace render_settings {
 	int screenres_x = 1000, screenres_y = 1000;
     float tile_size_x = 2, tile_size_y = 2;
-    float height_factor = 5;
+    float height_factor = 12;
     vector<vec3f> player_colors = { vec3f(1,0,0),vec3f(1,1,0),vec3f(1,0,1),vec3f(0,1,1),vec3f(0,0,1),
                                     vec3f(0,1,0),vec3f(1,0.5,1),vec3f(0.5,1,1),vec3f(1,1,0.5),vec3f(0.7,0.7,0.7) };
 };
@@ -52,5 +52,6 @@ void setup_dir_light(shader_ref shader) {
 }
 
 float random_float() {
-	return ((rand() % 32768) / 16384.0f) - 1.0f;
+    //return ((rand() % 32768) / 16384.0f) - 1.0f;
+    return rand() / ((float) RAND_MAX); // random float in [0.0;1.0]
 }

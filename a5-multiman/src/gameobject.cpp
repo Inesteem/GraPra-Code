@@ -337,6 +337,14 @@ Building::Building(Obj *obj,Obj *selection_circle,Obj *upgrade_arrow, string nam
     
     state = msg::building_state::construction_site;
 
+    vec3f effectPos = vec3f(m_pos.x*render_settings::tile_size_x, m_center.y + m_height, m_pos.y*render_settings::tile_size_y);
+    vec3f effectCol = vec3f(0,0,1.0f);
+    m_upgradeEffect = new UpgradeEffect(effectPos, effectCol);
+}
+
+Building::~Building()
+{
+    //delete m_upgradeEffect;
 }
 
 void Building::change_size(int size){
@@ -400,11 +408,14 @@ void Building::upgrade(Obj *obj, int state){
 		turret = false;
 	}
 	
-	
+    //m_upgradeEffect->Start();
 }
 
 
 void Building::draw(){
+    m_upgradeEffect->Update();
+    m_upgradeEffect->Render();
+
 	static float rotation = 0;
 	rotation += 0.007;
 	if(rotation == std::numeric_limits<float>::max()-2)
@@ -683,6 +694,9 @@ void Building::change_owner(unsigned int owner){
     m_owner = owner;
     vec3f color = get_player_color(m_owner);
 	label->set_color(color);    
+
+    m_upgradeEffect->ChangeParticleColor(color);
+    m_upgradeEffect->Start();
 }
 
 //UNITGROUP

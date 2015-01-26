@@ -1,6 +1,6 @@
 bin_PROGRAMS = multiman multiman_server
 
-BUILT_SOURCES = main.x
+BUILT_SOURCES = main.x particles.x
 
 # libconfigfiles_la_SOURCES = grammar.yy  lexer.ll  parser.h  token.h lexer.h config_creator.h configfile.h configfile.cpp
 multiman_SOURCES = 	main.cpp \
@@ -16,6 +16,8 @@ multiman_SOURCES = 	main.cpp \
             mouseactions.cpp mouseactions.h \
             label.cpp label.h \
             menu.cpp menu.h \
+            particles.cpp particles.h \
+            effect.cpp effect.h \
             gameobject.cpp gameobject.h \
             game.cpp game.h
 

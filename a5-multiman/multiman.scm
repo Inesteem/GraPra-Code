@@ -47,6 +47,8 @@
 (texture-from-file "u_b_t2" "Menu/upgrade_button_turret2.png" 'tex2d #t)
 (texture-from-file "button" "Menu/button.png" 'tex2d #t)
 
+(texture-from-file "test" "explosions-04.png" 'tex2d #t)
+
 
 (set-move-factor! 1)
 
