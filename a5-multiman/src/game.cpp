@@ -20,7 +20,7 @@ void Game::set_action(moac::Action *action){
 
 void Game::add_building(string name, int size, int x, int y, unsigned int id){
     m_buildings.push_back(Building(m_objhandler->getObjByName(name), m_objhandler->getObjByName("selection_circle"),m_objhandler->getObjByName("upgrade_arrow"), name,x,y, -1 ,size, m_sh->get_height(x,y), id));
-		
+    m_sh->set_heights(vec2f(x,y),m_sh->get_height(x,y),size);
 	planes.push_back(vec3f(x,-1,y));		
 		
 	
@@ -32,6 +32,7 @@ void Game::change_building_owner(int building_id, int new_owner, FRACTIONS frac)
         if(m_buildings[i].get_id() == building_id){
             if(m_buildings[i].get_owner_id() == -1 && new_owner != -1) {
                 this->upgrade_building(i, msg::building_state::house_lvl1,frac);
+
             }
             m_buildings[i].change_owner(new_owner);
 
@@ -137,18 +138,18 @@ void Game::upgrade_building(unsigned int buildingId, unsigned int state, FRACTIO
 			//TODO: const names
 			if(FRACTION == PAC){
 				switch(state){
-					case msg::building_state::house_lvl1 : m_buildings[i].upgrade(m_objhandler->getObjByName("house_pacman_lvl1"),state); break;
-					case msg::building_state::house_lvl2 : m_buildings[i].upgrade(m_objhandler->getObjByName("house_pacman_lvl2"),state); break;
-					case msg::building_state::house_lvl3 : m_buildings[i].upgrade(m_objhandler->getObjByName("house_pacman_lvl3"),state); break;
-					case msg::building_state::turret_lvl1 : m_buildings[i].upgrade(m_objhandler->getObjByName("turret_pacman_lvl1"),state); break;
+                case msg::building_state::house_lvl1 : m_buildings[i].upgrade(m_objhandler->getObjByName("house_pacman_lvl1"),state); m_buildings[i].change_size(2);  break;
+                    case msg::building_state::house_lvl2 : m_buildings[i].upgrade(m_objhandler->getObjByName("house_pacman_lvl2"),state);m_buildings[i].change_size(3);  break;
+                    case msg::building_state::house_lvl3 : m_buildings[i].upgrade(m_objhandler->getObjByName("house_pacman_lvl3"),state);m_buildings[i].change_size(4);  break;
+                    case msg::building_state::turret_lvl1 : m_buildings[i].upgrade(m_objhandler->getObjByName("turret_pacman_lvl1"),state);m_buildings[i].change_size(2);  break;
 					default : m_buildings[i].upgrade(m_objhandler->getObjByName("building_lot"), state);
 				} 
 			} else {
 				switch(state){
-					case msg::building_state::house_lvl1 : m_buildings[i].upgrade(m_objhandler->getObjByName("house_bbm_lvl1"),state); break;
-					case msg::building_state::house_lvl2 : m_buildings[i].upgrade(m_objhandler->getObjByName("house_bbm_lvl2"),state); break;
-					case msg::building_state::house_lvl3 : m_buildings[i].upgrade(m_objhandler->getObjByName("house_bbm_lvl3"),state); break;
-					case msg::building_state::turret_lvl1 : m_buildings[i].upgrade(m_objhandler->getObjByName("turret_bbm_lvl1"),state); break;
+                    case msg::building_state::house_lvl1 : m_buildings[i].upgrade(m_objhandler->getObjByName("house_bbm_lvl1"),state);m_buildings[i].change_size(2);  break;
+                    case msg::building_state::house_lvl2 : m_buildings[i].upgrade(m_objhandler->getObjByName("house_bbm_lvl2"),state);m_buildings[i].change_size(3);  break;
+                    case msg::building_state::house_lvl3 : m_buildings[i].upgrade(m_objhandler->getObjByName("house_bbm_lvl3"),state); m_buildings[i].change_size(4); break;
+                    case msg::building_state::turret_lvl1 : m_buildings[i].upgrade(m_objhandler->getObjByName("turret_bbm_lvl1"),state);m_buildings[i].change_size(2);  break;
 					default : m_buildings[i].upgrade(m_objhandler->getObjByName("building_lot"), state);
 				} 					
 			}

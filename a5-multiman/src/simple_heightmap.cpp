@@ -1,6 +1,7 @@
 
 #include "simple_heightmap.h"
 #include "rendering.h"
+#include <texture.h>
 #include <vector>
 simple_heightmap::simple_heightmap()
     {
@@ -27,7 +28,7 @@ void simple_heightmap::init( const std::string filename, int width, int height){
         m_gamefield[i] = 'n';
     }
 
-    vector<vec3f> pos = vector<vec3f>(m_g_width*m_g_height);
+    vector<vec3f> pos = vector<vec3f>((m_g_width+1)*(m_g_height+1));
     vector<vec3f> norm = vector<vec3f>(m_width*m_height);
 
 //    m_heights = vector<float>(m_width*m_height);
@@ -39,9 +40,9 @@ void simple_heightmap::init( const std::string filename, int width, int height){
 
 //        }
 //    }
-    for(int i = 0; i < m_g_height; ++i){
-        for(int j = 0; j < m_g_width; ++j){
-            pos[i + j * m_g_height] = vec3f(j/(float)m_g_width,0,i/(float)m_g_height);
+    for(int i = 0; i <= m_g_height; ++i){
+        for(int j = 0; j <= m_g_width; ++j){
+            pos[i + j * (m_g_height+1)] = vec3f((float)j/(float)m_g_width,0,(float)i/(float)m_g_height);
 //            pos[i + j *m_g_height].y =  m_heights[i*(m_width/m_g_width)  + j*(m_height/m_g_height) *m_g_height].x ;
 
 //            m_heights[i + j *m_height] = colors[i + j *m_height].x * render_settings::height_factor;
@@ -58,7 +59,7 @@ void simple_heightmap::init( const std::string filename, int width, int height){
     m_model.col_major[3 *4 + 2] = -render_settings::tile_size_y/2;
 
     tex_params_t p = default_tex_params();
-    height_map = make_texture_ub(("height_map"), filename.c_str(), GL_TEXTURE_2D, &p);
+    height_map = make_texture(("height_map"), filename.c_str(), GL_TEXTURE_2D, &p);
 
 //    for(int i = 0; i < m_height; ++i){
 //        for(int j = 0; j < m_width; ++j){
@@ -85,15 +86,15 @@ void simple_heightmap::init( const std::string filename, int width, int height){
 //        }
 //    }
 
-    for(int i = 0; i < m_g_height-1; ++i){
-        for(int j = 0; j < m_g_width-1; ++j){
+    for(int i = 0; i < m_g_height; ++i){
+        for(int j = 0; j < m_g_width; ++j){
 
-            index.push_back(i + j*m_g_height);
-            index.push_back((i+1)  + j*m_g_height);
-            index.push_back(i+1 + (j+1)*m_g_height);
+            index.push_back(i + j*(m_g_height+1));
+            index.push_back((i+1)  + j*(m_g_height+1));
+            index.push_back(i+1 + (j+1)*(m_g_height+1));
 
 //            index.push_back(i+1 + (j+1)*m_g_height);
-            index.push_back(i + (j+1)*m_g_height);
+            index.push_back(i + (j+1)*(m_g_height+1));
 //            index.push_back(i + (j)*m_g_height);
 
         }
@@ -143,6 +144,59 @@ float simple_heightmap::get_height(float x, float y){
 }
 
 
+void simple_heightmap::set_heights(vec2f pos, float height, float radius_in_tiles){
+    shader_ref shader = find_shader("compute-shader");
+//   glMemoryBarrier(GL_FRAMEBUFFER_BARRIER_BIT);
+
+    if (pos.x < 0 || pos.y < 0 || pos.x > m_width || pos.y > m_height ) return;
+    float new_x = pos.x*m_height/m_g_height;
+    float new_y = pos.y*m_width/m_g_width;
+    vec2i npos = vec2i((int) new_x, (int) new_y);
+    bind_shader(shader);
+    int loc = glGetUniformLocation(gl_shader_object(shader), "height");
+    glUniform1f(loc,height/render_settings::height_factor);
+
+    loc = glGetUniformLocation(gl_shader_object(shader), "radius");
+    glUniform1f(loc,radius_in_tiles);
+
+    loc =glGetUniformLocation(gl_shader_object(shader), "tile_size_x");
+    glUniform1f(loc,render_settings::tile_size_x);
+    loc =glGetUniformLocation(gl_shader_object(shader), "tile_size_y");
+    glUniform1f(loc,render_settings::tile_size_y);
+    loc =glGetUniformLocation(gl_shader_object(shader), "pos");
+    glUniform2i(loc,npos.x,npos.y);
+    loc =glGetUniformLocation(gl_shader_object(shader), "g_height");
+    glUniform1f(loc,m_g_height);
+    loc =glGetUniformLocation(gl_shader_object(shader), "g_widht");
+    glUniform1f(loc,m_g_width);
+
+    bind_texture_as_image(height_map,0,1, GL_READ_WRITE,GL_RGBA8);
+    loc = glGetUniformLocation(gl_shader_object(shader), "height_map");
+    glUniform1i(loc, 0);
+
+
+
+    glDispatchCompute(m_width/16, m_height/16, 1);
+
+
+    unbind_shader(shader);
+     glMemoryBarrier(GL_FRAMEBUFFER_BARRIER_BIT);
+    unbind_texture_as_image(height_map,0);
+
+
+
+    for(int i = - radius_in_tiles*(m_height/m_g_height)+ npos.x; i < radius_in_tiles*(m_height/m_g_height)+npos.x; ++i){
+        for(int j = - radius_in_tiles*(m_height/m_g_height)+npos.y; j < radius_in_tiles*(m_height/m_g_height)+npos.y; ++j){
+            try {
+                m_heights.at(j + i*m_height).x = height/render_settings::height_factor;
+            }
+            catch(...){
+
+            }
+        }
+    }
+
+}
 
 void simple_heightmap::draw(){
 
@@ -268,6 +322,7 @@ vec3f simple_heightmap::sample_normal(int x, int y){
 	normalize_vec3f(&n);
 	return -n;
 }
+
 
 
 //void simple_heightmap::re_init(vector<vec3f> *planes){
