@@ -96,7 +96,6 @@ namespace moac {
 	      
 		} else 
 			cout << '\a';
-		
 	}
 	
 	void Action::upgrade_turret(){

@@ -157,7 +157,7 @@
 
           if(tex_col.r >= 0.5 && tex_col.g >= 0.5 && tex_col.b >= 0.5){
                 out_col = vec4(color,0.5);
-				gl_FragDepth = 0.1;
+				gl_FragDepth = 0.3;
           }
             else if(!(tex_col.r >= 0.9 || tex_col.g <= 0.1 || tex_col.b >= 0.9))  {
                 out_col = tex_col;
@@ -186,7 +186,6 @@
 	out vec2 tc;
 	void main() {
 		pos_wc = model * vec4(in_pos, 1.0);
-// 		norm_wc = transpose(inverse(mat3x3(model))) * in_norm;
 		norm_wc = (model_normal * vec4(in_norm,0)).xyz;
 		tc = in_tc;
 		gl_Position = proj * view * pos_wc;
@@ -912,32 +911,49 @@ uniform float down;
 #version 150 core
 	out vec4 out_col;
 	uniform sampler2D diffuse_tex;
-	uniform sampler2D alpha_tex;
 	uniform vec3 light_dir;
 	uniform vec3 light_col;
 	uniform vec3 eye_pos;
-	uniform vec4 color;
+	uniform vec3 color;
 	uniform float use_alpha;
+	uniform float use_lighting;
 	in vec4 pos_wc;
 	in vec3 norm_wc;
 	in vec2 tc;
 	void main() {
-		out_col = color;
-		if(color.x == 0 && color.y == 0 && color.z == 0){
-			out_col = vec4(0.,0.,0.,1.);
-			vec3 col = texture(diffuse_tex, tc.st).rgb;
-			vec3 col_a = texture(alpha_tex, tc.st).rgb;
-			float alpha =  (col_a.r + col_a.g + col_a.b)/3;
-
-			float n_dot_l = max(0, dot(norm_wc, -light_dir));
-		//	out_col += vec4(col * light_col * n_dot_l, 0.);
-			out_col = vec4(texture(diffuse_tex, tc.st).r,texture(diffuse_tex, tc.st).g,texture(diffuse_tex, tc.st).b,1);
+		
+		vec3 sun_dir = vec3(0,-1,0);
+		
+		out_col = vec4(color,1.);
+		float n_dot_l = max(0, dot(norm_wc, -light_dir));
+		float n_dot_l_2 = max(0, dot(norm_wc, -sun_dir));
+		
+		if(use_lighting != 0.0){
+			out_col += vec4(0.2 *color * light_col * (n_dot_l+n_dot_l_2), 0.);
+	//		out_col = vec4(1);
+		}
+		vec3 col = texture(diffuse_tex, tc.st).rgb;
+		
+		if(col.x >= 0.9 && col.y <= 0.1 && col.z >= 0.9){
+			discard;
+		}
+		
+		if(!(col.x >= 0.99 && col.y >= 0.99 && col.z >= 0.99)){
+			out_col = vec4(col,1.);
+			
+			if(use_lighting != 0.0)
+				out_col += vec4(0.2 * col * (light_col + 0.2*color) * (n_dot_l+n_dot_l_2), 0.);
+		//		out_col = vec4(1);
+		
 			if(use_alpha == 1){
-				out_col.a = 1-alpha; 
-		//		out_col = vec4(texture(diffuse_tex, tc.st).r,texture(diffuse_tex, tc.st).g,texture(diffuse_tex, tc.st).b,1);
+				
+				vec2 l = vec2(0.5,0.5) - tc;
+				float dis = sqrt(l.x * l.x + l.y * l.y);
+				out_col.a = max(0,1 - (dis*2));
+
 			}
-		} 
-	}
+		}
+	} 
 }
 #:inputs (list "in_pos" "in_norm" "in_tc")>
 

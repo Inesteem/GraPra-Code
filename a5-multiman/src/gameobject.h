@@ -134,6 +134,7 @@ private:
     bool settlement, turret;
     
     unsigned int unit_count;
+    unsigned int real_unit_count;
     unsigned int id;
     int m_owner;
     int state;

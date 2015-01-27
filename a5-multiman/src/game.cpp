@@ -137,6 +137,8 @@ void Game::upgrade_building(unsigned int buildingId, unsigned int state, FRACTIO
 			//TODO: const names
 			switch(state){
                 case msg::building_state::house_lvl1 : m_buildings[i].upgrade(m_objhandler->getObjByName("house_pacman"),state); break;
+                case msg::building_state::house_lvl2 : m_buildings[i].upgrade(m_objhandler->getObjByName("house_pacman_lvl2"),state); break;
+                case msg::building_state::house_lvl3 : m_buildings[i].upgrade(m_objhandler->getObjByName("house_pacman_lvl3"),state); break;
                 case msg::building_state::turret_lvl1 : m_buildings[i].upgrade(m_objhandler->getObjByName("turret_pacman"),state); break;
 				default : m_buildings[i].upgrade(m_objhandler->getObjByName("building_lot"), state);
 			}

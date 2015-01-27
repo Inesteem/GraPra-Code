@@ -472,7 +472,7 @@ void Building::draw(){
 			i++;
 		}
 		
-    } else if (state == msg::building_state::house_lvl1) {
+    } else if (state == msg::building_state::house_lvl1 || state == msg::building_state::house_lvl2 || state == msg::building_state::house_lvl3) {
 		draw_state_house_1();
 		
     } else if (state == msg::building_state::turret_lvl1) {
@@ -502,8 +502,12 @@ void Building::draw(){
 			drawelement *de = *it;
 			de->Modelmatrix(&arrow_model_2);
 			de->bind();
-			setup_dir_light(m_shader);
+			setup_dir_light(find_shader("alpha-color-shader"));
 			de->apply_default_matrix_uniforms();
+			float lighting = 0;
+			int loc = glGetUniformLocation(gl_shader_object(find_shader("alpha-color-shader")), "use_lighting");
+			glUniform1f(loc,lighting);
+			
 			de->apply_default_tex_uniforms_and_bind_textures();
 			de->draw_em();
 			de->unbind();
@@ -534,11 +538,21 @@ void Building::draw_state_house_1(){
 	shader_ref shader_t = find_shader("alpha-color-shader");
 	bind_shader(shader_t);
 
+	float lighting = 1;
+	int loc = glGetUniformLocation(gl_shader_object(shader_t), "use_lighting");
+	glUniform1f(loc,lighting);
+
 	glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	int i = 0;
+    
 	for (vector<drawelement*>::iterator it = m_obj->drawelements->begin(); it != m_obj->drawelements->end(); ++it) {
 		drawelement *de = *it;
+		
+		float use_alpha = 0;
+		
+		if(index_buffer_length_of_mesh((de->meshes.front())) == 6)
+			use_alpha = 1;
+		
 		de->Modelmatrix(&m_model);
 		setup_dir_light(shader_t);
 		de->apply_default_matrix_uniforms(shader_t);
@@ -546,36 +560,15 @@ void Building::draw_state_house_1(){
 //		mesh_ref mesh_1 = *de->meshes.begin();
 //		cout << mesh_name(mesh_1) << endl;
 //		cout << de->name << endl;
-		int loc;
 		
-		texture_ref tex_alpha = find_texture("alpha_mask_1");
-		
-		bind_texture(tex_alpha, 1);
-		loc = glGetUniformLocation(gl_shader_object(shader_t), "alpha_tex");
-		glUniform1i(loc, 1);	
-		vec4f color = vec4f(0,0,0,1);
-		float use_alpha = 0;
-
-		if(i == 2)
-			use_alpha = 1;
-		if(i == 0 || i == 1){
-			
-			vec3f col = get_player_color(m_owner);
-			color = vec4f(col.x,col.y,col.z,1);
-		}
-
-			
-
-		
+		vec3f color = get_player_color(m_owner);
 		loc = glGetUniformLocation(gl_shader_object(shader_t), "color");
-		glUniform4fv(loc, 1,(float *)&color);				
+		glUniform3fv(loc, 1,(float *)&color);				
 
 		loc = glGetUniformLocation(gl_shader_object(shader_t), "use_alpha");
 		glUniform1f(loc,use_alpha);
 
-		
 		de->draw_em();
-		i++;
 
 	}	
 //		cout << i << endl;
@@ -650,6 +643,7 @@ bool Building::check_for_upgrade_settlement(int state){
 
 		if(this->state == house_lvl2 		&&	state == house_lvl3 && unit_count >= UpgradeToHouseLvl3)
 			return true;
+
 	}
 	else if(turret){
 		if(state == house_lvl1 && unit_count >= RebuildingToHouseLvl1)

@@ -185,21 +185,33 @@ void GameStage::addTroup(Troup *troup)
 void GameStage::upgrade_building_house(unsigned int buildingId){
     Building *building = m_buildings[buildingId];
 
-    if(building->m_state == msg::building_state::house_lvl2) return; // already highest level
+    if(building->m_state == msg::building_state::house_lvl3) return; // already highest level
 
     msg::building_upgrade bu = make_message<msg::building_upgrade>();
     bu.buildingId = buildingId;
 
     int units = 0;
 
-    if(building->m_state == msg::building_state::construction_site || building->m_state == msg::building_state::turret_lvl1 || building->m_state == msg::building_state::turret_lvl2) {
+    if(building->m_state == msg::building_state::construction_site){ 
         units = msg::upgrade_cost::UpgradeToHouseLvl1;
         if(units > building->m_unitCount) return; // not enough units
         building->m_state = msg::building_state::house_lvl1;
+        
+	}else if(building->m_state == msg::building_state::turret_lvl1 || building->m_state == msg::building_state::turret_lvl2) {    
+
+        units = msg::upgrade_cost::RebuildingToHouseLvl1;
+        if(units > building->m_unitCount) return; // not enough units
+        building->m_state = msg::building_state::house_lvl1;
+		
     } else if(building->m_state == msg::building_state::house_lvl1) {
         units = msg::upgrade_cost::UpgradeToHouseLvl2;
         if(units > building->m_unitCount) return; // not enough units
         building->m_state = msg::building_state::house_lvl2;
+        
+    } else if(building->m_state == msg::building_state::house_lvl2) {
+        units = msg::upgrade_cost::UpgradeToHouseLvl3;
+        if(units > building->m_unitCount) return; // not enough units
+        building->m_state = msg::building_state::house_lvl3;
     } else return;
 
     bu.state = building->m_state;
@@ -219,11 +231,17 @@ void GameStage::upgrade_building_turret(unsigned int buildingId){
 
     int units = 0;
 
-    if(building->m_state == msg::building_state::construction_site || building->m_state == msg::building_state::house_lvl1 || building->m_state == msg::building_state::house_lvl2) {
+    if(building->m_state == msg::building_state::construction_site || building->m_state == msg::building_state::house_lvl1) {
         units = msg::upgrade_cost::UpgradeToTurretLvl1;
         if(units > building->m_unitCount) return; // not enough units
         building->m_state = msg::building_state::turret_lvl1;
-    } else if(building->m_state == msg::building_state::turret_lvl1) {
+
+	} else if(building->m_state == msg::building_state::house_lvl2 || building->m_state == msg::building_state::house_lvl3){
+        units = msg::upgrade_cost::RebuildingToTurretLvl1;
+        if(units > building->m_unitCount) return; // not enough units
+        building->m_state = msg::building_state::turret_lvl1;
+        
+	} else if(building->m_state == msg::building_state::turret_lvl1) {
         units = msg::upgrade_cost::UpgradeToTurretLvl2;
         if(units > building->m_unitCount) return; // not enough units
         building->m_state = msg::building_state::turret_lvl2;

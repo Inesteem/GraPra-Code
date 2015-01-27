@@ -434,7 +434,6 @@ IconBar::IconBar(){
 	label_2->set_size(vec2f(4,2));
 	label_1->set_color(vec3f(0.678, 0.956, 0.928));	
 	label_2->set_color(vec3f(0.678, 0.956, 0.928));	
-	//label_1->update_label_pos(buttons[3].model.row_col(0,3) + 13*offset_button_y, -1000, buttons[3].model.row_col(1,3)+3*offset_button_y);
 	label_1->update_label_pos(buttons[3].model.row_col(0,3) + 10.5*offset_button_y, -1000, buttons[3].model.row_col(1,3)+2.4*offset_button_y);
 	label_2->update_label_pos(buttons[4].model.row_col(0,3) + 10.5*offset_button_y, -1000, buttons[4].model.row_col(1,3)+2.4*offset_button_y);
 }
@@ -549,7 +548,7 @@ void IconBar::draw_building(){
 
 	vec3f b_pos = pos + (light_dir*2);
 
-	shader_ref shader = find_shader("pos+norm+tc");
+	shader_ref shader = find_shader("alpha-color-shader");
 
 	bind_shader(shader);
 
@@ -679,7 +678,7 @@ void IconBar::draw_buttons_2(){
 		
 	
 }
-
+//defect
 void IconBar::draw_buttons(){
 	
 	vec3f color = vec3f(-1,-1,-1);

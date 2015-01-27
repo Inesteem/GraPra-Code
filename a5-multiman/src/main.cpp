@@ -176,19 +176,19 @@ void standard_keyboard(unsigned char key, int x, int y)
         quit(0);
     case 'f':
 
-        if( dist < 60){
+    //    if( dist < 60){
             copy_vec3f(&tmp, &cam_dir);
             mul_vec3f_by_scalar(&tmp, &tmp, -cgl_cam_move_factor);
             add_components_vec3f(&cam_pos, &cam_pos, &tmp);
-        }
+   //     }
         break;
     case 'r':
 
-        if(dist > 25 ){
+   //    if(dist > 25 ){
             copy_vec3f(&tmp, &cam_dir);
             mul_vec3f_by_scalar(&tmp, &tmp, cgl_cam_move_factor);
             add_components_vec3f(&cam_pos, &cam_pos, &tmp);
-        }
+    //    }
         break;
     case 'a':
         if(cam_pos.x < sh->get_size().x){
@@ -614,22 +614,15 @@ void load_configfile(const char *);
 
 
 void reset(){
-    delete(sh);
-    delete(game);
-    delete(messageReader);
-    delete(action);
+    delete sh;
+    delete game;
+    delete messageReader;
+    delete action;
+    
     sh = new simple_heightmap();
-
-
-
-
     game = new Game(objhandler,sh, messageReader,menu);
-
     messageReader = new client_message_reader(game);
-
-
-
-    action = new Action(game, objhandler, reset);
+    action = new Action(game, objhandler, &reset);
     game->set_action(action);
 }
 
@@ -671,8 +664,10 @@ void actual_main() {
     objhandler->addObj("tropical_tree", "./render-data/models/tropical_tree.obj", find_shader("pos+norm+tc"));
     objhandler->addObj("building_lot", "./render-data/models/building_lot.obj", find_shader("pos+norm+tc"));
     //      objhandler->addObj_withScale("upgrade_arrow", "./render-data/models/cube.obj", find_shader("pos+norm+tc"), vec3f(0.99,0.99,0.99));
-    objhandler->addObj("upgrade_arrow", "./render-data/models/cube.obj", find_shader("pos+norm+tc"));
+    objhandler->addObj("upgrade_arrow", "./render-data/models/cube.obj", find_shader("alpha-color-shader"));
     objhandler->addObj("house_pacman", "./render-data/models/siedlung.obj", find_shader("alpha-color-shader"));
+    objhandler->addObj("house_pacman_lvl2", "./render-data/models/siedlung_lvl2.obj", find_shader("alpha-color-shader"));
+    objhandler->addObj("house_pacman_lvl3", "./render-data/models/siedlung_lvl3.obj", find_shader("alpha-color-shader"));
     objhandler->addObj("turret_pacman", "./render-data/models/simple_tower_pacman.obj", find_shader("pos+norm+tc"));
     //        objhandler->addObj("pacman", "./render-data/models/pacman.obj", find_shader("pos+norm+tc"));
     objhandler->addObj("bomberman","./render-data/models/bbm-nolegs.obj",find_shader("unit-shader"));
@@ -720,7 +715,7 @@ void actual_main() {
     // Dark blue background
     glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
 
-    action = new Action(game, objhandler,reset);
+    action = new Action(game, objhandler,&reset);
     game->set_action(action);
 
     // TODO REMOVE
