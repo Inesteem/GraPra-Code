@@ -61,12 +61,12 @@ protected:
 	
 	vector<Label *>labels;
 	vector<std::string> strings = {"Host Game", "Fraktion", "Level","Color", "Players", "Join Game"};
-    vector<const char*> level_names = {"lvl01","lvl02", "lvl03"};
+    vector<const char*> level_names = {"Level 1","Level 2", "Level 3", "Level 4"};
 	vector<const char*> color_names = {"Color","Grey","Red", "Yellow", "Violet", "Cyan","Blue","Green", "Pink","LightBlue","PaleYellow"};
     vector<vec3f> player_colors = { vec3f(1.,1.,1.),vec3f(0.7,0.7,0.7), vec3f(1,0,0),vec3f(1,1,0),vec3f(1,0,1),vec3f(0,1,1),vec3f(0,0,1),
 								vec3f(0,1,0),vec3f(1,0.5,1),vec3f(0.5,1,1),vec3f(1,1,0.5) };
 	vector<int> nums = {-1,1,1,1,1,-1};
-    vector<int> max_nums = {-1,2,3,11,4,-1};
+    vector<int> max_nums = {-1,2,4,11,4,-1};
 	vector<int> min_nums = {-1,1,1,1,1,-1};
 	
 	client_message_reader *message_reader;
