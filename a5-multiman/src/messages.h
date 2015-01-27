@@ -35,6 +35,12 @@ namespace msg {
         const unsigned int TowerLvl2 = 3;
     }
 
+    namespace unit_generation_time { // in msec
+        const static unsigned int UpgradeRateLvl1 = 2000;
+        const static unsigned int UpgradeRateLvl2 = 1000;
+        const static unsigned int UpgradeRateLvl3 = 500;
+    }
+
     namespace upgrade_cost {
         const unsigned int UpgradeToHouseLvl1 = 10;
         const unsigned int UpgradeToHouseLvl2 = 20;
