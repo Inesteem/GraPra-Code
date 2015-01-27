@@ -1036,7 +1036,7 @@ uniform float down;
 				tex_col.z >= (color.z-0.3) && tex_col.z <= (color.z+0.3)){
 					discard;
 			} else
-				out_col = tex_col * vec4(p_color.x,p_color.y, p_color.z,1);
+				out_col = tex_col * vec4(p_color.x,p_color.y, p_color.z,0.8);
 		}
 		
 	}

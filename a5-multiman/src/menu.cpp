@@ -459,7 +459,8 @@ void IconBar::draw(){
 	glUniformMatrix4fv(loc, 1, GL_FALSE, model_background.col_major);
 
 	glEnable(GL_BLEND);
-	glBlendFunc(GL_ONE, GL_ONE);
+//	glBlendFunc(GL_SRC_ALPHA,GL_DST_ALPHA);
+	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 	glDepthMask(GL_TRUE);
 
 
