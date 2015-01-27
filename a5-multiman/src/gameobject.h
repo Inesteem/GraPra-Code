@@ -173,7 +173,7 @@ private:
 
     matrix4x4f m_model;
 
-    BombermanEffect *m_bombermanEffect;
+    BombermanEffect *m_bombermanEffect = 0;
 };
 
 
