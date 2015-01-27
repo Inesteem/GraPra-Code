@@ -30,13 +30,32 @@
         uniform float tile_size_y;
         uniform float g_height;
         uniform float g_width;
-        uniform vec2 pos;
-        uniform layout(rgba32f) image2D height_map;
+        uniform ivec2 pos;
+        uniform layout(rgba8) image2D height_map;
+
+        bool hit(ivec2 hit){
+            float offset = radius*15;
+            if(hit.x > pos.x + offset/2 + offset ) return false;
+            if(hit.x < pos.x + offset/2 - offset) return false;
+            if(hit.y > pos.y + offset/2 + offset ) return false;
+            if(hit.y < pos.y + offset/2 - offset) return false;
+            return true;
+        }
+        bool outerhit(ivec2 hit){
+            float offset = radius*15;
+            if(hit.x > pos.x + offset/2 + offset + offset ) return false;
+            if(hit.x < pos.x + offset/2 - offset + offset) return false;
+            if(hit.y > pos.y + offset/2 + offset + offset) return false;
+            if(hit.y < pos.y + offset/2 - offset + offset) return false;
+            return true;
+        }
 
         void main() {
             ivec2 storePos = ivec2(gl_GlobalInvocationID.yx);
-            if(pos.x + 200 > storePos.x || pos.x - 200 < storePos.x || pos.y + 200 > storePos.y || pos.y - 200 < storePos.y){
-                imageStore(height_map, storePos, vec4(height, height, height, 1));
+            ivec2 size = imageSize(height_map);
+            if( hit(storePos) ){
+//                ivec2 t = imageSize(height_map);
+                imageStore(height_map, storePos.yx, vec4(height, height, height, 1));
             }
         }
 }
@@ -420,6 +439,7 @@
         //used to calculate normals
         uniform mat4 model;
         uniform mat4 view;
+        uniform mat4 proj;
         layout(triangles) in;
         layout(triangle_strip, max_vertices = 3) out;
         in vec3 out_pos[3];
@@ -434,7 +454,7 @@
             mat3 tmp1 = mat3(model);
             mat3 tmp2 = mat3(view);
             mat3 normal = tmp2 * tmp1;
-            normal = transpose(inverse(normal));
+            normal = transpose(inverse(mat3x3(view*model)));
             vec3 A = out_pos[2] - out_pos[0];
             vec3 B = out_pos[1] - out_pos[0];
             gFacetNormal = normal * normalize(cross(A, B));
