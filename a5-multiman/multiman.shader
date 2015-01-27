@@ -34,7 +34,8 @@
         uniform layout(rgba8) image2D height_map;
 
         bool hit(ivec2 hit){
-            float offset = radius*15;
+            ivec2 t = imageSize(height_map);
+            float offset = (t/64)*radius;
             if(hit.x > pos.x + offset/2 + offset ) return false;
             if(hit.x < pos.x + offset/2 - offset) return false;
             if(hit.y > pos.y + offset/2 + offset ) return false;
