@@ -6,6 +6,7 @@
 #include "objloader.h"
 #include "wall-timer.h"
 #include "effect.h"
+#include "rendering.h"
 
 #include <vector>
 #include <string>
@@ -133,6 +134,7 @@ private:
     bool settlement, turret;
     
     unsigned int unit_count;
+    unsigned int real_unit_count;
     unsigned int id;
     int m_owner;
     int state;
@@ -145,16 +147,18 @@ private:
 class Unit {
 
 public:
-    Unit(vec2f pos, vec2f view_dir, vec2f pos_group, vec2f start, vec2f end, simple_heightmap *sh, float base_height, float scale);
+    Unit(vec2f pos, vec2f view_dir, vec2f pos_group, vec2f start, vec2f end, simple_heightmap *sh, float base_height, float scale, float rot_angle, bool is_pac);
     matrix4x4f *getModel();
     void update(vec2f new_pos,float height);
         vec2f m_pos_group;
           bool move = false;
 private:
     wall_time_timer movement_timer;
-//    wall_time_timer rotations_timer;
+    wall_time_timer wobble_timer;
     simple_heightmap* m_sh;
     vec2f m_pos, m_view_dir, m_start, m_end;
+    float rand_start = random_float()*1000;
+    bool is_pac;
     float m_angle = 0;
     float m_speed;
     const float BASE_SPEED = 0.1;

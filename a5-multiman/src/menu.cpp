@@ -7,6 +7,8 @@
 #define FRAKTION_ID 1
 
 #include "menu.h"
+#include "game.h"
+#include "rendering.h"
 #include "mouseactions.h"
 
 #include <GL/glew.h>
@@ -252,6 +254,11 @@ vec3f Menu::get_player_color(){
 	return player_colors[COLOR-1];
 }
 
+int Menu::get_frac(){
+		
+	return FRAKTION;
+}
+
 void Menu::set_mode(Mode mode){ 
 	this->mode = mode;
 	if(mode == GAMESTART)
@@ -394,6 +401,8 @@ IconBar::IconBar(){
 	vec3f cam_pos = {0,0,0}, cam_dir = {0,0,-1}, cam_up = {0,1,0};
 	cam = make_orthographic_cam((char*)"gui cam", &cam_pos, &cam_dir, &cam_up, fovy, 0, 50, 0, near, far);	
 	
+	player_color = get_player_color(PLAYER_ID);
+	
 	background = 					find_texture("iconbar");
 	picture[0] =					find_texture("terrain_hm");
 	picture[1] =					find_texture("dorf");
@@ -425,7 +434,6 @@ IconBar::IconBar(){
 	label_2->set_size(vec2f(4,2));
 	label_1->set_color(vec3f(0.678, 0.956, 0.928));	
 	label_2->set_color(vec3f(0.678, 0.956, 0.928));	
-	//label_1->update_label_pos(buttons[3].model.row_col(0,3) + 13*offset_button_y, -1000, buttons[3].model.row_col(1,3)+3*offset_button_y);
 	label_1->update_label_pos(buttons[3].model.row_col(0,3) + 10.5*offset_button_y, -1000, buttons[3].model.row_col(1,3)+2.4*offset_button_y);
 	label_2->update_label_pos(buttons[4].model.row_col(0,3) + 10.5*offset_button_y, -1000, buttons[4].model.row_col(1,3)+2.4*offset_button_y);
 }
@@ -434,6 +442,7 @@ IconBar::IconBar(){
 void IconBar::draw(){
 	
 
+	player_color = get_player_color(PLAYER_ID);
 	camera_ref old_cam = current_camera();
 	use_camera(cam);
 	bind_shader(shader);
@@ -455,6 +464,8 @@ void IconBar::draw(){
 	loc = glGetUniformLocation(gl_shader_object(shader), "color");
 	glUniform3fv(loc, 1,(float *)&color);		
 
+	loc = glGetUniformLocation(gl_shader_object(shader), "p_color");
+	glUniform3fv(loc, 1,(float *)&player_color);	
 
 	bind_texture(background, 0);
 	loc = glGetUniformLocation(gl_shader_object(shader), "tex");
@@ -508,8 +519,8 @@ void IconBar::draw(){
 	unbind_shader(shader);
 
 	
-//	if(building_selected)
-//		draw_building();
+	if(building_selected)
+		draw_building();
 		
 	use_camera(old_cam);	
 	
@@ -537,7 +548,7 @@ void IconBar::draw_building(){
 
 	vec3f b_pos = pos + (light_dir*2);
 
-	shader_ref shader = find_shader("pos+norm+tc");
+	shader_ref shader = find_shader("alpha-color-shader");
 
 	bind_shader(shader);
 
@@ -580,6 +591,8 @@ void IconBar::draw_building(){
 
 		loc = glGetUniformLocation(gl_shader_object(shader), "model");
 		glUniformMatrix4fv(loc, 1, GL_FALSE, model.col_major);	
+		
+			
 
 		de->apply_default_tex_uniforms_and_bind_textures(shader);
 		
@@ -633,10 +646,12 @@ void IconBar::draw_buttons_2(){
 	loc = glGetUniformLocation(gl_shader_object(shader), "model");
 	glUniformMatrix4fv(loc, 1, GL_FALSE, buttons[1].model.col_major);	
 
-	bind_texture(buttons[1].textures[buttons[1].state], 0);
+	bind_texture(buttons[1].textures[buttons[1].state], 0);	
 
 	loc = glGetUniformLocation(gl_shader_object(shader), "tex");	
 	glUniform1i(loc, 0);	
+	
+	
 	
 	draw_mesh(mesh);	
 	
@@ -655,6 +670,7 @@ void IconBar::draw_buttons_2(){
 	
 	loc = glGetUniformLocation(gl_shader_object(shader), "tex");
 	glUniform1i(loc, 0);
+
 	
 	draw_mesh(mesh);	
 	
@@ -662,7 +678,7 @@ void IconBar::draw_buttons_2(){
 		
 	
 }
-
+//defect
 void IconBar::draw_buttons(){
 	
 	vec3f color = vec3f(-1,-1,-1);

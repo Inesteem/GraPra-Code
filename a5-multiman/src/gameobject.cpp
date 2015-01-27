@@ -3,7 +3,7 @@
 
 #include "game.h"
 #include "gameobject.h"
-#include "rendering.h"
+
 #include "label.h"
 #include "limits"
 #include <cmath>
@@ -124,6 +124,7 @@ Obj::Obj(string name, int id, mesh_ref mesh, texture_ref tex, shader_ref shader)
 Obj::Obj(string name, int id, vector<string> filenames, shader_ref shader):name(name), id(id), shader(shader){
     vector<ObjLoader> loaders;
     mesh = make_mesh(name.c_str(),filenames.size()*2 + 1);
+      bind_mesh_to_gl(mesh);
     for(int i = 0; i < filenames.size(); ++i){
         loaders.push_back( ObjLoader(filenames[i].c_str(),filenames[i].c_str()));
         loaders[i].TranslateToOrigin();
@@ -136,33 +137,33 @@ Obj::Obj(string name, int id, vector<string> filenames, shader_ref shader):name(
         inpos  += to_string(i);
 //        innorm += to_string(i);
 //        cout << inpos << innorm << endl;
-        bind_mesh_to_gl(mesh);
+
         add_vertex_buffer_to_mesh(mesh, inpos.c_str(), GL_FLOAT, loaders[i].objdata.vertices, 3, (float*) loaders[i].objdata.vertex_data , GL_STATIC_DRAW);
 //        add_vertex_buffer_to_mesh(mesh, innorm.c_str(), GL_FLOAT, loaders[i].objdata.vertices, 3, (float *) loaders[i].objdata.normal_data, GL_STATIC_DRAW);
-        unbind_mesh_from_gl(mesh);
+
 
     }
-    for(int i = 0; i < filenames.size(); ++i){
-//        loaders.push_back( ObjLoader(filenames[i].c_str(),filenames[i].c_str()));
+//    for(int i = 0; i < filenames.size(); ++i){
+////        loaders.push_back( ObjLoader(filenames[i].c_str(),filenames[i].c_str()));
 
-        string innorm = "in_norm_";
+//        string innorm = "in_norm_";
 
-//        inpos  += to_string(i);
-        innorm += to_string(i);
-//        cout << inpos << innorm << endl;
-        bind_mesh_to_gl(mesh);
-//        add_vertex_buffer_to_mesh(mesh, inpos.c_str(), GL_FLOAT, loaders[i].objdata.vertices, 3, (float*) loaders[i].objdata.vertex_data , GL_STATIC_DRAW);
-        add_vertex_buffer_to_mesh(mesh, innorm.c_str(), GL_FLOAT, loaders[i].objdata.vertices, 3, (float *) loaders[i].objdata.normal_data, GL_STATIC_DRAW);
-        unbind_mesh_from_gl(mesh);
+////        inpos  += to_string(i);
+//        innorm += to_string(i);
+//        cout << innorm << endl;
 
-    }
+////        add_vertex_buffer_to_mesh(mesh, inpos.c_str(), GL_FLOAT, loaders[i].objdata.vertices, 3, (float*) loaders[i].objdata.vertex_data , GL_STATIC_DRAW);
+//        add_vertex_buffer_to_mesh(mesh, innorm.c_str(), GL_FLOAT, loaders[i].objdata.vertices, 3, (float *) loaders[i].objdata.normal_data, GL_STATIC_DRAW);
+
+
+//    }
     vec3f min, max;
     loaders[0].BoundingBox(min,max);
     bb_min = min;
     bb_max = max;
 
 
-    bind_mesh_to_gl(mesh);
+
     add_vertex_buffer_to_mesh(mesh, "in_tc", GL_FLOAT, loaders[0].objdata.vertices, 2, (float *) loaders[0].objdata.texcoord_data, GL_STATIC_DRAW);
     add_index_buffer_to_mesh(mesh, loaders[0].objdata.groups->triangles * 3, (unsigned int *) loaders[0].objdata.groups->v_ids, GL_STATIC_DRAW);
     unbind_mesh_from_gl(mesh);
@@ -279,8 +280,9 @@ void GameObject::draw(){
         setup_dir_light(m_shader);
         de->apply_default_matrix_uniforms();
         de->apply_default_tex_uniforms_and_bind_textures();
-       // int loc = glGetUniformLocation(gl_shader_object(m_shader), "proj");
-        //glUniformMatrix4fv(loc, 1, GL_FALSE, projection_matrix_of_cam(current_camera())->col_major);
+//        int loc = glGetUniformLocation(gl_shader_object(m_shader), "p_color");
+//        vec3f color = get_player_color(PLAYER_ID);
+//        glUniform3f(loc,color.x,color.y,color.z);
 
 //        loc = glGetUniformLocation(gl_shader_object(m_shader), "view");
 //        glUniformMatrix4fv(loc, 1, GL_FALSE, gl_view_matrix_of_cam(current_camera())->col_major);
@@ -470,7 +472,7 @@ void Building::draw(){
 			i++;
 		}
 		
-    } else if (state == msg::building_state::house_lvl1) {
+    } else if (state == msg::building_state::house_lvl1 || state == msg::building_state::house_lvl2 || state == msg::building_state::house_lvl3) {
 		draw_state_house_1();
 		
     } else if (state == msg::building_state::turret_lvl1) {
@@ -500,8 +502,12 @@ void Building::draw(){
 			drawelement *de = *it;
 			de->Modelmatrix(&arrow_model_2);
 			de->bind();
-			setup_dir_light(m_shader);
+			setup_dir_light(find_shader("alpha-color-shader"));
 			de->apply_default_matrix_uniforms();
+			float lighting = 0;
+			int loc = glGetUniformLocation(gl_shader_object(find_shader("alpha-color-shader")), "use_lighting");
+			glUniform1f(loc,lighting);
+			
 			de->apply_default_tex_uniforms_and_bind_textures();
 			de->draw_em();
 			de->unbind();
@@ -532,11 +538,21 @@ void Building::draw_state_house_1(){
 	shader_ref shader_t = find_shader("alpha-color-shader");
 	bind_shader(shader_t);
 
+	float lighting = 1;
+	int loc = glGetUniformLocation(gl_shader_object(shader_t), "use_lighting");
+	glUniform1f(loc,lighting);
+
 	glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	int i = 0;
+    
 	for (vector<drawelement*>::iterator it = m_obj->drawelements->begin(); it != m_obj->drawelements->end(); ++it) {
 		drawelement *de = *it;
+		
+		float use_alpha = 0;
+		
+		if(index_buffer_length_of_mesh((de->meshes.front())) == 6)
+			use_alpha = 1;
+		
 		de->Modelmatrix(&m_model);
 		setup_dir_light(shader_t);
 		de->apply_default_matrix_uniforms(shader_t);
@@ -544,36 +560,15 @@ void Building::draw_state_house_1(){
 //		mesh_ref mesh_1 = *de->meshes.begin();
 //		cout << mesh_name(mesh_1) << endl;
 //		cout << de->name << endl;
-		int loc;
 		
-		texture_ref tex_alpha = find_texture("alpha_mask_1");
-		
-		bind_texture(tex_alpha, 1);
-		loc = glGetUniformLocation(gl_shader_object(shader_t), "alpha_tex");
-		glUniform1i(loc, 1);	
-		vec4f color = vec4f(0,0,0,1);
-		float use_alpha = 0;
-
-		if(i == 2)
-			use_alpha = 1;
-		if(i == 0 || i == 1){
-			
-			vec3f col = get_player_color(m_owner);
-			color = vec4f(col.x,col.y,col.z,1);
-		}
-
-			
-
-		
+		vec3f color = get_player_color(m_owner);
 		loc = glGetUniformLocation(gl_shader_object(shader_t), "color");
-		glUniform4fv(loc, 1,(float *)&color);				
+		glUniform3fv(loc, 1,(float *)&color);				
 
 		loc = glGetUniformLocation(gl_shader_object(shader_t), "use_alpha");
 		glUniform1f(loc,use_alpha);
 
-		
 		de->draw_em();
-		i++;
 
 	}	
 //		cout << i << endl;
@@ -645,6 +640,7 @@ bool Building::check_for_upgrade_settlement(int state){
 
 		if(this->state == house_lvl2 		&&	state == house_lvl3 && unit_count >= UpgradeToHouseLvl3)
 			return true;
+
 	}
 	else if(turret){
 		if(state == house_lvl1 && unit_count >= RebuildingToHouseLvl1)
@@ -732,6 +728,14 @@ UnitGroup::UnitGroup(Obj *obj, simple_heightmap *sh, string name, vec2f start, v
     m_unit_count(unit_count), m_sh(sh), m_id(m_id),
     m_time_to_reach_end(time_to_rech_end), m_spawned(0), m_start_b(start), m_end_b(end),m_scale(scale), draw_as_mesh(draw_as_mesh)
 {
+    matrix4x4f arto;
+    make_unit_matrix4x4f(&arto);
+    if(obj->name == "bomberman"){
+
+        vec3f axis;
+        float angle = M_PI;
+        make_rotation_matrix4x4f(&arto, &axis, angle);
+    }
     m_another_timer.restart();
 //    m_modelmatrices = vector<matrix4x4f>();
 //    m_cur_heights = vector<float>();
@@ -762,9 +766,7 @@ UnitGroup::UnitGroup(Obj *obj, simple_heightmap *sh, string name, vec2f start, v
     m_model.col_major[3 * 4 + 0] = m_pos.x*render_settings::tile_size_x;
     m_model.col_major[3 * 4 + 1] = m_center.y + m_height;
     m_model.col_major[3 * 4 + 2] = m_pos.y*render_settings::tile_size_y;
-    m_model.col_major[0 * 4 + 0] = m_scale;
-    m_model.col_major[1 * 4 + 1] = m_scale;
-    m_model.col_major[2 * 4 + 2] = m_scale;
+
 //    matrix4x4f testUnit;
 //    make_unit_matrix4x4f(&testUnit);
 //    m_modelmatrices.push_back(testUnit);
@@ -915,6 +917,12 @@ void UnitGroup::draw(){
 
             loc = glGetUniformLocation(gl_shader_object(m_obj->shader), "light_dir");
             glUniform3f(loc, 0.7, 1.2,0.3);
+
+            vec3f color = get_player_color(m_owner);
+
+            loc = glGetUniformLocation(gl_shader_object(m_obj->shader), "color");
+            glUniform3f(loc, color.x, color.y, color.z);
+
             loc = glGetUniformLocation(gl_shader_object(m_obj->shader), "light_col");
             glUniform3f(loc, 1,1,1);
             loc = glGetUniformLocation(gl_shader_object(m_obj->shader), "time");
@@ -944,6 +952,11 @@ void UnitGroup::draw(){
 
             de->Modelmatrix(m_units[i].getModel());
 			de->bind();
+            vec3f color = get_player_color(m_owner);
+
+            int loc = glGetUniformLocation(gl_shader_object(m_obj->shader), "p_color");
+            glUniform3f(loc, color.x, color.y, color.z);
+
 			setup_dir_light(m_shader);
 			de->apply_default_matrix_uniforms();
 			de->apply_default_tex_uniforms_and_bind_textures();
@@ -958,36 +971,69 @@ void UnitGroup::spawn_unit_row(unsigned int size){
     m_row_size.push_back(size);
 
     int new_size = size;
-
-    for(int i = -(new_size/2); i <= new_size/2; ++i){
-
-        m_view_dir = m_end - m_start;
-     //   if(length_of_vec2f(&m_view_dir) < 0.0001) break;
-        vec2f ortho = vec2f(m_view_dir.y, -m_view_dir.x);
-
-        normalize_vec2f(&ortho);
-        normalize_vec2f(&m_view_dir);
-        vec2f pos = vec2f(m_pos.x + ortho.x *  i -  m_view_dir.x *  m_rows , m_pos.y + ortho.y *  i -  m_view_dir.y *  m_rows) ;
-        vec2f start = vec2f(m_start.x + ortho.x * (float) i -  m_view_dir.x * (float) m_rows,m_start.y + ortho.y * (float) i -  m_view_dir.y * (float) m_rows) ;
-        vec2f end = vec2f(m_end.x + ortho.x * (float) i -  m_view_dir.x * (float) m_rows,m_end.y + ortho.y * (float) i -  m_view_dir.y * (float) m_rows) ;
-
-
-        m_units.push_back(Unit(pos
-                              ,m_view_dir
-                               , vec2f(i,m_rows)
-                               ,start
-                               ,end
-                               ,m_sh
-                              , m_center.y, m_scale));
-        m_spawned++;
-
+    float rot = -M_PI/2;
+    bool is_pac = true;
+    if(m_obj->name == "bomberman"){
+        rot = M_PI/2;
+        is_pac = false;
     }
+    if(new_size%2 == 1){
+        for(int i = -(new_size/2); i <= (new_size)/2; ++i){
+
+            m_view_dir = m_end - m_start;
+         //   if(length_of_vec2f(&m_view_dir) < 0.0001) break;
+            vec2f ortho = vec2f(m_view_dir.y, -m_view_dir.x);
+
+            normalize_vec2f(&ortho);
+            normalize_vec2f(&m_view_dir);
+            vec2f pos = vec2f(m_pos.x + ortho.x *  i -  m_view_dir.x *  m_rows , m_pos.y + ortho.y *  i -  m_view_dir.y *  m_rows) ;
+            vec2f start = vec2f(m_start.x + ortho.x * (float) i -  m_view_dir.x * (float) m_rows,m_start.y + ortho.y * (float) i -  m_view_dir.y * (float) m_rows) ;
+            vec2f end = vec2f(m_end.x + ortho.x * (float) i -  m_view_dir.x * (float) m_rows,m_end.y + ortho.y * (float) i -  m_view_dir.y * (float) m_rows) ;
+
+
+
+            m_units.push_back(Unit(pos
+                                  ,m_view_dir
+                                   , vec2f(i,m_rows)
+                                   ,start
+                                   ,end
+                                   ,m_sh
+                                  , m_center.y, m_scale,rot, is_pac));
+            m_spawned++;
+
+        }
+    } else {
+        for(int i = -(new_size/2); i < (new_size)/2; ++i){
+
+            m_view_dir = m_end - m_start;
+         //   if(length_of_vec2f(&m_view_dir) < 0.0001) break;
+            vec2f ortho = vec2f(m_view_dir.y, -m_view_dir.x);
+
+            normalize_vec2f(&ortho);
+            normalize_vec2f(&m_view_dir);
+            vec2f pos = vec2f(m_pos.x + ortho.x *  i -  m_view_dir.x *  m_rows , m_pos.y + ortho.y *  i -  m_view_dir.y *  m_rows) ;
+            vec2f start = vec2f(m_start.x + ortho.x * (float) i -  m_view_dir.x * (float) m_rows,m_start.y + ortho.y * (float) i -  m_view_dir.y * (float) m_rows) ;
+            vec2f end = vec2f(m_end.x + ortho.x * (float) i -  m_view_dir.x * (float) m_rows,m_end.y + ortho.y * (float) i -  m_view_dir.y * (float) m_rows) ;
+
+
+            m_units.push_back(Unit(pos
+                                  ,m_view_dir
+                                   , vec2f(i,m_rows)
+                                   ,start
+                                   ,end
+                                   ,m_sh
+                                  , m_center.y, m_scale, rot, is_pac));
+            m_spawned++;
+
+        }
+    }
+
 }
 
 
 // UNIT
 
-Unit::Unit(vec2f pos, vec2f view_dir, vec2f pos_group, vec2f start, vec2f end, simple_heightmap *sh, float base_height, float scale): m_pos(pos), m_view_dir(view_dir), m_pos_group(pos_group), m_start(start), m_end(end), m_sh(sh), m_base_height(base_height){
+Unit::Unit(vec2f pos, vec2f view_dir, vec2f pos_group, vec2f start, vec2f end, simple_heightmap *sh, float base_height, float scale, float rot_angle, bool is_pac): m_pos(pos), m_view_dir(view_dir),is_pac(is_pac), m_pos_group(pos_group), m_start(start), m_end(end), m_sh(sh), m_base_height(base_height){
     make_unit_matrix4x4f(&m_model);
     m_model.col_major[0 * 4 + 0] = scale;
     m_model.col_major[1 * 4 + 1] = scale;
@@ -995,7 +1041,7 @@ Unit::Unit(vec2f pos, vec2f view_dir, vec2f pos_group, vec2f start, vec2f end, s
     m_model.col_major[3 * 4 + 1] = base_height + sh->get_height(pos.x, pos.y);
     matrix4x4f rot;
     vec3f axis(0,1,0);
-    float angle = -M_PI/2;
+    float angle = rot_angle;
     make_rotation_matrix4x4f(&rot,&axis,angle);
     m_model = m_model*rot;
     movement_timer.restart();
@@ -1057,7 +1103,12 @@ void Unit::update(vec2f new_pos, float height){
     m_up_speed = ( m_dest_height - m_cur_height ) /5;
 
     m_model.col_major[3 * 4 + 0] = m_pos.x * render_settings::tile_size_x;
-    m_model.col_major[3 * 4 + 1] = m_base_height + m_sh->get_height(m_pos.x,m_pos.y);
+    if(is_pac){
+        m_model.col_major[3 * 4 + 1] = m_base_height + m_sh->get_height(m_pos.x,m_pos.y);
+    } else{
+        float x = wobble_timer.look()/500 + rand_start;
+        m_model.col_major[3 * 4 + 1] = m_base_height + m_sh->get_height(m_pos.x,m_pos.y) + 0.6 + 0.6*sin(x)*cos(x);
+    }
     m_model.col_major[3 * 4 + 2] = m_pos.y * render_settings::tile_size_y;
     m_model = m_model*rot;
     }

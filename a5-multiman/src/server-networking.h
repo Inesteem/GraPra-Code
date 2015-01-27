@@ -23,6 +23,7 @@ public:
     void handle_message(msg::spawn_troup_client *m);
     void handle_message(msg::building_upgrade_house *m);
     void handle_message(msg::building_upgrade_turret *m);
+    void handle_message(msg::client_settings *m);
 };
 
 namespace client_connections {

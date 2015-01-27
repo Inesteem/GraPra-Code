@@ -60,6 +60,7 @@ namespace msg {
             building_upgrade,
             building_upgrade_house,
             building_upgrade_turret,
+            client_settings,
             game_over
 		};
 	}
@@ -105,6 +106,7 @@ namespace msg {
         uint8_t sourceId;
         uint8_t destinationId;
         uint16_t unitCount;
+        uint8_t frac;
     } __attribute__((aligned(8)));
 
     struct next_troup_destination : public message {
@@ -126,12 +128,14 @@ namespace msg {
         int8_t oldOwner;
         int8_t newOwner;
         uint16_t newUnitCount;
+        uint8_t frac;
     } __attribute__((aligned(8)));
 
     struct building_upgrade : public message {
         building_upgrade() : message(code::building_upgrade) {}
         int8_t buildingId;
         uint8_t state;
+        uint8_t frac;
     } __attribute__((aligned(8)));
 
     struct building_unit_generated : public message {
@@ -164,6 +168,13 @@ namespace msg {
     struct building_upgrade_turret : public message {
         building_upgrade_turret() : message(code::building_upgrade_turret) {}
         uint16_t buildingId;
+    } __attribute__((aligned(8)));
+    
+    struct client_settings : public message {
+        client_settings() : message(code::client_settings) {}
+        uint16_t playerId;
+        uint8_t frac;
+        uint8_t colorId;
     } __attribute__((aligned(8)));
 }
 
@@ -210,6 +221,7 @@ protected:
     virtual void handle_message(msg::building_upgrade_house *m) { warn(m); }
     virtual void handle_message(msg::building_upgrade_turret *m) { warn(m); }
     virtual void handle_message(msg::game_over *m) { warn(m); }
+    virtual void handle_message(msg::client_settings *m) { warn(m); }
 };
 
 

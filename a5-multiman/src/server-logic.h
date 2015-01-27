@@ -142,9 +142,11 @@ public:
 
     void addArmy(unsigned int sourceBuildingID, unsigned int destinationBuildingID, unsigned int unitCount);
     void addTroup(Troup *troup);
+    void handle_client_settings(unsigned int playerId, unsigned int colorId, unsigned int frac );
 
     unordered_map<unsigned int, Building*> m_buildings;
     unordered_map<unsigned int, Troup*> m_troups;
 };
 
+   extern int player_frac[10];
 #endif

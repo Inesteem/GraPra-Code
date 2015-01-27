@@ -6,6 +6,7 @@
 #include "rendering.h"
 
 int PLAYER_ID;
+int FRACTION;
 
 Game::Game(ObjHandler *objhandler, simple_heightmap *sh, client_message_reader *message_reader, Menu *menu): m_objhandler(objhandler), m_sh(sh), m_messageReader(message_reader),menu(menu)
 {
@@ -26,11 +27,11 @@ void Game::add_building(string name, int size, int x, int y, unsigned int id){
 
 }
 
-void Game::change_building_owner(int building_id, int new_owner){
+void Game::change_building_owner(int building_id, int new_owner, FRACTIONS frac){
     for(int i = 0; i < m_buildings.size(); i++){
         if(m_buildings[i].get_id() == building_id){
             if(m_buildings[i].get_owner_id() == -1 && new_owner != -1) {
-                this->upgrade_building(i, msg::building_state::house_lvl1);
+                this->upgrade_building(i, msg::building_state::house_lvl1,frac);
             }
             m_buildings[i].change_owner(new_owner);
 
@@ -92,6 +93,13 @@ void Game::init(string filename, int widht, int height, int id){
     if(color.x != -1){
 		set_player_color(id,color);
 	}
+	
+	msg::client_settings cs = make_message<msg::client_settings>();
+	cs.playerId = id;
+	cs.frac = FRACTION;
+	cs.colorId = 0;
+	m_messageReader->send_message(cs);  
+        
     
     m_sh->init(filename, widht, height);
 }
@@ -109,22 +117,28 @@ void Game::update_unit_group(unsigned int x, unsigned int y, unsigned int troupI
 		}
 	}	
 }
-void Game::add_unit_group(unsigned int sourceId, unsigned int destinationId, unsigned int count, unsigned int troupId){
+void Game::add_unit_group(unsigned int sourceId, unsigned int destinationId, unsigned int count, unsigned int troupId, FRACTIONS frac, int owner){
 	Building *source = getBuilding(sourceId);
 	Building *destination = getBuilding(destinationId);
     vec2f start = source->get_pos();
     vec2f end = destination->get_pos();
 
-    cout << "spawning enemies at: " << start.x << "," << start.y << " count: " << count << endl;
-    m_unitgroups.push_back(UnitGroup(m_objhandler->getObjByName("pacman"),m_sh,"bomb",start,end,0,count, 10000, m_sh->get_height(start.x, start.y), troupId, 0.5f,true));
+    cout << "spawning enemies at: " << start.x << "," << start.y << " count: " << count << " frac : " << frac  << endl;
+    if(frac == PAC ){
+        m_unitgroups.push_back(UnitGroup(m_objhandler->getObjByName("pacman"),m_sh,"pacman",start,end,owner,count, 10000, m_sh->get_height(start.x, start.y), troupId, 0.5f,true));
+    } else if(frac == BOMB) {
+        m_unitgroups.push_back(UnitGroup(m_objhandler->getObjByName("bomberman"),m_sh,"bomberman",start,end,owner,count,10000,m_sh->get_height(start.x, start.y), troupId, 0.5f, false));
+    }
 }
 
-void Game::upgrade_building(unsigned int buildingId, unsigned int state){
+void Game::upgrade_building(unsigned int buildingId, unsigned int state, FRACTIONS frac){
     for(int i = 0; i < m_buildings.size(); i++){
 		if(m_buildings[i].get_id() == buildingId){
 			//TODO: const names
 			switch(state){
                 case msg::building_state::house_lvl1 : m_buildings[i].upgrade(m_objhandler->getObjByName("house_pacman"),state); break;
+                case msg::building_state::house_lvl2 : m_buildings[i].upgrade(m_objhandler->getObjByName("house_pacman_lvl2"),state); break;
+                case msg::building_state::house_lvl3 : m_buildings[i].upgrade(m_objhandler->getObjByName("house_pacman_lvl3"),state); break;
                 case msg::building_state::turret_lvl1 : m_buildings[i].upgrade(m_objhandler->getObjByName("turret_pacman"),state); break;
 				default : m_buildings[i].upgrade(m_objhandler->getObjByName("building_lot"), state);
 			}
@@ -165,6 +179,10 @@ void Game::set_selected(Building *building){
 	m_selected = building;
 	
 }
+
+void Game::set_fraction(unsigned int frac){
+	FRACTION = frac;
+}	
 
 
 void Game::draw(){
@@ -215,6 +233,7 @@ void Game::game_over(int winner_id){
 		menu->set_mode(menu->GAMEWON);
 	else
 		menu->set_mode(menu->GAMELOOSE);
+    action->reset();
 	menu->set_render_menu(true);
 	
 }

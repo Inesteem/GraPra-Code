@@ -157,7 +157,7 @@
 
           if(tex_col.r >= 0.5 && tex_col.g >= 0.5 && tex_col.b >= 0.5){
                 out_col = vec4(color,0.5);
-				gl_FragDepth = 0.1;
+				gl_FragDepth = 0.3;
           }
             else if(!(tex_col.r >= 0.9 || tex_col.g <= 0.1 || tex_col.b >= 0.9))  {
                 out_col = tex_col;
@@ -186,7 +186,6 @@
 	out vec2 tc;
 	void main() {
 		pos_wc = model * vec4(in_pos, 1.0);
-// 		norm_wc = transpose(inverse(mat3x3(model))) * in_norm;
 		norm_wc = (model_normal * vec4(in_norm,0)).xyz;
 		tc = in_tc;
 		gl_Position = proj * view * pos_wc;
@@ -216,6 +215,51 @@
 #:inputs (list "in_pos" "in_norm" "in_tc")>
 
 
+#<make-shader "unit-shader"
+#:vertex-shader #{
+#version 150 core
+        in vec3 in_pos;
+        in vec3 in_norm;
+        in vec2 in_tc;
+        uniform mat4 proj;
+        uniform mat4 view;
+        uniform mat4 model;
+        uniform mat4 model_normal;
+        out vec4 pos_wc;
+        out vec3 norm_wc;
+        out vec2 tc;
+        void main() {
+                pos_wc = model * vec4(in_pos, 1.0);
+// 		norm_wc = transpose(inverse(mat3x3(model))) * in_norm;
+                norm_wc = (model_normal * vec4(in_norm,0)).xyz;
+                tc = in_tc;
+                gl_Position = proj * view * pos_wc;
+
+        }
+}
+#:fragment-shader #{
+#version 150 core
+        out vec4 out_col;
+        uniform sampler2D diffuse_tex;
+        uniform vec3 light_dir;
+        uniform vec3 light_col;
+        uniform vec3 eye_pos;
+        uniform vec3 p_color = vec3(1,1,1);
+        in vec4 pos_wc;
+        in vec3 norm_wc;
+        in vec2 tc;
+        void main() {
+                out_col = vec4(0.,0.,0.,1.);
+                vec3 color = texture(diffuse_tex, tc.st).rgb;
+
+                float n_dot_l = max(0, dot(norm_wc, -light_dir));
+                out_col += vec4(p_color*color * light_col * n_dot_l, 0.);
+//		out_col = vec4(color.r,color.g,color.b,1);
+//		if(out_col.x <= 0.2 && out_col.y <= 0.2 &&out_col.z <= 0.2)
+//			discard;
+        }
+}
+#:inputs (list "in_pos" "in_norm" "in_tc")>
 
 
 #<make-shader "text-shader"
@@ -430,11 +474,11 @@
                      float border_grass_rock = 0.4 * height_factor;
                      float border_rock = 0.6 * height_factor;
                      float border_rock_snow = 0.85 * height_factor;
-
-                     vec4 color_water = vec4(texture(water, vec2(pos.z,pos.x)).rgb, 1.0);
-                     vec4 color_grass = vec4(texture(grass, vec2(pos.z,pos.x)).rgb, 1.0);
-                     vec4 color_rock = vec4(texture(stone,vec2(pos.z,pos.x)).rgb, 1.0);
-                     vec4 color_snow = vec4(texture(snow, vec2(pos.z,pos.x)).rgb, 1.0);
+                     vec2 tc = vec2(pos.z/4,pos.x/4);
+                     vec4 color_water = vec4(texture(water, tc).rgb, 1.0);
+                     vec4 color_grass = vec4(texture(grass, tc).rgb, 1.0);
+                     vec4 color_rock = vec4(texture(stone,tc).rgb, 1.0);
+                     vec4 color_snow = vec4(texture(snow, tc).rgb, 1.0);
 
 
                      if (pos.y <= border_water) {
@@ -651,19 +695,67 @@
         uniform float time;
         out vec2 tc;
         out vec3 norm_wc;
-        out vec4 pos_wc;
+        out vec3 pos_wc;
         void main() {
             float t = (sin(time/100)+1)/2.0;
             norm_wc = mix(in_norm_0,in_norm_1,t);
             vec3 pos = mix(in_pos_0,in_pos_1,t);
-            pos_wc = model * vec4(pos, 1.0);
+            pos_wc = vec3(model * vec4(pos, 1.0));
             //            pos_wc = model * vec4(in_pos_1, 1.0);
             norm_wc = transpose(inverse(mat3x3(model))) * norm_wc;
 //            norm_wc = (model_normal * vec4(in_norm,0)).xyz;
             tc = in_tc;
-            gl_Position = proj * view * pos_wc;
+            gl_Position = proj * view * vec4(pos_wc,1);
         }
 
+}
+#:geometry-shader #{
+#version 150 core
+
+        //used to calculate normals
+        uniform mat4 model;
+        uniform mat4 view;
+        layout(triangles) in;
+        layout(triangle_strip, max_vertices = 3) out;
+        in vec3 pos_wc[3];
+
+         out vec3 gFacetNormal;
+
+
+        out vec3 pos;
+
+        void main()
+        {
+            mat3 tmp1 = mat3(model);
+            mat3 tmp2 = mat3(view);
+            mat3 normal = tmp2 * tmp1;
+            normal = transpose(inverse(normal));
+            vec3 A = pos_wc[2] - pos_wc[0];
+            vec3 B = pos_wc[1] - pos_wc[0];
+            gFacetNormal = normal * normalize(cross(A, B));
+
+
+//            gPatchDistance = tePatchDistance[0];
+//            gTriDistance = vec3(1, 0, 0);
+            gl_Position = gl_in[0].gl_Position;
+            pos = pos_wc[0]; EmitVertex();
+
+//            A = out_pos[0] - out_pos[1];
+//            B = out_pos[2] - out_pos[1];
+//            gFacetNormal = normal * normalize(cross(A, B));
+
+            gl_Position = gl_in[1].gl_Position;
+            pos = pos_wc[1]; EmitVertex();
+
+//            A = out_pos[1] - out_pos[2];
+//            B = out_pos[0] - out_pos[2];
+//            gFacetNormal = normal * normalize(cross(A, B));
+
+            gl_Position = gl_in[2].gl_Position;
+            pos = pos_wc[2]; EmitVertex();
+
+            EndPrimitive();
+        }
 }
 #:fragment-shader #{
 #version 150 core
@@ -673,20 +765,22 @@
         uniform vec3 light_dir;
         uniform vec3 light_col;
         uniform vec3 eye_pos;
-        in vec4 pos_wc;
-        in vec3 norm_wc;
+        uniform vec3 color;
+        in vec3 pos;
+        in vec3 gFacetNormal;
         in vec2 tc;
         void main() {
                 out_col = vec4(0.,0.,0.,1.);
-                vec3 color = texture(diffuse_tex, tc.st).rgb;
+                vec3 color1 = texture(diffuse_tex, tc.st).rgb;
 //                out_col = vec4(norm_wc,1);
-                float n_dot_l = max(0, dot(norm_wc, -light_dir));
-                out_col += vec4(color * light_col * n_dot_l, 0.);
+                float n_dot_l = max(0, dot(gFacetNormal, -light_dir));
+                out_col += vec4(color * color1 * light_col * n_dot_l, 0.);
 //                out_col = vec4(0,1,1,1);
         }
 }
 
-#:inputs (list "in_pos_0" "in_pos_1" "in_norm_0" "in_norm_1"  "in_tc")>
+#:inputs (list "in_pos_0" "in_pos_1" "in_tc")>
+
 
 #<make-shader "count-shader"
 #:vertex-shader #{
@@ -817,32 +911,49 @@ uniform float down;
 #version 150 core
 	out vec4 out_col;
 	uniform sampler2D diffuse_tex;
-	uniform sampler2D alpha_tex;
 	uniform vec3 light_dir;
 	uniform vec3 light_col;
 	uniform vec3 eye_pos;
-	uniform vec4 color;
+	uniform vec3 color;
 	uniform float use_alpha;
+	uniform float use_lighting;
 	in vec4 pos_wc;
 	in vec3 norm_wc;
 	in vec2 tc;
 	void main() {
-		out_col = color;
-		if(color.x == 0 && color.y == 0 && color.z == 0){
-			out_col = vec4(0.,0.,0.,1.);
-			vec3 col = texture(diffuse_tex, tc.st).rgb;
-			vec3 col_a = texture(alpha_tex, tc.st).rgb;
-			float alpha =  (col_a.r + col_a.g + col_a.b)/3;
-
-			float n_dot_l = max(0, dot(norm_wc, -light_dir));
-		//	out_col += vec4(col * light_col * n_dot_l, 0.);
-			out_col = vec4(texture(diffuse_tex, tc.st).r,texture(diffuse_tex, tc.st).g,texture(diffuse_tex, tc.st).b,1);
+		
+		vec3 sun_dir = vec3(0,-1,0);
+		
+		out_col = vec4(color,1.);
+		float n_dot_l = max(0, dot(norm_wc, -light_dir));
+		float n_dot_l_2 = max(0, dot(norm_wc, -sun_dir));
+		
+		if(use_lighting != 0.0){
+			out_col += vec4(0.2 *color * light_col * (n_dot_l+n_dot_l_2), 0.);
+	//		out_col = vec4(1);
+		}
+		vec3 col = texture(diffuse_tex, tc.st).rgb;
+		
+		if(col.x >= 0.9 && col.y <= 0.1 && col.z >= 0.9){
+			discard;
+		}
+		
+		if(!(col.x >= 0.99 && col.y >= 0.99 && col.z >= 0.99)){
+			out_col = vec4(col,1.);
+			
+			if(use_lighting != 0.0)
+				out_col += vec4(0.2 * col * (light_col + 0.2*color) * (n_dot_l+n_dot_l_2), 0.);
+		//		out_col = vec4(1);
+		
 			if(use_alpha == 1){
-				out_col.a = 1-alpha; 
-		//		out_col = vec4(texture(diffuse_tex, tc.st).r,texture(diffuse_tex, tc.st).g,texture(diffuse_tex, tc.st).b,1);
+				
+				vec2 l = vec2(0.5,0.5) - tc;
+				float dis = sqrt(l.x * l.x + l.y * l.y);
+				out_col.a = max(0,1 - (dis*2));
+
 			}
-		} 
-	}
+		}
+	} 
 }
 #:inputs (list "in_pos" "in_norm" "in_tc")>
 
@@ -900,6 +1011,7 @@ uniform float down;
 	in vec2 tc;
 	out vec4 out_col;
 	uniform vec3 color;
+	uniform vec3 p_color = vec3(1,1,1);
 	uniform sampler2D tex;
 	uniform float depth;
 	void main() {
@@ -914,7 +1026,7 @@ uniform float down;
 				tex_col.z >= (color.z-0.3) && tex_col.z <= (color.z+0.3)){
 					discard;
 			} else
-				out_col = tex_col;
+				out_col = tex_col * vec4(p_color.x,p_color.y, p_color.z,1);
 		}
 		
 	}

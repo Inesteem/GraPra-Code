@@ -96,6 +96,7 @@ public:
 	int get_row_max(){return max_rows;}
 	vec3f get_player_color();
 	int get_num_players();
+	int get_frac();
 	const char *get_level();
 	
 	void increase_row();
@@ -218,6 +219,9 @@ struct Button {
 
 
 class IconBar{
+	
+	vec3f player_color = {1,1,1};
+	vec3f no_color = {1,1,1};
 	
 	Building *building = nullptr;
 	vector <Button> buttons;
