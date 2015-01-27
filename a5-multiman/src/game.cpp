@@ -135,12 +135,22 @@ void Game::upgrade_building(unsigned int buildingId, unsigned int state, FRACTIO
     for(int i = 0; i < m_buildings.size(); i++){
 		if(m_buildings[i].get_id() == buildingId){
 			//TODO: const names
-			switch(state){
-                case msg::building_state::house_lvl1 : m_buildings[i].upgrade(m_objhandler->getObjByName("house_pacman"),state); break;
-                case msg::building_state::house_lvl2 : m_buildings[i].upgrade(m_objhandler->getObjByName("house_pacman_lvl2"),state); break;
-                case msg::building_state::house_lvl3 : m_buildings[i].upgrade(m_objhandler->getObjByName("house_pacman_lvl3"),state); break;
-                case msg::building_state::turret_lvl1 : m_buildings[i].upgrade(m_objhandler->getObjByName("turret_pacman"),state); break;
-				default : m_buildings[i].upgrade(m_objhandler->getObjByName("building_lot"), state);
+			if(FRACTION == PAC){
+				switch(state){
+					case msg::building_state::house_lvl1 : m_buildings[i].upgrade(m_objhandler->getObjByName("house_pacman_lvl1"),state); break;
+					case msg::building_state::house_lvl2 : m_buildings[i].upgrade(m_objhandler->getObjByName("house_pacman_lvl2"),state); break;
+					case msg::building_state::house_lvl3 : m_buildings[i].upgrade(m_objhandler->getObjByName("house_pacman_lvl3"),state); break;
+					case msg::building_state::turret_lvl1 : m_buildings[i].upgrade(m_objhandler->getObjByName("turret_pacman_lvl1"),state); break;
+					default : m_buildings[i].upgrade(m_objhandler->getObjByName("building_lot"), state);
+				} 
+			} else {
+				switch(state){
+					case msg::building_state::house_lvl1 : m_buildings[i].upgrade(m_objhandler->getObjByName("house_bbm_lvl1"),state); break;
+					case msg::building_state::house_lvl2 : m_buildings[i].upgrade(m_objhandler->getObjByName("house_bbm_lvl2"),state); break;
+					case msg::building_state::house_lvl3 : m_buildings[i].upgrade(m_objhandler->getObjByName("house_bbm_lvl3"),state); break;
+					case msg::building_state::turret_lvl1 : m_buildings[i].upgrade(m_objhandler->getObjByName("turret_bbm_lvl1"),state); break;
+					default : m_buildings[i].upgrade(m_objhandler->getObjByName("building_lot"), state);
+				} 					
 			}
 			return;
 		}

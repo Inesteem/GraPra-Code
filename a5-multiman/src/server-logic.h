@@ -39,7 +39,7 @@ class Path
     PathNode GetHighestPriorityOpenNode();
     bool OpenNodesExists();
     void ExpandNode(PathNode current, PathNode endPosition);
-    void RetracePath(PathNode startPosition, PathNode current);
+    void RetracePath(PathNode startPosition, PathNode current, PathNode endPosition);
 
     void FindDirectPath(PathNode &source, PathNode &destination);
     void FindPathAStar(PathNode startPosition, PathNode endPosition);
@@ -68,9 +68,7 @@ class Building : public GameObject
 {
 
         wall_time_timer m_generateUnitsTimer;
-        const static unsigned int c_upgradeRateLvl1 = 2200;
-        const static unsigned int c_upgradeRateLvl2 = 1400;
-        const static unsigned int c_upgradeRateLvl3 = 800;
+
 public:
     unsigned int m_unitCount;
     int m_player;

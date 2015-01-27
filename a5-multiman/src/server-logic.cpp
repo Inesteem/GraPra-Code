@@ -58,8 +58,6 @@ void GameStage::Update()
             ta.troupId = troup.second->m_id;
             broadcast(&ta);
 
-
-
             troup.second->m_destination->IncomingTroup(troup.second);
         }
     }
@@ -333,11 +331,11 @@ void Building::Update()
 {
     if(m_player == - 1 || m_state == msg::building_state::turret_lvl1 || m_state == msg::building_state::turret_lvl2 || m_state == msg::building_state::construction_site) return;
 
-    unsigned int upgradeRate = c_upgradeRateLvl1;
+    unsigned int upgradeRate = msg::unit_generation_time::UpgradeRateLvl1;
     if(m_state == msg::building_state::house_lvl2) {
-        upgradeRate = c_upgradeRateLvl2;
+        upgradeRate = msg::unit_generation_time::UpgradeRateLvl2;
     } else if(m_state == msg::building_state::house_lvl3) {
-        upgradeRate = c_upgradeRateLvl3;
+        upgradeRate = msg::unit_generation_time::UpgradeRateLvl3;
     }
 
     if(m_generateUnitsTimer.look() >= wall_time_timer::msec(upgradeRate)) {
@@ -504,7 +502,7 @@ PathNode Path::GetHighestPriorityOpenNode()
     return ret;
 }
 
-void Path::RetracePath(PathNode startPosition, PathNode current)
+void Path::RetracePath(PathNode startPosition, PathNode current, PathNode endPosition)
 {
     m_nodes.clear();
 
@@ -521,6 +519,9 @@ void Path::RetracePath(PathNode startPosition, PathNode current)
         m_nodes.insert(m_nodes.begin(), current);
 
     } while(1);
+
+    m_nodes.erase(--m_nodes.end());
+    m_nodes.push_back(endPosition);
 }
 
 void Path::ExpandNode(PathNode current, PathNode endPosition)
@@ -628,7 +629,7 @@ void Path::FindPathAStar(PathNode startPosition, PathNode endPosition)
         if(current.mapX == endPosition.mapX && current.mapY == endPosition.mapY) {
             // found path
             cout << "Found path!" << endl;
-            RetracePath(startPosition, current);
+            RetracePath(startPosition, current, endPosition);
             return;
         }
 

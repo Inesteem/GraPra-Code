@@ -472,11 +472,16 @@ void Building::draw(){
 			i++;
 		}
 		
+    } else if (FRACTION == 1 && state == msg::building_state::house_lvl1 || state == msg::building_state::house_lvl2 || state == msg::building_state::house_lvl3) {
+		draw_bbm_house();
+		
+    } else if (FRACTION == 1 && state == msg::building_state::turret_lvl1) {
+		draw_bbm_house();
     } else if (state == msg::building_state::house_lvl1 || state == msg::building_state::house_lvl2 || state == msg::building_state::house_lvl3) {
-		draw_state_house_1();
+		draw_pm_house();
 		
     } else if (state == msg::building_state::turret_lvl1) {
-		draw_state_turret_1();
+		draw_pm_house();
 		
 	} else {
 		GameObject::draw();
@@ -485,11 +490,10 @@ void Building::draw(){
 	label->update_gui_texture_int(unit_count);
 	label->render_gui_overlay();
 	
+	//check for upgrade
 	bool upgradeable = check_for_upgrade_settlement(state+1);
 	if(turret)
 		upgradeable = check_for_upgrade_turret(state+1);
-	
-	
 	
 	if(upgradeable && PLAYER_ID == m_owner){
 		matrix4x4f arrow_model_2;
@@ -504,9 +508,14 @@ void Building::draw(){
 			de->bind();
 			setup_dir_light(find_shader("alpha-color-shader"));
 			de->apply_default_matrix_uniforms();
-			float lighting = 0;
+			
+			float lighting = 0; // don't use lighting
 			int loc = glGetUniformLocation(gl_shader_object(find_shader("alpha-color-shader")), "use_lighting");
 			glUniform1f(loc,lighting);
+			
+			float depth = 0.21;
+			loc = glGetUniformLocation(gl_shader_object(find_shader("alpha-color-shader")), "depth");
+			glUniform1f(loc,depth);
 			
 			de->apply_default_tex_uniforms_and_bind_textures();
 			de->draw_em();
@@ -518,23 +527,55 @@ void Building::draw(){
     draw_selection_circle(3);
 }
 
-void Building::draw_state_turret_1(){
+void Building::draw_bbm_house(){
+	int loc;
+	shader_ref shader_t = find_shader("alpha-color-shader");
+	bind_shader(shader_t);
 
+
+	glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    
 	for (vector<drawelement*>::iterator it = m_obj->drawelements->begin(); it != m_obj->drawelements->end(); ++it) {
-			drawelement *de = *it;
-			de->Modelmatrix(&m_model);
-			de->bind();
-			setup_dir_light(m_shader);
-			de->apply_default_matrix_uniforms();
-			de->apply_default_tex_uniforms_and_bind_textures();
-			de->draw_em();
-			de->unbind();
+		drawelement *de = *it;
+		
+		float use_alpha = 2;// dont use alpha for all objects but those with playercolor
+		
+		if(index_buffer_length_of_mesh((de->meshes.front())) == 6)
+			use_alpha = 1;
+		
+		de->Modelmatrix(&m_model);
+		setup_dir_light(shader_t);
+		de->apply_default_matrix_uniforms(shader_t);
+		de->apply_default_tex_uniforms_and_bind_textures(shader_t);
+		
+		vec3f color = get_player_color(m_owner);
+		loc = glGetUniformLocation(gl_shader_object(shader_t), "color");
+		glUniform3fv(loc, 1,(float *)&color);				
+
+		loc = glGetUniformLocation(gl_shader_object(shader_t), "use_alpha");
+		glUniform1f(loc,use_alpha);
+
+		float lighting = 1; //use lighting (except objects with playercolor)
+		loc = glGetUniformLocation(gl_shader_object(find_shader("alpha-color-shader")), "use_lighting");
+		glUniform1f(loc,lighting);
+
+		float depth = -1; // normal depth 
+		loc = glGetUniformLocation(gl_shader_object(find_shader("alpha-color-shader")), "depth");
+		glUniform1f(loc,depth);
+
+
+		de->draw_em();
+
 	}	
+
+	glDisable(GL_BLEND);
+	unbind_shader(shader_t);
 	
 	
 }
 
-void Building::draw_state_house_1(){
+void Building::draw_pm_house(){
 	shader_ref shader_t = find_shader("alpha-color-shader");
 	bind_shader(shader_t);
 
@@ -568,10 +609,13 @@ void Building::draw_state_house_1(){
 		loc = glGetUniformLocation(gl_shader_object(shader_t), "use_alpha");
 		glUniform1f(loc,use_alpha);
 
+		float depth = -1; // depth normal
+		loc = glGetUniformLocation(gl_shader_object(find_shader("alpha-color-shader")), "depth");
+		glUniform1f(loc,depth);
+
 		de->draw_em();
 
 	}	
-//		cout << i << endl;
 
 	glDisable(GL_BLEND);
 	unbind_shader(shader_t);

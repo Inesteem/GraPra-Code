@@ -59,7 +59,7 @@ char hostname[1024];
 //char *hostName;
 
 
-
+int fraction = 1;
 Action *action;
 Menu *menu;
 
@@ -262,13 +262,14 @@ void menu_keyhandler(unsigned char key, int state){
         //host game
     case 13 : if(menu->get_row() == 0){
             game->set_fraction(menu->get_frac());
-
+			action->init_iconbar(menu->get_frac());
             pid_t pID = fork();
 
+            unsigned int level = menu->get_level();
             int numplayers = menu->get_num_players();
             std::string s = std::to_string(numplayers);
+            std::string l = std::to_string(level);
 
-            const char *level = menu->get_level();
 
             if (pID == 0) {// child
 
@@ -284,7 +285,7 @@ void menu_keyhandler(unsigned char key, int state){
                 str += " $*; echo '-- '; echo 'press return to close this terminal'; read";
 
                 //execl("/usr/bin/xterm","/usr/bin/xterm", "-geometry", "200x100+0+900", "-e", str.c_str(), NULL);
-                execl(str_2.c_str(),str_2.c_str(), s.c_str(), level, NULL);
+                execl(str_2.c_str(),str_2.c_str(), s.c_str(), l.c_str(), NULL);
 
             }
             else if (pID < 0){// failed to fork
@@ -663,13 +664,15 @@ void actual_main() {
     objhandler->addObj("tree", "./render-data/models/tree.obj", find_shader("pos+norm+tc"));
     objhandler->addObj("tropical_tree", "./render-data/models/tropical_tree.obj", find_shader("pos+norm+tc"));
     objhandler->addObj("building_lot", "./render-data/models/building_lot.obj", find_shader("pos+norm+tc"));
-    //      objhandler->addObj_withScale("upgrade_arrow", "./render-data/models/cube.obj", find_shader("pos+norm+tc"), vec3f(0.99,0.99,0.99));
     objhandler->addObj("upgrade_arrow", "./render-data/models/cube.obj", find_shader("alpha-color-shader"));
-    objhandler->addObj("house_pacman", "./render-data/models/siedlung.obj", find_shader("alpha-color-shader"));
+    objhandler->addObj("house_pacman_lvl1", "./render-data/models/siedlung.obj", find_shader("alpha-color-shader"));
     objhandler->addObj("house_pacman_lvl2", "./render-data/models/siedlung_lvl2.obj", find_shader("alpha-color-shader"));
     objhandler->addObj("house_pacman_lvl3", "./render-data/models/siedlung_lvl3.obj", find_shader("alpha-color-shader"));
-    objhandler->addObj("turret_pacman", "./render-data/models/simple_tower_pacman.obj", find_shader("pos+norm+tc"));
-    //        objhandler->addObj("pacman", "./render-data/models/pacman.obj", find_shader("pos+norm+tc"));
+    objhandler->addObj("house_bbm_lvl1", "./render-data/models/house_bbm_lvl1.obj", find_shader("alpha-color-shader"));
+    objhandler->addObj("house_bbm_lvl2", "./render-data/models/house_bbm_lvl2.obj", find_shader("alpha-color-shader"));
+    objhandler->addObj("house_bbm_lvl3", "./render-data/models/house_bbm_lvl3.obj", find_shader("alpha-color-shader"));
+    objhandler->addObj("turret_bbm_lvl1", "./render-data/models/tower_bbm_lvl1.obj", find_shader("alpha-color-shader"));
+    objhandler->addObj("turret_pacman_lvl1", "./render-data/models/simple_tower_pacman.obj", find_shader("pos+norm+tc"));
     objhandler->addObj("bomberman","./render-data/models/bbm-nolegs.obj",find_shader("unit-shader"));
     vector<string> filenames;
     filenames.push_back("./render-data/models/pacman_1.obj");

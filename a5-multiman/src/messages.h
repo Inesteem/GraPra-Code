@@ -35,6 +35,12 @@ namespace msg {
         const unsigned int TowerLvl2 = 3;
     }
 
+    namespace unit_generation_time { // in msec
+        const static unsigned int UpgradeRateLvl1 = 2000;
+        const static unsigned int UpgradeRateLvl2 = 1000;
+        const static unsigned int UpgradeRateLvl3 = 500;
+    }
+
     namespace upgrade_cost {
         const unsigned int UpgradeToHouseLvl1 = 10;
         const unsigned int UpgradeToHouseLvl2 = 20;
@@ -77,7 +83,7 @@ namespace msg {
         uint16_t mapX;
         uint16_t mapY;
         int8_t id;
-        char levelName[LVL_MAX_LENGTH];
+        uint8_t level;
     } __attribute__((aligned(8)));
 
 	struct spawn_house : public message {

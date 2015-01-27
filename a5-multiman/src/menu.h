@@ -61,12 +61,12 @@ protected:
 	
 	vector<Label *>labels;
 	vector<std::string> strings = {"Host Game", "Fraktion", "Level","Color", "Players", "Join Game"};
-	vector<const char*> level_names = {"lvl01","lvl02"};
+    vector<const char*> level_names = {"Level 1","Level 2", "Level 3", "Level 4"};
 	vector<const char*> color_names = {"Color","Grey","Red", "Yellow", "Violet", "Cyan","Blue","Green", "Pink","LightBlue","PaleYellow"};
     vector<vec3f> player_colors = { vec3f(1.,1.,1.),vec3f(0.7,0.7,0.7), vec3f(1,0,0),vec3f(1,1,0),vec3f(1,0,1),vec3f(0,1,1),vec3f(0,0,1),
 								vec3f(0,1,0),vec3f(1,0.5,1),vec3f(0.5,1,1),vec3f(1,1,0.5) };
 	vector<int> nums = {-1,1,1,1,1,-1};
-	vector<int> max_nums = {-1,2,2,11,4,-1};
+    vector<int> max_nums = {-1,2,4,11,4,-1};
 	vector<int> min_nums = {-1,1,1,1,1,-1};
 	
 	client_message_reader *message_reader;
@@ -97,7 +97,7 @@ public:
 	vec3f get_player_color();
 	int get_num_players();
 	int get_frac();
-	const char *get_level();
+    unsigned int get_level();
 	
 	void increase_row();
 	void decrease_row();
@@ -219,6 +219,7 @@ struct Button {
 
 
 class IconBar{
+	int fraction = 0;
 	
 	vec3f player_color = {1,1,1};
 	vec3f no_color = {1,1,1};
@@ -259,7 +260,6 @@ class IconBar{
 	
 
 	matrix4x4f  model_background;
-	matrix4x4f  model_picture;
 
 	shader_ref 	shader;
 	camera_ref 	cam;
@@ -272,11 +272,10 @@ class IconBar{
 	void draw_buttons();
 	void draw_buttons_2();
 	void draw_building();
-	void draw_picture();
 	
 public: 
 
-	IconBar();
+	IconBar(int fraction);
 	void draw();
 	int click(int x, int y, vec3f (*ptr)(int x, int y));
 	int scale_button(int b, bool smaller);

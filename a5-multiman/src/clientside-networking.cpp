@@ -77,9 +77,11 @@ client_message_reader::client_message_reader(Game *game) : message_reader(), gam
 
 void client_message_reader::handle_message(msg::init_game *m)
 {
-    std::cout << "Initilizing map with level " << (char*) m->levelName << " (x = " << (unsigned int) m->mapX << ", y = " << (unsigned int) m->mapY << "), player id: " << (unsigned int) m->id << std::endl;
-    //string heightmapPath = "./render-data/images/" + string((char*) m->levelName) + "_height.png";
-    game->init("./render-data/images/lvl02_height.png",m->mapX,m->mapY, m->id);
+    std::stringstream ss;
+    ss << "./render-data/images/lvl" << ((unsigned int) m->level) << "_height.png";
+    string heightmapPath = ss.str();
+    std::cout << "Initilizing map with level " << heightmapPath << " (x = " << (unsigned int) m->mapX << ", y = " << (unsigned int) m->mapY << "), player id: " << (unsigned int) m->id << std::endl;
+    game->init(heightmapPath,m->mapX,m->mapY, m->id);
 }
 
 void client_message_reader::handle_message(msg::spawn_house *m)
