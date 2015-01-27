@@ -3,6 +3,7 @@
 //#include "cmdline.h"
 
 #include <iostream>
+#include <string>
 //#include <GL/freeglut.h>
 //#include <cairo/cairo.h>
 
@@ -76,7 +77,8 @@ client_message_reader::client_message_reader(Game *game) : message_reader(), gam
 
 void client_message_reader::handle_message(msg::init_game *m)
 {
-    std::cout << "Initilizing map with level " << m->levelName << " (x = " << (unsigned int) m->mapX << ", y = " << (unsigned int) m->mapY << "), player id: " << (unsigned int) m->id << std::endl;
+    std::cout << "Initilizing map with level " << (char*) m->levelName << " (x = " << (unsigned int) m->mapX << ", y = " << (unsigned int) m->mapY << "), player id: " << (unsigned int) m->id << std::endl;
+    //string heightmapPath = "./render-data/images/" + string((char*) m->levelName) + "_height.png";
     game->init("./render-data/images/lvl02_height.png",m->mapX,m->mapY, m->id);
 }
 

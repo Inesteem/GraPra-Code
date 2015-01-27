@@ -165,6 +165,11 @@ void Building::KillUnits(unsigned int unitCount){
 
 void GameStage::addTroup(Troup *troup)
 {
+    if(troup->m_unitCount > troup->m_source->m_unitCount) {
+        // discard this troup
+        delete troup;
+        return;
+    }
     troup->m_source->KillUnits(troup->m_unitCount);
 
     m_troups[troup->m_id] = troup;
