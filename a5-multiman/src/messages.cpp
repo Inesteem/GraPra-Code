@@ -58,6 +58,9 @@ void message_reader::handle_message() {
         case msg::code::building_upgrade_turret:    handle_message((msg::building_upgrade_turret*)buffer); break;
         case msg::code::game_over:                  handle_message((msg::game_over*)buffer); break;
         case msg::code::client_settings:            handle_message((msg::client_settings*)buffer); break;
+        case msg::code::spawn_random_stuff:         handle_message((msg::spawn_random_stuff*)buffer); break;
+
+
 
 		default:
 			cerr << "got a message with unknown code " << (int)buffer[1] << endl;

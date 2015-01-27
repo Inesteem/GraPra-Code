@@ -167,7 +167,7 @@ void simple_heightmap::set_heights(vec2f pos, float height, float radius_in_tile
     glUniform2i(loc,npos.x,npos.y);
     loc =glGetUniformLocation(gl_shader_object(shader), "g_height");
     glUniform1f(loc,m_g_height);
-    loc =glGetUniformLocation(gl_shader_object(shader), "g_widht");
+    loc =glGetUniformLocation(gl_shader_object(shader), "g_width");
     glUniform1f(loc,m_g_width);
 
     bind_texture_as_image(height_map,0,1, GL_READ_WRITE,GL_RGBA8);
@@ -180,7 +180,7 @@ void simple_heightmap::set_heights(vec2f pos, float height, float radius_in_tile
 
 
     unbind_shader(shader);
-     glMemoryBarrier(GL_FRAMEBUFFER_BARRIER_BIT);
+//     glMemoryBarrier(GL_FRAMEBUFFER_BARRIER_BIT);
     unbind_texture_as_image(height_map,0);
 
 

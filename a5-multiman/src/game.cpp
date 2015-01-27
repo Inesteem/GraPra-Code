@@ -104,6 +104,8 @@ void Game::init(string filename, int widht, int height, int id){
         
     
     m_sh->init(filename, widht, height);
+
+    m_snow = new SnowEffect(vec3f(widht * render_settings::tile_size_x / 2.0 ,10 , height * render_settings::tile_size_y / 2.0), 100);
 }
 
 ObjHandler* Game::get_objhandler(){
@@ -139,18 +141,18 @@ void Game::upgrade_building(unsigned int buildingId, unsigned int state, FRACTIO
 			//TODO: const names
 			if(FRACTION == PAC){
 				switch(state){
-                case msg::building_state::house_lvl1 : m_buildings[i].upgrade(m_objhandler->getObjByName("house_pacman_lvl1"),state); m_buildings[i].change_size(2);  break;
-                    case msg::building_state::house_lvl2 : m_buildings[i].upgrade(m_objhandler->getObjByName("house_pacman_lvl2"),state);m_buildings[i].change_size(3);  break;
-                    case msg::building_state::house_lvl3 : m_buildings[i].upgrade(m_objhandler->getObjByName("house_pacman_lvl3"),state);m_buildings[i].change_size(4);  break;
-                    case msg::building_state::turret_lvl1 : m_buildings[i].upgrade(m_objhandler->getObjByName("turret_pacman_lvl1"),state);m_buildings[i].change_size(2);  break;
+                case msg::building_state::house_lvl1 : m_buildings[i].upgrade(m_objhandler->getObjByName("house_pacman_lvl1"),state); m_buildings[i].change_size(2); m_sh->set_heights(m_buildings[i].get_pos(),m_sh->get_height(m_buildings[i].get_pos().x,m_buildings[i].get_pos().y),2);  break;
+                    case msg::building_state::house_lvl2 : m_buildings[i].upgrade(m_objhandler->getObjByName("house_pacman_lvl2"),state);m_buildings[i].change_size(3);  m_sh->set_heights(m_buildings[i].get_pos(),m_sh->get_height(m_buildings[i].get_pos().x,m_buildings[i].get_pos().y),3); break;
+                    case msg::building_state::house_lvl3 : m_buildings[i].upgrade(m_objhandler->getObjByName("house_pacman_lvl3"),state);m_buildings[i].change_size(4); m_sh->set_heights(m_buildings[i].get_pos(),m_sh->get_height(m_buildings[i].get_pos().x,m_buildings[i].get_pos().y),4);  break;
+                    case msg::building_state::turret_lvl1 : m_buildings[i].upgrade(m_objhandler->getObjByName("turret_pacman_lvl1"),state);m_buildings[i].change_size(2); m_sh->set_heights(m_buildings[i].get_pos(),m_sh->get_height(m_buildings[i].get_pos().x,m_buildings[i].get_pos().y),2);  break;
 					default : m_buildings[i].upgrade(m_objhandler->getObjByName("building_lot"), state);
 				} 
 			} else {
 				switch(state){
-                    case msg::building_state::house_lvl1 : m_buildings[i].upgrade(m_objhandler->getObjByName("house_bbm_lvl1"),state);m_buildings[i].change_size(2);  break;
-                    case msg::building_state::house_lvl2 : m_buildings[i].upgrade(m_objhandler->getObjByName("house_bbm_lvl2"),state);m_buildings[i].change_size(3);  break;
-                    case msg::building_state::house_lvl3 : m_buildings[i].upgrade(m_objhandler->getObjByName("house_bbm_lvl3"),state); m_buildings[i].change_size(4); break;
-                    case msg::building_state::turret_lvl1 : m_buildings[i].upgrade(m_objhandler->getObjByName("turret_bbm_lvl1"),state);m_buildings[i].change_size(2);  break;
+                    case msg::building_state::house_lvl1 : m_buildings[i].upgrade(m_objhandler->getObjByName("house_bbm_lvl1"),state);m_buildings[i].change_size(2);  m_sh->set_heights(m_buildings[i].get_pos(),m_sh->get_height(m_buildings[i].get_pos().x,m_buildings[i].get_pos().y),2); break;
+                    case msg::building_state::house_lvl2 : m_buildings[i].upgrade(m_objhandler->getObjByName("house_bbm_lvl2"),state);m_buildings[i].change_size(3);  m_sh->set_heights(m_buildings[i].get_pos(),m_sh->get_height(m_buildings[i].get_pos().x,m_buildings[i].get_pos().y),3); break;
+                    case msg::building_state::house_lvl3 : m_buildings[i].upgrade(m_objhandler->getObjByName("house_bbm_lvl3"),state); m_buildings[i].change_size(4);  m_sh->set_heights(m_buildings[i].get_pos(),m_sh->get_height(m_buildings[i].get_pos().x,m_buildings[i].get_pos().y),4);break;
+                    case msg::building_state::turret_lvl1 : m_buildings[i].upgrade(m_objhandler->getObjByName("turret_bbm_lvl1"),state);m_buildings[i].change_size(2);  m_sh->set_heights(m_buildings[i].get_pos(),m_sh->get_height(m_buildings[i].get_pos().x,m_buildings[i].get_pos().y),2); break;
 					default : m_buildings[i].upgrade(m_objhandler->getObjByName("building_lot"), state);
 				} 					
 			}
@@ -200,6 +202,7 @@ void Game::set_fraction(unsigned int frac){
 void Game::draw(){
 	m_sh->draw();
 
+    m_snow->Render();
 
     for(int i = 0; i < m_trees.size(); ++i){
         m_trees[i].draw();
@@ -220,6 +223,7 @@ void Game::draw(){
 }
 
 void Game::update(){
+    m_snow->Update();
     for(int i = 0; i < m_unitgroups.size(); ++i){
         m_unitgroups[i].update();
    }

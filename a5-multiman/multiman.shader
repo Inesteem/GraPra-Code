@@ -35,11 +35,13 @@
 
         bool hit(ivec2 hit){
             ivec2 t = imageSize(height_map);
-            float offset = (t/64)*radius;
-            if(hit.x > pos.x + offset/2 + offset ) return false;
-            if(hit.x < pos.x + offset/2 - offset) return false;
-            if(hit.y > pos.y + offset/2 + offset ) return false;
-            if(hit.y < pos.y + offset/2 - offset) return false;
+            float offset_y = radius*tile_size_y;
+            float offset_x = radius*tile_size_x;
+
+            if(hit.x > pos.x  + offset_x ) return false;
+            if(hit.x < pos.x - offset_x) return false;
+            if(hit.y > pos.y + offset_y ) return false;
+            if(hit.y < pos.y - offset_y) return false;
             return true;
         }
         bool outerhit(ivec2 hit){

@@ -56,6 +56,7 @@ namespace msg {
 			init_game = 1,
 			spawn_house,
 			spawn_tree,
+            spawn_random_stuff,
             init_done,
             spawn_troup_server,
             spawn_troup_client,
@@ -100,6 +101,13 @@ namespace msg {
         uint16_t y;
         uint8_t type;
 	} __attribute__((aligned(8)));
+
+    struct spawn_random_stuff : public message {
+        spawn_random_stuff() : message(code::spawn_random_stuff) {}
+        uint16_t x;
+        uint16_t y;
+    } __attribute__((aligned(8)));
+
 
 	struct init_done : public message {
 		init_done() : message(code::init_done) {}
@@ -228,6 +236,8 @@ protected:
     virtual void handle_message(msg::building_upgrade_turret *m) { warn(m); }
     virtual void handle_message(msg::game_over *m) { warn(m); }
     virtual void handle_message(msg::client_settings *m) { warn(m); }
+    virtual void handle_message(msg::spawn_random_stuff *m) { warn(m); }
+
 };
 
 
