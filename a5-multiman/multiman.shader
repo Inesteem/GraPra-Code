@@ -917,10 +917,17 @@ uniform float down;
 	uniform vec3 color;
 	uniform float use_alpha;
 	uniform float use_lighting;
+	uniform float depth;
 	in vec4 pos_wc;
 	in vec3 norm_wc;
 	in vec2 tc;
 	void main() {
+		
+		if(depth != 0 && depth < 1 && depth > 0){
+			gl_FragDepth = depth;
+		}	else {
+			gl_FragDepth = gl_FragCoord.z;
+		}
 		
 		vec3 sun_dir = vec3(0,-1,0);
 		
@@ -928,22 +935,22 @@ uniform float down;
 		float n_dot_l = max(0, dot(norm_wc, -light_dir));
 		float n_dot_l_2 = max(0, dot(norm_wc, -sun_dir));
 		
-		if(use_lighting != 0.0){
+		if(use_lighting != 0.0 && use_alpha != 2){
 			out_col += vec4(0.2 *color * light_col * (n_dot_l+n_dot_l_2), 0.);
-	//		out_col = vec4(1);
 		}
 		vec3 col = texture(diffuse_tex, tc.st).rgb;
 		
 		if(col.x >= 0.9 && col.y <= 0.1 && col.z >= 0.9){
 			discard;
 		}
+	
 		
+		//texcol
 		if(!(col.x >= 0.99 && col.y >= 0.99 && col.z >= 0.99)){
 			out_col = vec4(col,1.);
 			
 			if(use_lighting != 0.0)
 				out_col += vec4(0.2 * col * (light_col + 0.2*color) * (n_dot_l+n_dot_l_2), 0.);
-		//		out_col = vec4(1);
 		
 			if(use_alpha == 1){
 				
@@ -952,7 +959,10 @@ uniform float down;
 				out_col.a = max(0,1 - (dis*2));
 
 			}
+		} else if(use_alpha == 2){
+			out_col.a = 0.4;
 		}
+			
 	} 
 }
 #:inputs (list "in_pos" "in_norm" "in_tc")>

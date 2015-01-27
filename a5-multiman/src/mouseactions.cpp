@@ -74,10 +74,9 @@ namespace moac {
 		ob_set = false;
 		prepare_attack = false;
 		render_status_bar = true;
-		slidebar = new SlideBar();	
-		slidebar->initialize_slidebar();
 		statusbar = new StatusBar("status_bar", objhandler);		
-		iconbar = new IconBar();	
+		slidebar = new SlideBar();	
+		slidebar->initialize_slidebar();	
 			
 		vec3f cam_pos = {0,0,0}, cam_dir = {0,0,-1}, cam_up = {0,1,0};
 		orthocam = make_orthographic_cam((char*)"gui cam", &cam_pos, &cam_dir, &cam_up, 50, 0, 50, 0, 0.01, 1000);	
@@ -230,7 +229,9 @@ namespace moac {
 		
 	}
 
-
+	void Action::init_iconbar(int fraction){
+		iconbar = new IconBar(fraction);	
+	}
 
 	void Action::update_iconbar(){
 		iconbar->update();	

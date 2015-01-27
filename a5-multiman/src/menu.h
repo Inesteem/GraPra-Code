@@ -219,6 +219,7 @@ struct Button {
 
 
 class IconBar{
+	int fraction = 0;
 	
 	vec3f player_color = {1,1,1};
 	vec3f no_color = {1,1,1};
@@ -259,7 +260,6 @@ class IconBar{
 	
 
 	matrix4x4f  model_background;
-	matrix4x4f  model_picture;
 
 	shader_ref 	shader;
 	camera_ref 	cam;
@@ -272,11 +272,10 @@ class IconBar{
 	void draw_buttons();
 	void draw_buttons_2();
 	void draw_building();
-	void draw_picture();
 	
 public: 
 
-	IconBar();
+	IconBar(int fraction);
 	void draw();
 	int click(int x, int y, vec3f (*ptr)(int x, int y));
 	int scale_button(int b, bool smaller);
