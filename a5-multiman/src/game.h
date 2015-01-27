@@ -73,5 +73,5 @@ private:
 
 extern int PLAYER_ID;
 extern int FRACTION;
-
+extern wall_time_timer rot_timer;
 #endif // GAME_H

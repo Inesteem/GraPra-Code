@@ -993,7 +993,7 @@ uniform float down;
 			out_col = vec4(col,1.);
 			
 			if(use_lighting != 0.0)
-				out_col += vec4(0.2 * col * (light_col + 0.2*color) * (n_dot_l+n_dot_l_2), 0.);
+				out_col += vec4((0.2 * col +( (light_col + 0.2*color) * (n_dot_l+n_dot_l_2)), 0.));
 		
 			if(use_alpha == 1){
 				

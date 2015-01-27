@@ -7,6 +7,7 @@
 
 int PLAYER_ID;
 int FRACTION;
+wall_time_timer rot_timer;
 
 Game::Game(ObjHandler *objhandler, simple_heightmap *sh, client_message_reader *message_reader, Menu *menu): m_objhandler(objhandler), m_sh(sh), m_messageReader(message_reader),menu(menu)
 {

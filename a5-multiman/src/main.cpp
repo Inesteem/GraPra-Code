@@ -670,7 +670,7 @@ void actual_main() {
     objhandler = new ObjHandler();
     objhandler->addObj("tree", "./render-data/models/tree.obj", find_shader("pos+norm+tc"));
     objhandler->addObj("tropical_tree", "./render-data/models/tropical_tree.obj", find_shader("pos+norm+tc"));
-    objhandler->addObj("building_lot", "./render-data/models/building_lot.obj", find_shader("pos+norm+tc"));
+    objhandler->addObj("building_lot", "./render-data/models/building_lot.obj", find_shader("alpha-color-shader"));
     objhandler->addObj("upgrade_arrow", "./render-data/models/cube.obj", find_shader("alpha-color-shader"));
     objhandler->addObj("house_pacman_lvl1", "./render-data/models/siedlung.obj", find_shader("alpha-color-shader"));
     objhandler->addObj("house_pacman_lvl2", "./render-data/models/siedlung_lvl2.obj", find_shader("alpha-color-shader"));

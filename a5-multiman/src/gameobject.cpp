@@ -444,14 +444,15 @@ void Building::upgrade(Obj *obj, int state){
 
 
 void Building::draw(){
+	
+	int loc;
+	shader_ref shader_t = find_shader("alpha-color-shader");
+	
     m_upgradeEffect->Update();
     m_upgradeEffect->Render();
 
-	static float rotation = 0;
-	rotation += 0.007;
-	if(rotation == std::numeric_limits<float>::max()-2)
-		rotation = 0;
-
+	float rotation = rot_timer.look()/1000;
+		//buildinglot
         if(state <= msg::building_state::construction_site){
 		matrix4x4f shovel_model;
 		
@@ -465,9 +466,26 @@ void Building::draw(){
 			if(i==1)
 				de->Modelmatrix(&shovel_model);
 			de->bind();
-			setup_dir_light(m_shader);
+			setup_dir_light(shader_t);
 			de->apply_default_matrix_uniforms();
 			de->apply_default_tex_uniforms_and_bind_textures();
+
+			vec3f color = get_player_color(m_owner);
+			loc = glGetUniformLocation(gl_shader_object(shader_t), "color");
+			glUniform3fv(loc, 1,(float *)&color);				
+
+			float use_alpha = -1;
+			loc = glGetUniformLocation(gl_shader_object(shader_t), "use_alpha");
+			glUniform1f(loc,use_alpha);
+
+			float lighting = 1; //use lighting 
+			loc = glGetUniformLocation(gl_shader_object(shader_t), "use_lighting");
+			glUniform1f(loc,lighting);
+
+			float depth = -1; // normal depth 
+			loc = glGetUniformLocation(gl_shader_object(shader_t), "depth");
+			glUniform1f(loc,depth);
+
 
 			de->draw_em();
 			de->unbind();
@@ -508,15 +526,15 @@ void Building::draw(){
 			drawelement *de = *it;
 			de->Modelmatrix(&arrow_model_2);
 			de->bind();
-			setup_dir_light(find_shader("alpha-color-shader"));
+			setup_dir_light(shader_t);
 			de->apply_default_matrix_uniforms();
 			
 			float lighting = 0; // don't use lighting
-			int loc = glGetUniformLocation(gl_shader_object(find_shader("alpha-color-shader")), "use_lighting");
+			int loc = glGetUniformLocation(gl_shader_object(shader_t), "use_lighting");
 			glUniform1f(loc,lighting);
 			
 			float depth = 0.21;
-			loc = glGetUniformLocation(gl_shader_object(find_shader("alpha-color-shader")), "depth");
+			loc = glGetUniformLocation(gl_shader_object(shader_t), "depth");
 			glUniform1f(loc,depth);
 			
 			de->apply_default_tex_uniforms_and_bind_textures();
