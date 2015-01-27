@@ -35,8 +35,8 @@
 
         bool hit(ivec2 hit){
             ivec2 t = imageSize(height_map);
-            float offset_y = g_height*radius/20;
-            float offset_x = g_width*radius/20;
+            float offset_y = radius*tile_size_y;
+            float offset_x = radius*tile_size_x;
 
             if(hit.x > pos.x  + offset_x ) return false;
             if(hit.x < pos.x - offset_x) return false;
