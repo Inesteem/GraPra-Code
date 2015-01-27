@@ -65,17 +65,18 @@ void initGame(unsigned int level) {
 	for(unsigned int r = 0; r < y; r++) {
 		for(unsigned int c = 0; c < x; c++) {
             vec3f color = mapData[(y - 1 - r) * x + c];
+
             if(color.x > 0.9 && color.y > 0.9 && color.z > 0.9) { // white
                 blockMap(r, c, x, y);
-            } else if(color.x > 0.9f && y > 0.9) { // yellow
+            }
+            else if(color.x > 0.9f && color.y > 0.9) { // yellow
                 msg::spawn_random_stuff srs = make_message<msg::spawn_random_stuff>();
                 srs.x = c;
                 srs.y = r;
 
                 broadcast(&srs);
-            } else if(color.x > 0.9f) { // red
-                //gameStage->m_map[r][c] = false;
-                //cout << "Building at (" << r << "," << c << ")" << endl;
+            }
+            else if(color.x > 0.9f) { // red
                 Building *b = gameStage->spawnHouse(c, r);
 
 				msg::spawn_house sh = make_message<msg::spawn_house>();
@@ -98,7 +99,8 @@ void initGame(unsigned int level) {
                 bug.buildingId = b->m_id;
                 bug.newUnitCount = b->m_unitCount;
                 broadcast(&bug);						
-            } else if(color.z > 0.9f) { // blue
+            }
+            else if(color.z > 0.9f) { // blue
                 Building *b = gameStage->spawnHouse(c, r);
 
                 msg::spawn_house sh = make_message<msg::spawn_house>();
@@ -126,7 +128,8 @@ void initGame(unsigned int level) {
                 if(b->m_player != -1) {
                     gameStage->upgrade_building_house(b->m_id);
                 }
-            } else if(color.y > 0.4f) { // green
+            }
+            else if(color.y > 0.4f) { // green
                 // block area around tree
                 blockMap(r,c-1, x, y);
                 blockMap(r,c, x, y);
