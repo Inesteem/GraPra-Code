@@ -32,6 +32,7 @@ public:
         return vec2f(m_g_width*render_settings::tile_size_x,m_g_height*render_settings::tile_size_y);
     }
 
+    void set_heights(vec2f pos, float height, float radius_in_tiles);
    // void add_units(int count, int x, int y);
 
 
@@ -58,6 +59,7 @@ private:
     texture_ref snow = find_texture("terrain_3");
     texture_ref height_map;
 	std::string filename;
+
 
 };
 
