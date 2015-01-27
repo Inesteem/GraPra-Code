@@ -416,7 +416,7 @@ int Building::get_level(){
 		return 0;
 	else if(state == msg::building_state::house_lvl2 || state == msg::building_state::turret_lvl2)	
 		return 1;
-	else if(state == msg::building_state::house_lvl3 || state == msg::building_state::turret_lvl3)	
+    else if(state == msg::building_state::house_lvl3)
 		return 2;		
 	else
 		return -1;
@@ -428,7 +428,7 @@ void Building::upgrade(Obj *obj, int state){
 	m_obj = obj;
 	this->state = state;
 	
-	if(state == msg::building_state::turret_lvl1 || state == msg::building_state::turret_lvl2 || state == msg::building_state::turret_lvl3 ){
+    if(state == msg::building_state::turret_lvl1 || state == msg::building_state::turret_lvl2){
 		settlement = false;
 		turret = true;
 	} 
@@ -612,9 +612,6 @@ bool Building::check_for_upgrade_turret(int state){
 		}		
 		
 		if(this->state == turret_lvl1 && state == turret_lvl2 && unit_count >= UpgradeToTurretLvl2)
-			return true;
-
-		if(this->state == turret_lvl2 && state == turret_lvl3 && unit_count >= UpgradeToTurretLvl3)
 			return true;
 	}	
 	
@@ -906,6 +903,7 @@ void UnitGroup::update_dest_heights(){
 
 void UnitGroup::draw(){
     if(draw_as_mesh){
+        // PACMANS
         for(int i =0; i < m_spawned; ++i){
             bind_shader(m_obj->shader);
 
@@ -948,7 +946,11 @@ void UnitGroup::draw(){
 
         }
     } else {
+    // BOMBERMANS
     for(int i = 0; i < m_spawned; ++i){
+
+        // particle effect
+        m_units[i].drawParticleEffect();
 
 		for (vector<drawelement*>::iterator it = m_obj->drawelements->begin(); it != m_obj->drawelements->end(); ++it) {
 			drawelement *de = *it;
@@ -1049,15 +1051,34 @@ Unit::Unit(vec2f pos, vec2f view_dir, vec2f pos_group, vec2f start, vec2f end, s
     m_model = m_model*rot;
     movement_timer.restart();
     move = true;
+
+    if(!is_pac) {
+        vec3f color = get_player_color(PLAYER_ID);
+        vec3f position = vec3f(pos.x, base_height, pos.y);
+        m_bombermanEffect = new BombermanEffect(position, color);
+    }
 }
 
 matrix4x4f* Unit::getModel(){
     return &m_model;
 }
 
+void Unit::drawParticleEffect()
+{
+    if(m_bombermanEffect) {
+        m_bombermanEffect->Render();
+    }
+}
+
 void Unit::update(vec2f new_pos, float height){
 
     if(move){
+
+        if(m_bombermanEffect) {
+            vec3f p = vec3f(new_pos.x * render_settings::tile_size_x, height, new_pos.y * render_settings::tile_size_y);
+            m_bombermanEffect->Update(p);
+        }
+
 //        cout << "m_pos " << m_pos.x << " " << m_pos.y << endl;
 //        cout << "m_start " << m_start.x << " " << m_start.y << endl;
 //        cout << "m_end " << m_end.x << " " << m_end.y << endl;

@@ -42,7 +42,10 @@ void initGame(string &levelName) {
         ig.mapX = x+1;
         ig.mapY = y+1;
         ig.id = i;
-        strcpy(ig.levelName, levelName.c_str());
+
+        strncpy(ig.levelName, levelName.c_str(), levelName.length());
+        ig.levelName[LVL_MAX_LENGTH-1] = '\0';
+
         send_message(i, &ig);
     }
 

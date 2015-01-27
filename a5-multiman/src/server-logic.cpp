@@ -165,6 +165,11 @@ void Building::KillUnits(unsigned int unitCount){
 
 void GameStage::addTroup(Troup *troup)
 {
+    if(troup->m_unitCount > troup->m_source->m_unitCount) {
+        // discard this troup
+        delete troup;
+        return;
+    }
     troup->m_source->KillUnits(troup->m_unitCount);
 
     m_troups[troup->m_id] = troup;
@@ -328,7 +333,13 @@ void Building::Update()
 {
     if(m_player == - 1 || m_state == msg::building_state::turret_lvl1 || m_state == msg::building_state::turret_lvl2 || m_state == msg::building_state::construction_site) return;
 
-    unsigned int upgradeRate = m_state == msg::building_state::house_lvl1 ? c_upgradeRateLvl1 : c_upgradeRateLvl2;
+    unsigned int upgradeRate = c_upgradeRateLvl1;
+    if(m_state == msg::building_state::house_lvl2) {
+        upgradeRate = c_upgradeRateLvl2;
+    } else if(m_state == msg::building_state::house_lvl3) {
+        upgradeRate = c_upgradeRateLvl3;
+    }
+
     if(m_generateUnitsTimer.look() >= wall_time_timer::msec(upgradeRate)) {
         m_generateUnitsTimer.restart();
         m_unitCount++;
@@ -348,19 +359,27 @@ void Building::IncomingTroup(Troup *troup)
     cout << "incoming troup, src player: " << src->m_player << ", dest player: " << dest->m_player << endl;
 
     if(src->m_player == dest->m_player) {
+        // own troup
         m_unitCount += troup->m_unitCount;
         msg::building_unit_generated bug = make_message<msg::building_unit_generated>();
         bug.newUnitCount = m_unitCount;
         bug.buildingId = m_id;
         broadcast(&bug);
     } else {
-        if(troup->m_unitCount <= dest->m_unitCount) {
-            m_unitCount -= troup->m_unitCount;
+        unsigned int battleValue = troup->m_unitCount;
+        if(this->m_state == msg::building_state::turret_lvl1) {
+            battleValue = troup->m_unitCount / msg::defence_value::TowerLvl1;
+        } else if(this->m_state == msg::building_state::turret_lvl2) {
+            battleValue = troup->m_unitCount / msg::defence_value::TowerLvl2;
+        }
+
+        if(battleValue <= dest->m_unitCount) {
+            m_unitCount -= battleValue;
             msg::building_unit_generated bug = make_message<msg::building_unit_generated>();
             bug.newUnitCount = m_unitCount;
             bug.buildingId = m_id;
             broadcast(&bug);
-        } else {
+        } else {           
             dest->m_state = msg::building_state::house_lvl1;
             //msg::building_upgrade bu = make_message<msg::building_upgrade>();
             //bu.buildingId = dest->m_id;
@@ -374,7 +393,14 @@ void Building::IncomingTroup(Troup *troup)
             boc.frac = player_frac[m_player];
 
             dest->m_player = src->m_player;
-            dest->m_unitCount = troup->m_unitCount - dest->m_unitCount;
+
+            unsigned int diedUnits = dest->m_unitCount;
+            if(this->m_state == msg::building_state::turret_lvl1) {
+                diedUnits = dest->m_unitCount * msg::defence_value::TowerLvl1;
+            } else if(this->m_state == msg::building_state::turret_lvl2) {
+                diedUnits = dest->m_unitCount * msg::defence_value::TowerLvl2;
+            }
+            dest->m_unitCount = troup->m_unitCount - diedUnits;
 
             boc.newUnitCount = dest->m_unitCount;
             broadcast(&boc);
