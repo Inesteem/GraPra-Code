@@ -314,6 +314,7 @@ void menu_keyhandler(unsigned char key, int state){
         }
         //join game
         if(menu->get_row() == menu->get_row_max()-1){
+			action->init_iconbar(menu->get_frac());
             if(eingabe==0){
                 eingabe = 1;
                 hostname[index_hostname] = '<';

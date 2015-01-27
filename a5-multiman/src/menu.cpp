@@ -249,7 +249,7 @@ unsigned int Menu::get_level(){
 vec3f Menu::get_player_color(){
 
 	if(COLOR == 1)
-		return vec3f(-1,-1,-1);
+		return vec3f(1,1,1);
 		
 	return player_colors[COLOR-1];
 }
@@ -402,7 +402,7 @@ IconBar::IconBar(int fraction){
 	vec3f cam_pos = {0,0,0}, cam_dir = {0,0,-1}, cam_up = {0,1,0};
 	cam = make_orthographic_cam((char*)"gui cam", &cam_pos, &cam_dir, &cam_up, fovy, 0, 50, 0, near, far);	
 	
-	player_color = get_player_color(PLAYER_ID);
+//	player_color = get_player_color(PLAYER_ID);
 	
 	background =					find_texture("interface_pm");
 	if(fraction == 2)
