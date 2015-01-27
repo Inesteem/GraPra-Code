@@ -110,6 +110,9 @@ public:
     void change_size(int size);
 	unsigned int get_owner_id();
 	unsigned int get_id();
+    vec2f get_pos(){
+        return m_pos;
+    };
 	void update_unit_count(int count);
 	int get_unit_count();
 	int get_state();

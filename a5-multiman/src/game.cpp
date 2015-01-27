@@ -138,18 +138,18 @@ void Game::upgrade_building(unsigned int buildingId, unsigned int state, FRACTIO
 			//TODO: const names
 			if(FRACTION == PAC){
 				switch(state){
-                case msg::building_state::house_lvl1 : m_buildings[i].upgrade(m_objhandler->getObjByName("house_pacman_lvl1"),state); m_buildings[i].change_size(2);  break;
-                    case msg::building_state::house_lvl2 : m_buildings[i].upgrade(m_objhandler->getObjByName("house_pacman_lvl2"),state);m_buildings[i].change_size(3);  break;
-                    case msg::building_state::house_lvl3 : m_buildings[i].upgrade(m_objhandler->getObjByName("house_pacman_lvl3"),state);m_buildings[i].change_size(4);  break;
-                    case msg::building_state::turret_lvl1 : m_buildings[i].upgrade(m_objhandler->getObjByName("turret_pacman_lvl1"),state);m_buildings[i].change_size(2);  break;
+                case msg::building_state::house_lvl1 : m_buildings[i].upgrade(m_objhandler->getObjByName("house_pacman_lvl1"),state); m_buildings[i].change_size(2); m_sh->set_heights(m_buildings[i].get_pos(),m_sh->get_height(m_buildings[i].get_pos().x,m_buildings[i].get_pos().y),2);  break;
+                    case msg::building_state::house_lvl2 : m_buildings[i].upgrade(m_objhandler->getObjByName("house_pacman_lvl2"),state);m_buildings[i].change_size(3);  m_sh->set_heights(m_buildings[i].get_pos(),m_sh->get_height(m_buildings[i].get_pos().x,m_buildings[i].get_pos().y),3); break;
+                    case msg::building_state::house_lvl3 : m_buildings[i].upgrade(m_objhandler->getObjByName("house_pacman_lvl3"),state);m_buildings[i].change_size(4); m_sh->set_heights(m_buildings[i].get_pos(),m_sh->get_height(m_buildings[i].get_pos().x,m_buildings[i].get_pos().y),4);  break;
+                    case msg::building_state::turret_lvl1 : m_buildings[i].upgrade(m_objhandler->getObjByName("turret_pacman_lvl1"),state);m_buildings[i].change_size(2); m_sh->set_heights(m_buildings[i].get_pos(),m_sh->get_height(m_buildings[i].get_pos().x,m_buildings[i].get_pos().y),2);  break;
 					default : m_buildings[i].upgrade(m_objhandler->getObjByName("building_lot"), state);
 				} 
 			} else {
 				switch(state){
-                    case msg::building_state::house_lvl1 : m_buildings[i].upgrade(m_objhandler->getObjByName("house_bbm_lvl1"),state);m_buildings[i].change_size(2);  break;
-                    case msg::building_state::house_lvl2 : m_buildings[i].upgrade(m_objhandler->getObjByName("house_bbm_lvl2"),state);m_buildings[i].change_size(3);  break;
-                    case msg::building_state::house_lvl3 : m_buildings[i].upgrade(m_objhandler->getObjByName("house_bbm_lvl3"),state); m_buildings[i].change_size(4); break;
-                    case msg::building_state::turret_lvl1 : m_buildings[i].upgrade(m_objhandler->getObjByName("turret_bbm_lvl1"),state);m_buildings[i].change_size(2);  break;
+                    case msg::building_state::house_lvl1 : m_buildings[i].upgrade(m_objhandler->getObjByName("house_bbm_lvl1"),state);m_buildings[i].change_size(2);  m_sh->set_heights(m_buildings[i].get_pos(),m_sh->get_height(m_buildings[i].get_pos().x,m_buildings[i].get_pos().y),2); break;
+                    case msg::building_state::house_lvl2 : m_buildings[i].upgrade(m_objhandler->getObjByName("house_bbm_lvl2"),state);m_buildings[i].change_size(3);  m_sh->set_heights(m_buildings[i].get_pos(),m_sh->get_height(m_buildings[i].get_pos().x,m_buildings[i].get_pos().y),3); break;
+                    case msg::building_state::house_lvl3 : m_buildings[i].upgrade(m_objhandler->getObjByName("house_bbm_lvl3"),state); m_buildings[i].change_size(4);  m_sh->set_heights(m_buildings[i].get_pos(),m_sh->get_height(m_buildings[i].get_pos().x,m_buildings[i].get_pos().y),4);break;
+                    case msg::building_state::turret_lvl1 : m_buildings[i].upgrade(m_objhandler->getObjByName("turret_bbm_lvl1"),state);m_buildings[i].change_size(2);  m_sh->set_heights(m_buildings[i].get_pos(),m_sh->get_height(m_buildings[i].get_pos().x,m_buildings[i].get_pos().y),2); break;
 					default : m_buildings[i].upgrade(m_objhandler->getObjByName("building_lot"), state);
 				} 					
 			}
