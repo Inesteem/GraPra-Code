@@ -59,6 +59,7 @@ class Label {
         vec3f 		texture_color = {1.f, 1.f, 1.f};
 		vec3f 		color = {1.f, 1.f, 1.f};
 		vec3f 		pos;
+		vec3f 		original_pos = {-1,-1,-1};
 		bool		use_cam;
 
 		vec2f BillboardSize;
@@ -88,6 +89,7 @@ class Label {
 		void set_texture(const char *name);
 		void set_color(vec3f color);
 		void set_model(matrix4x4f model);
+		void recalculate_pos();
 		
 		void setup_display();
 		void change_mesh();

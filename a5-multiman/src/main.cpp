@@ -157,6 +157,12 @@ void mouse(int button, int state, int x, int y) {
 
 }
 
+void reset_labels(){
+	for(int i = 0; i < labels.size();i++){
+		labels[i]->recalculate_pos();
+	}
+	
+}
 
 void standard_keyboard(unsigned char key, int x, int y)
 {
@@ -231,6 +237,7 @@ void standard_keyboard(unsigned char key, int x, int y)
     }
     make_lookat_matrixf(lookat_matrix, &cam_pos, &cam_dir, &cam_up);
     recompute_gl_matrices_of_cam(current_camera());
+    reset_labels();
 }
 
 static int eingabe= 0;

@@ -1,12 +1,13 @@
-#define update_1 10
-#define update_2 20
-
 #include "game.h"
 #include "gameobject.h"
 
 #include "label.h"
 #include "limits"
 #include <cmath>
+
+
+std::vector<Label*> labels;
+
 //wrapper for objloader
 Obj::Obj(string name, int id, string filename, shader_ref shader):id(id),name(name),shader(shader){
     ObjLoader loader(name.c_str(), filename.c_str());
@@ -363,7 +364,8 @@ Building::Building(Obj *obj,Obj *selection_circle,Obj *upgrade_arrow, string nam
     label->update_label_pos(2*x, 2*y, height+2);
     vec3f color = get_player_color(m_owner);
     label->set_color(color);
-    
+    label->recalculate_pos();
+    labels.push_back(label);
     state = msg::building_state::construction_site;
 
     vec3f effectPos = vec3f(m_pos.x*render_settings::tile_size_x, m_center.y + m_height, m_pos.y*render_settings::tile_size_y);

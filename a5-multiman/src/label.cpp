@@ -299,7 +299,9 @@ void Label::update_label_model(matrix4x4f model){
 	this-> model = model;
 }
 void Label::update_label_pos(float x, float y, float z){
-	pos = vec3f(x,z, y);
+	if(original_pos.x == -1)
+		original_pos = vec3f(x,z,y);
+	pos = vec3f(x,z,y);
 	make_unit_matrix4x4f(&model);	
 	model.row_col(0,3) = x;
 	model.row_col(2,3) = y;
@@ -319,6 +321,19 @@ void Label::update_label_pos(float x, float y, float z){
 	make_rotation_matrix4x4f(&rot, &axis,angle);
 //	multiply_matrices4x4f(&model,&model,&rot);
 }
+
+void Label::recalculate_pos(){
+
+	vec3f cam_pos, dir, new_pos;
+	extract_pos_vec3f_of_matrix(&cam_pos, lookat_matrix_of_cam(current_camera()));
+	dir = cam_pos - original_pos;
+	normalize_vec3f(&dir);
+	new_pos = cam_pos - (dir*10);
+	update_label_pos(new_pos.x,new_pos.z,new_pos.y);
+};
+
+
+
 
 	/*SlideBar*/
 

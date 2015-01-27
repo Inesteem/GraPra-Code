@@ -242,5 +242,6 @@ private:
 
 
 
+extern std::vector<Label*> labels;
 
 #endif // GAMEOBJECT_H
