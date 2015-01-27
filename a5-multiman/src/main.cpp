@@ -265,10 +265,11 @@ void menu_keyhandler(unsigned char key, int state){
 			action->init_iconbar(menu->get_frac());
             pid_t pID = fork();
 
+            unsigned int level = menu->get_level();
             int numplayers = menu->get_num_players();
             std::string s = std::to_string(numplayers);
+            std::string l = std::to_string(level);
 
-            const char *level = menu->get_level();
 
             if (pID == 0) {// child
 
@@ -284,7 +285,7 @@ void menu_keyhandler(unsigned char key, int state){
                 str += " $*; echo '-- '; echo 'press return to close this terminal'; read";
 
                 //execl("/usr/bin/xterm","/usr/bin/xterm", "-geometry", "200x100+0+900", "-e", str.c_str(), NULL);
-                execl(str_2.c_str(),str_2.c_str(), s.c_str(), level, NULL);
+                execl(str_2.c_str(),str_2.c_str(), s.c_str(), l.c_str(), NULL);
 
             }
             else if (pID < 0){// failed to fork

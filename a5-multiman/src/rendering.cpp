@@ -26,7 +26,6 @@ vec3f get_player_color(int id){
     return vec3f(0.2,0.2,0.2);
 }
 
-
 void set_player_color(int id, vec3f color){
 	using namespace render_settings;
 	for(int i = 0; i < player_colors.size(); i++){

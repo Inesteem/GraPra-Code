@@ -1,4 +1,4 @@
-#ifndef __WALL_TIMER_H__ 
+#ifndef __WALL_TIMER_H__
 #define __WALL_TIMER_H__ 
 
 #include <sys/time.h>
@@ -23,4 +23,3 @@ struct wall_time_timer {
 };
 
 #endif
-

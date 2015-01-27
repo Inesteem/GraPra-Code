@@ -152,6 +152,8 @@ public:
     void update(vec2f new_pos,float height);
         vec2f m_pos_group;
           bool move = false;
+
+          void drawParticleEffect();
 private:
     wall_time_timer movement_timer;
     wall_time_timer wobble_timer;
@@ -171,6 +173,7 @@ private:
 
     matrix4x4f m_model;
 
+    BombermanEffect *m_bombermanEffect = 0;
 };
 
 

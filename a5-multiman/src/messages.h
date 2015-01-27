@@ -25,17 +25,28 @@ namespace msg {
             house_lvl3 = 2,
             turret_lvl1 = 3,
             turret_lvl2 = 4,         
-            turret_lvl3 = 5         
         };
+    }
+
+    namespace defence_value
+    {
+        const unsigned int House = 1;
+        const unsigned int TowerLvl1 = 2;
+        const unsigned int TowerLvl2 = 3;
+    }
+
+    namespace unit_generation_time { // in msec
+        const static unsigned int UpgradeRateLvl1 = 2000;
+        const static unsigned int UpgradeRateLvl2 = 1000;
+        const static unsigned int UpgradeRateLvl3 = 500;
     }
 
     namespace upgrade_cost {
         const unsigned int UpgradeToHouseLvl1 = 10;
-        const unsigned int UpgradeToHouseLvl2 = 30;
-        const unsigned int UpgradeToHouseLvl3 = 100;
+        const unsigned int UpgradeToHouseLvl2 = 20;
+        const unsigned int UpgradeToHouseLvl3 = 40;
         const unsigned int UpgradeToTurretLvl1 = 20;
         const unsigned int UpgradeToTurretLvl2 = 50;
-        const unsigned int UpgradeToTurretLvl3 = 150;
         const unsigned int RebuildingToHouseLvl1 = 30;
         const unsigned int RebuildingToTurretLvl1 = 50;
     }
@@ -72,8 +83,8 @@ namespace msg {
         uint16_t mapX;
         uint16_t mapY;
         int8_t id;
-        char levelName[LVL_MAX_LENGTH];
-	} __attribute__((aligned(8)));
+        uint8_t level;
+    } __attribute__((aligned(8)));
 
 	struct spawn_house : public message {
         spawn_house() : message(code::spawn_house) {}
