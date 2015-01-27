@@ -29,9 +29,13 @@ void blockMap(int r, int c, int maxX, int maxY) {
     gameStage->m_map[r][c] = false;
 }
 
-void initGame(string &levelName) {
+void initGame(unsigned int level) {
 	unsigned int x, y;
-    string levelPath = "./render-data/images/" + levelName + ".png";
+
+    std::stringstream ss;
+    ss << "./render-data/images/lvl" << level << ".png";
+    string levelPath = ss.str();
+
     vec3f *mapData = load_image3f(levelPath.c_str(), &x, &y);
 
     gameStage->m_mapX = x;
@@ -42,9 +46,7 @@ void initGame(string &levelName) {
         ig.mapX = x+1;
         ig.mapY = y+1;
         ig.id = i;
-
-        strncpy(ig.levelName, levelName.c_str(), levelName.length());
-        ig.levelName[LVL_MAX_LENGTH-1] = '\0';
+        ig.level = level;
 
         send_message(i, &ig);
     }
@@ -63,7 +65,9 @@ void initGame(string &levelName) {
 	for(unsigned int r = 0; r < y; r++) {
 		for(unsigned int c = 0; c < x; c++) {
             vec3f color = mapData[(y - 1 - r) * x + c];
-			if(color.x > 0.9f) {
+            if(color.x > 0.9 && color.y > 0.9 && color.z > 0.9) { // white
+                blockMap(r, c, x, y);
+            } else if(color.x > 0.9f) { // red
                 //gameStage->m_map[r][c] = false;
                 //cout << "Building at (" << r << "," << c << ")" << endl;
                 Building *b = gameStage->spawnHouse(c, r);
@@ -78,6 +82,29 @@ void initGame(string &levelName) {
 				msg::building_owner_changed nho = make_message<msg::building_owner_changed>();
 				nho.buildingId = b->m_id;
 				nho.oldOwner = -1;
+                nho.newUnitCount = 10;
+                nho.newOwner = -1;
+                b->m_player = -1;
+                broadcast(&nho);
+
+                b->m_unitCount = 10;
+                msg::building_unit_generated bug = make_message<msg::building_unit_generated>();
+                bug.buildingId = b->m_id;
+                bug.newUnitCount = b->m_unitCount;
+                broadcast(&bug);						
+            } else if(color.z > 0.9f) { // blue
+                Building *b = gameStage->spawnHouse(c, r);
+
+                msg::spawn_house sh = make_message<msg::spawn_house>();
+                sh.x = c;
+                sh.y = r;
+                sh.id = b->m_id;
+                sh.unitCount = 20;
+                broadcast(&sh);
+
+                msg::building_owner_changed nho = make_message<msg::building_owner_changed>();
+                nho.buildingId = b->m_id;
+                nho.oldOwner = -1;
                 nho.newUnitCount = 20;
                 nho.newOwner = (buildingPlayerIndex < client_connections::sockets) ? buildingPlayerIndex : -1;
                 b->m_player = (buildingPlayerIndex < client_connections::sockets) ? buildingPlayerIndex : -1;
@@ -93,8 +120,7 @@ void initGame(string &levelName) {
                 if(b->m_player != -1) {
                     gameStage->upgrade_building_house(b->m_id);
                 }
-							
-			} else if(color.y > 0.4f) {
+            } else if(color.y > 0.4f) { // green
                 // block area around tree
                 blockMap(r,c-1, x, y);
                 blockMap(r,c, x, y);
@@ -160,14 +186,14 @@ int main(int argc, char **argv)
         exit(0);
     }
 
-    string levelName = string(argv[2]);
-    if(levelName.length() > LVL_MAX_LENGTH) {
-        cout << "Invalid level name, must be shorter than" << LVL_MAX_LENGTH << " characters." << endl;
+    int levelNumber = atoi(argv[2]);
+    if(levelNumber < -1) {
+        cout << "Invalid level number" << endl;
         exit(0);
     }
 
     cout << "Number of players: " << numPlayers << endl;
-    cout << "Level: " << levelName << endl;
+    cout << "Level: " << levelNumber << endl;
 	
     client_connections::sockets = numPlayers;
 	client_connections::socket = new tcp::socket*[client_connections::sockets];
@@ -190,7 +216,7 @@ int main(int argc, char **argv)
             // TODO send message to single client with player id
 		}
 
-        initGame(levelName);
+        initGame(levelNumber);
 
 		bool game_over = false;
 

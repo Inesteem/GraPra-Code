@@ -502,7 +502,7 @@ PathNode Path::GetHighestPriorityOpenNode()
     return ret;
 }
 
-void Path::RetracePath(PathNode startPosition, PathNode current)
+void Path::RetracePath(PathNode startPosition, PathNode current, PathNode endPosition)
 {
     m_nodes.clear();
 
@@ -519,6 +519,9 @@ void Path::RetracePath(PathNode startPosition, PathNode current)
         m_nodes.insert(m_nodes.begin(), current);
 
     } while(1);
+
+    m_nodes.erase(--m_nodes.end());
+    m_nodes.push_back(endPosition);
 }
 
 void Path::ExpandNode(PathNode current, PathNode endPosition)
@@ -626,7 +629,7 @@ void Path::FindPathAStar(PathNode startPosition, PathNode endPosition)
         if(current.mapX == endPosition.mapX && current.mapY == endPosition.mapY) {
             // found path
             cout << "Found path!" << endl;
-            RetracePath(startPosition, current);
+            RetracePath(startPosition, current, endPosition);
             return;
         }
 

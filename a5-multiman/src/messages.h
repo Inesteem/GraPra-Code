@@ -83,7 +83,7 @@ namespace msg {
         uint16_t mapX;
         uint16_t mapY;
         int8_t id;
-        char levelName[LVL_MAX_LENGTH];
+        uint8_t level;
     } __attribute__((aligned(8)));
 
 	struct spawn_house : public message {

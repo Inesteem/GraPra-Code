@@ -241,8 +241,8 @@ void Menu::set_hostname(char * hostName){
 int Menu::get_num_players(){
 	return NUM_PLAYERS;
 }
-const char *Menu::get_level(){
-	return level_names[(int)LEVEL-1];
+unsigned int Menu::get_level(){
+    return LEVEL;
 }
 
 

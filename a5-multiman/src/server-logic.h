@@ -39,7 +39,7 @@ class Path
     PathNode GetHighestPriorityOpenNode();
     bool OpenNodesExists();
     void ExpandNode(PathNode current, PathNode endPosition);
-    void RetracePath(PathNode startPosition, PathNode current);
+    void RetracePath(PathNode startPosition, PathNode current, PathNode endPosition);
 
     void FindDirectPath(PathNode &source, PathNode &destination);
     void FindPathAStar(PathNode startPosition, PathNode endPosition);
