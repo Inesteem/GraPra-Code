@@ -103,6 +103,8 @@ void Game::init(string filename, int widht, int height, int id){
         
     
     m_sh->init(filename, widht, height);
+
+    m_snow = new SnowEffect(vec3f(widht * render_settings::tile_size_x / 2.0 ,10 , height * render_settings::tile_size_y / 2.0), 100);
 }
 
 ObjHandler* Game::get_objhandler(){
@@ -199,6 +201,7 @@ void Game::set_fraction(unsigned int frac){
 void Game::draw(){
 	m_sh->draw();
 
+    m_snow->Render();
 
     for(int i = 0; i < m_trees.size(); ++i){
         m_trees[i].draw();
@@ -219,6 +222,7 @@ void Game::draw(){
 }
 
 void Game::update(){
+    m_snow->Update();
     for(int i = 0; i < m_unitgroups.size(); ++i){
         m_unitgroups[i].update();
    }

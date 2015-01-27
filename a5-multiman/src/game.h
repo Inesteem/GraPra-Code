@@ -68,6 +68,7 @@ private:
    vector<Building> m_buildings;
    vector<UnitGroup> m_unitgroups;
    
+   SnowEffect *m_snow;
    
 };
 

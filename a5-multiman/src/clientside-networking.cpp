@@ -146,3 +146,8 @@ void client_message_reader::handle_message(msg::game_over *m) {
     game->game_over(m->winner);
     m_init_done = false;
 }
+
+void client_message_reader::handle_message(msg::spawn_random_stuff *m) {
+    // TODO spawn random stuff
+}
+

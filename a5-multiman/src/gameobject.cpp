@@ -487,9 +487,11 @@ void Building::draw(){
 		GameObject::draw();
 	}
 	
-	label->update_gui_texture_int(unit_count);
-	label->render_gui_overlay();
-	
+        if(this->m_owner == PLAYER_ID || this->m_owner == -1) {
+            label->update_gui_texture_int(unit_count);
+            label->render_gui_overlay();
+        }
+
 	//check for upgrade
 	bool upgradeable = check_for_upgrade_settlement(state+1);
 	if(turret)
