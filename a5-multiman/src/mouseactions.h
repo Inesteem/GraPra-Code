@@ -68,6 +68,7 @@ namespace moac {
 		void check_button_clicked(int x, int y, int state);
 		void update_iconbar();
         void reset( );
+        void init_iconbar(int fraction);
 	
 	};	
 	

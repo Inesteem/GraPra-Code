@@ -104,8 +104,8 @@ public:
     float dist_to(vec3f &pos);
     void draw();
     void draw_selection_circle();
-    void draw_state_house_1();
-    void draw_state_turret_1();
+    void draw_pm_house();
+    void draw_bbm_house();
     void draw_selection_circle(int size);
     void change_size(int size);
 	unsigned int get_owner_id();

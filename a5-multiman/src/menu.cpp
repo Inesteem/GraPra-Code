@@ -396,14 +396,17 @@ MenuEntry *EntryManager::previous_entry(){
 
 
 
-IconBar::IconBar(){
+IconBar::IconBar(int fraction){
+	this->fraction = fraction;
 	
 	vec3f cam_pos = {0,0,0}, cam_dir = {0,0,-1}, cam_up = {0,1,0};
 	cam = make_orthographic_cam((char*)"gui cam", &cam_pos, &cam_dir, &cam_up, fovy, 0, 50, 0, near, far);	
 	
 	player_color = get_player_color(PLAYER_ID);
 	
-	background = 					find_texture("iconbar");
+	background =					find_texture("interface_pm");
+	if(fraction == 2)
+		background =				find_texture("interface_bbm");
 	picture[0] =					find_texture("terrain_hm");
 	picture[1] =					find_texture("dorf");
 	
@@ -434,8 +437,8 @@ IconBar::IconBar(){
 	label_2->set_size(vec2f(4,2));
 	label_1->set_color(vec3f(0.678, 0.956, 0.928));	
 	label_2->set_color(vec3f(0.678, 0.956, 0.928));	
-	label_1->update_label_pos(buttons[3].model.row_col(0,3) + 10.5*offset_button_y, -1000, buttons[3].model.row_col(1,3)+2.4*offset_button_y);
-	label_2->update_label_pos(buttons[4].model.row_col(0,3) + 10.5*offset_button_y, -1000, buttons[4].model.row_col(1,3)+2.4*offset_button_y);
+	label_1->update_label_pos(buttons[2].model.row_col(0,3) + 10.5*offset_button_y, -1000, buttons[2].model.row_col(1,3)+2.4*offset_button_y);
+	label_2->update_label_pos(buttons[3].model.row_col(0,3) + 10.5*offset_button_y, -1000, buttons[3].model.row_col(1,3)+2.4*offset_button_y);
 }
 
 
@@ -456,7 +459,8 @@ void IconBar::draw(){
 	glUniformMatrix4fv(loc, 1, GL_FALSE, model_background.col_major);
 
 	glEnable(GL_BLEND);
-	glBlendFunc(GL_ONE, GL_ONE);
+//	glBlendFunc(GL_SRC_ALPHA,GL_DST_ALPHA);
+	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 	glDepthMask(GL_TRUE);
 
 
@@ -476,7 +480,7 @@ void IconBar::draw(){
 
 
 	bind_mesh_to_gl(mesh);
-//	draw_mesh(mesh);
+	draw_mesh(mesh);
 	
 	unbind_texture(background);
 	
@@ -486,19 +490,6 @@ void IconBar::draw(){
 	loc = glGetUniformLocation(gl_shader_object(shader), "depth");
 	glUniform1f(loc,depth_button);	
 
-	//fraction
-	
-	loc = glGetUniformLocation(gl_shader_object(shader), "model");
-	glUniformMatrix4fv(loc, 1, GL_FALSE, buttons[0].model.col_major);	
-	
-	bind_texture(buttons[0].textures[buttons[0].state], 0);
-	loc = glGetUniformLocation(gl_shader_object(shader), "tex");
-	glUniform1i(loc, 0);
-
-	draw_mesh(mesh);
-
-	unbind_texture(buttons[0].textures[buttons[0].state]);
-
 	glDisable(GL_BLEND);
 
 	color = vec3f(-1,-1,-1);
@@ -506,7 +497,6 @@ void IconBar::draw(){
 	glUniform3fv(loc, 1,(float *)&color);	
 	
 	if(building_selected){
-//		draw_picture();	
 		draw_buttons_2();
 		label_1->render_gui_overlay();
 		label_2->render_gui_overlay();
@@ -519,8 +509,8 @@ void IconBar::draw(){
 	unbind_shader(shader);
 
 	
-	if(building_selected)
-		draw_building();
+	//if(building_selected)
+	//	draw_building();
 		
 	use_camera(old_cam);	
 	
@@ -615,6 +605,19 @@ void IconBar::draw_buttons_2(){
 	glUniform3fv(loc, 1,(float *)&color);			
 	
 	loc = glGetUniformLocation(gl_shader_object(shader), "model");
+	glUniformMatrix4fv(loc, 1, GL_FALSE, buttons[2].model.col_major);	
+	
+	bind_texture(buttons[2].textures[buttons[2].state], 0);
+	loc = glGetUniformLocation(gl_shader_object(shader), "tex");
+	glUniform1i(loc, 0);
+
+	draw_mesh(mesh);
+
+	unbind_texture(buttons[2].textures[buttons[2].state]);
+	
+	//defence/production
+	
+	loc = glGetUniformLocation(gl_shader_object(shader), "model");
 	glUniformMatrix4fv(loc, 1, GL_FALSE, buttons[3].model.col_major);	
 	
 	bind_texture(buttons[3].textures[buttons[3].state], 0);
@@ -625,28 +628,15 @@ void IconBar::draw_buttons_2(){
 
 	unbind_texture(buttons[3].textures[buttons[3].state]);
 	
-	//defence/production
-	
-	loc = glGetUniformLocation(gl_shader_object(shader), "model");
-	glUniformMatrix4fv(loc, 1, GL_FALSE, buttons[4].model.col_major);	
-	
-	bind_texture(buttons[4].textures[buttons[4].state], 0);
-	loc = glGetUniformLocation(gl_shader_object(shader), "tex");
-	glUniform1i(loc, 0);
-
-	draw_mesh(mesh);
-
-	unbind_texture(buttons[4].textures[buttons[4].state]);
-	
 	//settlement_button
 
 	loc = glGetUniformLocation(gl_shader_object(shader), "depth");
 	glUniform1f(loc,depth_button_s);	
 
 	loc = glGetUniformLocation(gl_shader_object(shader), "model");
-	glUniformMatrix4fv(loc, 1, GL_FALSE, buttons[1].model.col_major);	
+	glUniformMatrix4fv(loc, 1, GL_FALSE, buttons[0].model.col_major);	
 
-	bind_texture(buttons[1].textures[buttons[1].state], 0);	
+	bind_texture(buttons[0].textures[buttons[0].state], 0);	
 
 	loc = glGetUniformLocation(gl_shader_object(shader), "tex");	
 	glUniform1i(loc, 0);	
@@ -655,7 +645,7 @@ void IconBar::draw_buttons_2(){
 	
 	draw_mesh(mesh);	
 	
-	unbind_texture(buttons[1].textures[buttons[1].state]);
+	unbind_texture(buttons[0].textures[buttons[0].state]);
 	
 	//turret_button	
 
@@ -663,10 +653,10 @@ void IconBar::draw_buttons_2(){
 	glUniform1f(loc,depth_button_t);	
 		
 	loc = glGetUniformLocation(gl_shader_object(shader), "model");
-	glUniformMatrix4fv(loc, 1, GL_FALSE, buttons[2].model.col_major);	
+	glUniformMatrix4fv(loc, 1, GL_FALSE, buttons[1].model.col_major);	
 
 
-	bind_texture(buttons[2].textures[buttons[2].state], 0);
+	bind_texture(buttons[1].textures[buttons[1].state], 0);
 	
 	loc = glGetUniformLocation(gl_shader_object(shader), "tex");
 	glUniform1i(loc, 0);
@@ -674,7 +664,7 @@ void IconBar::draw_buttons_2(){
 	
 	draw_mesh(mesh);	
 	
-	unbind_texture(buttons[2].textures[buttons[2].state]);	
+	unbind_texture(buttons[1].textures[buttons[1].state]);	
 		
 	
 }
@@ -740,89 +730,59 @@ void IconBar::draw_buttons(){
 		
 }
 
-void IconBar::draw_picture(){
-
-	loc = glGetUniformLocation(gl_shader_object(shader), "model");
-	glUniformMatrix4fv(loc, 1, GL_FALSE, model_picture.col_major);	
-
-	bind_texture(picture[pic], 0);
-	loc = glGetUniformLocation(gl_shader_object(shader), "tex");	
-	glUniform1i(loc, 0);	
-	
-	draw_mesh(mesh);	
-	
-	unbind_texture(picture[pic]);
-}
-
 void IconBar::init_modelmatrices(){
 	
 	//BACKGROUND
 	make_unit_matrix4x4f(&model_background);
 	model_background.row_col(0,0) = fovy;
-	model_background.row_col(1,1) = 0.18 * fovy;
+	model_background.row_col(1,1) = fovy;
 	model_background.row_col(0,3) = 0.f;
 	model_background.row_col(1,3) = 0.f;
-	
-		
-	//PICTURE
-	make_unit_matrix4x4f(&model_picture);
-	model_picture.row_col(1,1) = 0.12 * fovy;
-	model_picture.row_col(0,0) = 0.12 * fovy;
-	model_picture.row_col(0,3) = 0.85 * fovy;
-	model_picture.row_col(1,3) = 0.02 * fovy;
 	
 		
 }
 
 void IconBar::init_buttons(){
-	int tex_count[5] = 					{2,5,5,2,4};
-	int offsets[5] = 					{2,1,2,2,2};
-	const char *texture_names[18] = { 	"pacman", "terrain_hm",
-										"u_b_s2","u_b_s3","nu_b_s2", "nu_b_s3", "terrain_hm",
+	int tex_count[4] = 					{5,5,2,4};
+	int offsets[4] = 					{1,2,2,2};
+	const char *texture_names[16] = { 	"u_b_s2","u_b_s3","nu_b_s2", "nu_b_s3", "terrain_hm",
 										"u_b_t1","u_b_t2","nu_b_t1", "nu_b_t2", "terrain_hm",
-										"pacman_units","terrain_hm",
-										"pacman_unit_production","pacman_defence","terrain_hm","terrain_hm"};
+										"pacman_units","bbm_units",
+										"pacman_unit_production","pacman_defence","bbm_unit_production","bbm_defence"};
 	vec3f black = 						{0.1,0.1,0.1};					
-	vec3f none = 						{-1,-1,-1};					
-	vec3f colors[5] = 					{black,none,none,none,none};
-	bool u_a[5] = 						{true,false,false,false,false};
-	bool clickable[5] = 				{false,true,true,false,false};
-	float depth[5] = 					{depth_button,depth_button_s,depth_button_t,depth_button,depth_button};
-	float depth_acc[5] = 				{depth_button,depth_acc_button_s,depth_acc_button_t,depth_button,depth_button};
+	vec3f none = 						{-1,-1,-1};				
+	bool u_a[4] = 						{false,false,false,false};
+	bool clickable[5] = 				{true,true,false,false};
+	float depth[4] = 					{depth_button_s,depth_button_t,depth_button,depth_button};
+	float depth_acc[4] = 				{depth_acc_button_s,depth_acc_button_t,depth_button,depth_button};
 	
 	
 	float x_offset = offset_button_y;
 	matrix4x4f model;
 	int j = 0;
 	
-	for(int i = 0; i < 5; i++){
+	for(int i = 0; i < 4; i++){
 		
 		make_unit_matrix4x4f(&model);
 		model.row_col(1,1) = scale_button_y;
 		model.row_col(1,3) = offset_button_y;
 		model.row_col(0,3) = x_offset;
-		
-		//FRACTION_BUTTON
-		if(i == 0){
-			model.row_col(0,0) = 0.05 * fovy;
-		}
-		
-		//CLICK_BUTTONS
-		else {
-			model.row_col(0,0) = 0.12 * fovy;	
-		}
-			
+
+		model.row_col(0,0) = 0.12 * fovy;	
 		
 		x_offset += model.row_col(0,0) + offsets[i]*offset_button_y;	
 		
-		buttons.push_back(Button(model,depth[i],depth_acc[i], colors[i], u_a[i],clickable[i]));
+		buttons.push_back(Button(model,depth[i],depth_acc[i], none, u_a[i],clickable[i]));
 		int j_max = j+tex_count[i]; 
 		for(;j < j_max; j++){
 			buttons[i].add_texture(texture_names[j]);
 			cout << i << " : " << texture_names[j] << endl;
 		}
 	}
-
+	if(fraction == 1)
+		buttons[2].state = 0;
+	else 
+		buttons[2].state = 1;
 }
 
 
@@ -872,11 +832,11 @@ int IconBar::scale_button(int b, bool smaller){
 	float scale = 0.008 * fovy * i;
 	float offset = -0.5*scale;
 
-	if( buttons[index].clickable && buttons[index].state <= 1){
-		buttons[index].model.row_col(0,0) += scale;
-		buttons[index].model.row_col(1,1) += scale;
-		buttons[index].model.row_col(0,3) += offset;
-		buttons[index].model.row_col(1,3) += offset;
+	if( buttons[index-1].clickable && buttons[index-1].state <= 1){
+		buttons[index-1].model.row_col(0,0) += scale;
+		buttons[index-1].model.row_col(1,1) += scale;
+		buttons[index-1].model.row_col(0,3) += offset;
+		buttons[index-1].model.row_col(1,3) += offset;
 
 		if(b != button_pressed && !smaller){
 			button_pressed = -1;
@@ -917,18 +877,21 @@ void IconBar::update(){
 			s_level		 	= level;
 	
 			if(s_upgradeable)
-				buttons[1].state = level;
+				buttons[0].state = level;
 			else 
-				buttons[1].state = 2 + level; 		
+				buttons[0].state = 2 + level; 		
 			
 			t_level 		= 0;
 			t_upgradeable 	= building->check_for_upgrade_turret(turret_lvl1);
 			if(t_upgradeable)
-				buttons[2].state = 0;
+				buttons[1].state = 0;
 			else 
-				buttons[2].state = 2; 
+				buttons[1].state = 2; 
 				
-			buttons[4].state = 0;
+			if(fraction == 1)
+				buttons[3].state = 0;
+			else
+				buttons[3].state = 2;
 			l_2 << building->get_unit_production();
 			label_2->update_gui_texture_string(&l_2);
 		} 
@@ -938,19 +901,22 @@ void IconBar::update(){
 			t_level 		= level;
 			
 			if(t_upgradeable)
-				buttons[2].state = level+1;
+				buttons[1].state = level+1;
 			else 
-				buttons[2].state = 2 + level + 1; 			
+				buttons[1].state = 2 + level + 1; 			
 			
 			s_level 		= 0;
 			s_upgradeable 	= building->check_for_upgrade_settlement(house_lvl1);
 
 			if(s_upgradeable)
-				buttons[1].state = 0;
+				buttons[0].state = 0;
 			else 
-				buttons[1].state = 2; 		
+				buttons[0].state = 2; 		
 
-			buttons[4].state = 1;
+			if(fraction == 1)
+				buttons[3].state = 1;
+			else 
+				buttons[3].state = 3;
 			l_2 << building->get_defence_value();
 			label_2->update_gui_texture_string(&l_2);
 
