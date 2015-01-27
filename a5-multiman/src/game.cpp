@@ -20,7 +20,7 @@ void Game::set_action(moac::Action *action){
 
 void Game::add_building(string name, int size, int x, int y, unsigned int id){
     m_buildings.push_back(Building(m_objhandler->getObjByName(name), m_objhandler->getObjByName("selection_circle"),m_objhandler->getObjByName("upgrade_arrow"), name,x,y, -1 ,size, m_sh->get_height(x,y), id));
-		
+    m_sh->set_heights(vec2f(x,y),m_sh->get_height(x,y),size);
 	planes.push_back(vec3f(x,-1,y));		
 		
 	

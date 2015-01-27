@@ -1109,7 +1109,7 @@ void Unit::update(vec2f new_pos, float height){
     if(is_pac){
         m_model.col_major[3 * 4 + 1] = m_base_height + m_sh->get_height(m_pos.x,m_pos.y);
     } else{
-        float x = wobble_timer.look()/500 + rand_start;
+        float x = wobble_timer.look()/100 + rand_start;
         m_model.col_major[3 * 4 + 1] = m_base_height + m_sh->get_height(m_pos.x,m_pos.y) + 0.6 + 0.6*sin(x)*cos(x);
     }
     m_model.col_major[3 * 4 + 2] = m_pos.y * render_settings::tile_size_y;

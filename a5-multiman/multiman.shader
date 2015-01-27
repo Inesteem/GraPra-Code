@@ -20,6 +20,28 @@
 }
 #:inputs (list "in_pos")>
 
+#<make-shader "compute-shader"
+#:compute-shader #{
+#version 430 core
+        layout (local_size_x = 16, local_size_y = 16) in;
+        uniform float height;
+        uniform float radius;
+        uniform float tile_size_x;
+        uniform float tile_size_y;
+        uniform float g_height;
+        uniform float g_width;
+        uniform vec2 pos;
+        uniform layout(rgba32f) image2D height_map;
+
+        void main() {
+            ivec2 storePos = ivec2(gl_GlobalInvocationID.yx);
+            if(pos.x + 200 > storePos.x || pos.x - 200 < storePos.x || pos.y + 200 > storePos.y || pos.y - 200 < storePos.y){
+                imageStore(height_map, storePos, vec4(height, height, height, 1));
+            }
+        }
+}
+
+#:inputs (list "")>
 
 
 #<make-shader "pos+norm"
