@@ -67,6 +67,12 @@ void initGame(unsigned int level) {
             vec3f color = mapData[(y - 1 - r) * x + c];
             if(color.x > 0.9 && color.y > 0.9 && color.z > 0.9) { // white
                 blockMap(r, c, x, y);
+            } else if(color.x > 0.9f && y > 0.9) { // yellow
+                msg::spawn_random_stuff srs = make_message<msg::spawn_random_stuff>();
+                srs.x = c;
+                srs.y = r;
+
+                broadcast(&srs);
             } else if(color.x > 0.9f) { // red
                 //gameStage->m_map[r][c] = false;
                 //cout << "Building at (" << r << "," << c << ")" << endl;
@@ -142,7 +148,7 @@ void initGame(unsigned int level) {
 					st.type = 0;
 					
                 broadcast(&st);
-			} 
+            }
 		}
     }
 
