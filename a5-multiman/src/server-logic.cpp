@@ -21,10 +21,10 @@ void GameStage::init(unsigned int x, unsigned int y)
     m_mapY = y;
 }
 
-bool GameStage::playerColorAvailable(unsigned int id) {
+bool GameStage::playerColorAvailable(unsigned int colorId) {
     for(auto& p : m_players) {
         Player player = p;
-        if(player.m_id == id) return false;
+        if(player.m_colorId == colorId) return false;
     }
 
     return true;
@@ -42,7 +42,7 @@ void GameStage::handleClientSettings(unsigned int playerId, unsigned int colorId
         }
     }
 
-    Player player(actualColorId, frac, colorId);
+    Player player(playerId, frac, actualColorId);
     m_players.push_back(player);
     msg::new_player np = make_message<msg::new_player>();
     np.playerId = playerId;

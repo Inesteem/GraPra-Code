@@ -105,8 +105,12 @@ void Game::init(string filename, int widht, int height, int id){
 }
 
 vec3f Game::get_player_color(int playerId){
+    if(playerId == -1) {
+        return vec3f(0.2,0.2,0.2);
+    }
+
     try {
-        return player_colors.at(m_player_colors[playerId]);
+        return player_colors.at(m_color_id_for_player[playerId]);
     } catch (...){
 
     }

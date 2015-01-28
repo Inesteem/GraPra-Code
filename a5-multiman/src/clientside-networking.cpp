@@ -93,7 +93,8 @@ void client_message_reader::handle_message(msg::spawn_house *m)
 
 void client_message_reader::handle_message(msg::new_player *m)
 {
-    game->m_player_colors[m->playerId] = m->colorId;
+    cout << "COLORID: " << (unsigned int) m->colorId << ", player: " << m->playerId;
+    game->m_color_id_for_player[m->playerId] = m->colorId;
 }
 
 void client_message_reader::handle_message(msg::spawn_tree *m)
