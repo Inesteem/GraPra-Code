@@ -229,6 +229,7 @@ class IconBar{
 	
 	int loc = -1;
 	int button_pressed = -1;
+	bool open_menu = false;
 	
 	//0 = Pacman, 1 = Bomberman
 	unsigned int frac = 0;	
@@ -256,7 +257,7 @@ class IconBar{
 	float scale_button_y = 0.05 * fovy;			
 	
 	texture_ref background;
-	texture_ref picture[2];
+	texture_ref background_menu;
 	
 
 	matrix4x4f  model_background;
@@ -281,6 +282,7 @@ public:
 	int scale_button(int b, bool smaller);
 	void update();
 	void selected_building(Building *building);
+	void clicked_menu();
 	
 	
 };

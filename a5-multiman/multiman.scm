@@ -50,7 +50,9 @@
 
 (texture-from-file "pacman" "pacman.png" 'tex2d #t)
 (texture-from-file "interface_bbm" "Menu/InterfaceBomberman.png" 'tex2d #t)
+(texture-from-file "interface_bbm_menu" "Menu/InterfaceBomberman_menu.png" 'tex2d #t)
 (texture-from-file "interface_pm" "Menu/InterfacePacman.png" 'tex2d #t)
+(texture-from-file "interface_pm_menu" "Menu/InterfacePacman_menu.png" 'tex2d #t)
 (texture-from-file "nu_b_s2" "Menu/noupgrade_button_settlement2.png" 'tex2d #t)
 (texture-from-file "nu_b_s3" "Menu/noupgrade_button_settlement3.png" 'tex2d #t)
 (texture-from-file "nu_b_sm" "Menu/upgrade_button_settlement_max.png" 'tex2d #t)
