@@ -42,7 +42,7 @@ void simple_heightmap::init( const std::string filename, int width, int height){
 //    }
     for(int i = 0; i <= m_g_height; ++i){
         for(int j = 0; j <= m_g_width; ++j){
-            pos[i + j * (m_g_height+1)] = vec3f((float)j/(float)m_g_width,0,(float)i/(float)m_g_height);
+            pos[i + j * (m_g_height+1)] = vec3f((float)j/(float)m_g_width,get_height(i,j),(float)i/(float)m_g_height);
 //            pos[i + j *m_g_height].y =  m_heights[i*(m_width/m_g_width)  + j*(m_height/m_g_height) *m_g_height].x ;
 
 //            m_heights[i + j *m_height] = colors[i + j *m_height].x * render_settings::height_factor;
@@ -164,11 +164,11 @@ void simple_heightmap::set_heights(vec2f pos, float height, float radius_in_tile
     loc =glGetUniformLocation(gl_shader_object(shader), "tile_size_y");
     glUniform1f(loc,render_settings::tile_size_y);
     loc =glGetUniformLocation(gl_shader_object(shader), "pos");
-    glUniform2i(loc,npos.x,npos.y);
+    glUniform2f(loc,new_x,new_y);
     loc =glGetUniformLocation(gl_shader_object(shader), "g_height");
-    glUniform1f(loc,m_g_height);
+    glUniform1f(loc,m_height/m_g_height);
     loc =glGetUniformLocation(gl_shader_object(shader), "g_width");
-    glUniform1f(loc,m_g_width);
+    glUniform1f(loc,m_width/m_g_width);
 
     bind_texture_as_image(height_map,0,1, GL_READ_WRITE,GL_RGBA8);
     loc = glGetUniformLocation(gl_shader_object(shader), "height_map");

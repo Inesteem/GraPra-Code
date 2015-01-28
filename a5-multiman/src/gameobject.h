@@ -216,7 +216,7 @@ private:
     unsigned int m_rows = 0;
     vector<unsigned int> m_row_size;
     bool m_reached = false;
-    bool move = false;
+    bool move = true;
     simple_heightmap *m_sh;
     wall_time_timer m_timer;
     wall_time_timer m_another_timer;

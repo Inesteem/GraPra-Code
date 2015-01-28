@@ -64,6 +64,8 @@ void initGame(unsigned int level) {
 
 	for(unsigned int r = 0; r < y; r++) {
 		for(unsigned int c = 0; c < x; c++) {
+		
+			
             vec3f color = mapData[(y - 1 - r) * x + c];
 
             if(color.x > 0.9 && color.y > 0.9 && color.z > 0.9) { // white
@@ -90,6 +92,7 @@ void initGame(unsigned int level) {
 				nho.oldOwner = -1;
                 nho.newUnitCount = 10;
                 nho.newOwner = -1;
+                nho.frac = 0;
                 b->m_player = -1;
                 broadcast(&nho);
 
@@ -112,6 +115,7 @@ void initGame(unsigned int level) {
                 msg::building_owner_changed nho = make_message<msg::building_owner_changed>();
                 nho.buildingId = b->m_id;
                 nho.oldOwner = -1;
+                nho.frac = 0;
                 nho.newUnitCount = 20;
                 nho.newOwner = (buildingPlayerIndex < client_connections::sockets) ? buildingPlayerIndex : -1;
                 b->m_player = (buildingPlayerIndex < client_connections::sockets) ? buildingPlayerIndex : -1;
