@@ -338,7 +338,7 @@ void Building::Update()
         upgradeRate = msg::unit_generation_time::UpgradeRateLvl3;
     }
 
-    if(m_generateUnitsTimer.look() >= wall_time_timer::msec(upgradeRate)) {
+    if(m_generateUnitsTimer.look() >= wall_time_timer::msec(upgradeRate) && m_unitCount < 500) {
         m_generateUnitsTimer.restart();
         m_unitCount++;
 

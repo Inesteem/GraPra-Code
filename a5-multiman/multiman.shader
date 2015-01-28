@@ -985,7 +985,7 @@ uniform float down;
 		}
 		vec3 col = texture(diffuse_tex, tc.st).rgb;
 		
-		if(col.x >= 0.9 && col.y <= 0.1 && col.z >= 0.9){
+		if(col.x >= 0.8 && col.y <= 0.2 && col.z >= 0.8){
 			discard;
 		}
 	
@@ -1071,19 +1071,25 @@ uniform float down;
 	uniform float depth;
 	void main() {
 		gl_FragDepth = depth;
-		if(color.x == -1)
+        vec4 tex_col = vec4(texture(tex,tc).x,texture(tex,tc).y,texture(tex,tc).z,1);
+        
+
+		if(	tex_col.x >= (color.x-0.3) && tex_col.x <= (color.x+0.3) &&
+			tex_col.y >= (color.y-0.3) && tex_col.y <= (color.y+0.3) &&
+			tex_col.z >= (color.z-0.3) && tex_col.z <= (color.z+0.3))
+				discard;        
+        
+		else if(color.x == -1)
 			out_col = vec4(texture(tex, tc).rgb, 1);
 		
-		else{
-            vec4 tex_col = vec4(texture(tex,tc).x,texture(tex,tc).y,texture(tex,tc).z,1);
-			if(	tex_col.x >= (color.x-0.3) && tex_col.x <= (color.x+0.3) &&
-				tex_col.y >= (color.y-0.3) && tex_col.y <= (color.y+0.3) &&
-				tex_col.z >= (color.z-0.3) && tex_col.z <= (color.z+0.3)){
-					discard;
-			} else
-				out_col = tex_col * vec4(p_color.x,p_color.y, p_color.z,0.8);
-		}
+		else if(!(tex_col.x >= (tex_col.y-0.05) && tex_col.x <= (tex_col.y+0.05) && 
+					  tex_col.y >= (tex_col.z-0.05) && tex_col.y <= (tex_col.z+0.05)))
+			out_col = vec4(texture(tex, tc).rgb, 1);
 		
+		else
+			out_col = tex_col * vec4(p_color.x,p_color.y, p_color.z,0.8);
+		
+	
 	}
 }
 #:inputs (list "in_pos" "in_tc")>
@@ -1125,7 +1131,7 @@ uniform float down;
 
                        void main(){
 
-                               gl_FragDepth = 0.01;
+                               gl_FragDepth = 0.00001;
 
                                if(texture(tex, tc).r >= 0.5 || texture(tex, tc).g >= 0.5 || texture(tex, tc).b >= 0.5)
                                        out_col = vec4(color.r,color.g,color.b, 1.);
@@ -1180,3 +1186,60 @@ uniform float down;
 	}
 }
 #:inputs (list "in_pos" "in_norm" "in_tc")>
+
+#<make-shader "plant-shader"
+#:vertex-shader #{
+#version 150 core
+	in vec3 in_pos;
+	in vec3 in_norm;
+	in vec2 in_tc;
+	uniform mat4 proj;
+	uniform mat4 view;
+	uniform mat4 model;
+	uniform mat4 model_normal;
+	out vec4 pos_wc;
+	out vec3 norm_wc;
+	out vec2 tc;
+	void main() {
+		pos_wc = model * vec4(in_pos, 1.0);
+		norm_wc = (model_normal * vec4(in_norm,0)).xyz;
+		tc = in_tc;
+		gl_Position = proj * view * pos_wc;
+	}
+}
+#:fragment-shader #{
+#version 150 core
+	out vec4 out_col;
+	uniform sampler2D diffuse_tex;
+	uniform vec3 light_dir;
+	uniform vec3 light_col;
+	uniform vec3 eye_pos;
+	uniform vec3 color;
+	in vec4 pos_wc;
+	in vec3 norm_wc;
+	in vec2 tc;
+	void main() {
+		
+		vec3 sun_dir = vec3(0,-1,0);
+		vec3 col = texture(diffuse_tex, tc.st).rgb;
+		
+		if(col.x <= 0.2 && col.y <= 0.2 && col.z <= 0.2){
+			discard;
+		}			
+
+		out_col = vec4(col,1.);
+
+		float n_dot_l = max(0, dot(norm_wc, -light_dir));
+		float n_dot_l_2 = max(0, dot(norm_wc, -sun_dir));
+		
+		out_col += vec4(0.2 *col * light_col * (n_dot_l+n_dot_l_2), 0.);		
+
+
+		
+
+	
+		
+	} 
+}
+#:inputs (list "in_pos" "in_norm" "in_tc")>
+

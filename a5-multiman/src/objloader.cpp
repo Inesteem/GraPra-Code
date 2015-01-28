@@ -9,7 +9,7 @@
 using namespace std;
 
 ObjLoader::ObjLoader(const std::string &objname, const std::string &filename) {
-	cout << "loading " << filename << endl;
+//	cout << "loading " << filename << endl;
 	load_objfile(objname.c_str(), filename.c_str(), &objdata, false, false, 0);	// XXX
 	default_shader = make_invalid_shader();
 	pos_and_norm_shader = make_invalid_shader();
@@ -20,7 +20,7 @@ ObjLoader::ObjLoader(const std::string &objname, const std::string &filename) {
 void ObjLoader::GenerateMeshesAndDrawelements(std::vector<drawelement*> &drawelements) {
 	// todo: vertex-buffer sharing
 	for (int i = 0; i < objdata.number_of_groups; ++i) {
-		cout << "group " << i << endl;
+//		cout << "group " << i << endl;
 		obj_group *group = objdata.groups + i;
 		
 		mesh_ref m = make_mesh(group->name, group->t_ids ? 3 : 2);
@@ -59,7 +59,7 @@ void ObjLoader::GenerateMeshesAndDrawelements(std::vector<drawelement*> &drawele
 		else if (valid_shader_ref(default_shader))
 			shader = default_shader;
 
-		cout << de->Name() << ", shader " << shader.id << endl;
+//		cout << de->Name() << ", shader " << shader.id << endl;
 		de->use_shader(shader);
 		de->add_mesh(m);
 		drawelements.push_back(de);
@@ -141,7 +141,7 @@ void ObjLoader::GenerateNonsharingMeshesAndDrawElements(std::vector<drawelement*
 				 << "valid defs: " << valid_shader_ref(default_shader) << endl;
 		}
 		
-		cout << de->Name() << ", shader " << de->Shader().id << " (" << shader_name(de->Shader()) << ")" << endl;
+//		cout << de->Name() << ", shader " << de->Shader().id << " (" << shader_name(de->Shader()) << ")" << endl;
 
 		de->add_mesh(m);
 		drawelements.push_back(de);
@@ -207,7 +207,7 @@ void ObjLoader::TranslateTo(vec3f &pos) {
 
 PlyLoader::PlyLoader(const std::string &objname, const std::string &filename)
 {
-	cout << "loading " << filename << endl;
+//	cout << "loading " << filename << endl;
 	name = objname;
 	load_ply_file(filename.c_str(), &ply);
 	default_shader = make_invalid_shader();
@@ -246,11 +246,11 @@ void PlyLoader::GenerateMeshAndDrawelement(std::vector<drawelement*> &drawelemen
 		if (has_colors)
 			m->add_vertex_data("in_col", vertices, color_data);
 		for (int i = 0; i < 3; ++i)
-			cout << normal_data[i].x << "\t" << normal_data[i].y << "\t" << normal_data[i].z << endl;
-		cout << endl;
+//			cout << normal_data[i].x << "\t" << normal_data[i].y << "\t" << normal_data[i].z << endl;
+//		cout << endl;
 		for (int i = 0; i < 3; ++i)
-			cout << color_data[i].x << "\t" << color_data[i].y << "\t" << color_data[i].z << endl;
-		cout << endl;
+//			cout << color_data[i].x << "\t" << color_data[i].y << "\t" << color_data[i].z << endl;
+//		cout << endl;
 // 			const int tris = vertices;
 		const int tris = ply.face_verts.size();
 		unsigned int *idx = new unsigned int[tris];
@@ -263,7 +263,7 @@ void PlyLoader::GenerateMeshAndDrawelement(std::vector<drawelement*> &drawelemen
 
 		drawelement *de = new drawelement(name + string("-de"));
 		shader *shader;
-		cout << "N: " << has_normals << ", C: " << has_colors << endl;
+//		cout << "N: " << has_normals << ", C: " << has_colors << endl;
 		if (has_normals && !has_colors)
 			shader = new shader(pos_and_norm_shader);
 		else if (has_colors && !has_normals)
@@ -274,7 +274,7 @@ void PlyLoader::GenerateMeshAndDrawelement(std::vector<drawelement*> &drawelemen
 			shader = new shader(default_shader);
 					
 
-		cout << de->Name() << ", shader " << shader->cgl_ref().id << endl;
+//		cout << de->Name() << ", shader " << shader->cgl_ref().id << endl;
 		de->use_shader(shader_ptr(shader));
 		de->add_mesh(m);
 		drawelements.push_back(de);

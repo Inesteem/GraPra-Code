@@ -5,6 +5,7 @@
 #include "gameobject.h"
 #include "wall-timer.h"
 #include "menu.h"
+#include <cstdlib>
 
 
 
@@ -25,6 +26,7 @@ public:
     void add_tree(int x, int y, int type);
     void add_building(string name, int size, int x, int y, unsigned int id);
     void add_unit_group(unsigned int sourceId, unsigned int destinationId, unsigned int count, unsigned int troupId, FRACTIONS frac, int owner);
+    void add_stuff(unsigned int x, unsigned int y);
 
     void change_building_owner(int building_id, int new_owner, FRACTIONS frac);
     void update_unit_group(unsigned int x, unsigned int y, unsigned int troupId, unsigned int time);
@@ -67,6 +69,7 @@ private:
    vector<Tree> m_trees;
    vector<Building> m_buildings;
    vector<UnitGroup> m_unitgroups;
+   vector<RandomStuff> stuff;
    
    SnowEffect *m_snow;
    
