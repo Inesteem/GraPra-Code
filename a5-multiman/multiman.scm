@@ -70,6 +70,13 @@
 (texture-from-file "bbm_units" "Menu/bbm_units.png" 'tex2d #t)
 (texture-from-file "bbm_unit_production" "Menu/bbm_production.png" 'tex2d #t)
 (texture-from-file "menu" "Menu/menu_button.png" 'tex2d #t)
+(texture-from-file "main" "Menu/main.png" 'tex2d #t)
+(texture-from-file "exit" "Menu/exit.png" 'tex2d #t)
+(texture-from-file "pause" "Menu/pause.png" 'tex2d #t)
+(texture-from-file "resume" "Menu/resume.png" 'tex2d #t)
+(texture-from-file "exit_game" "Menu/exit_game.png" 'tex2d #t)
+(texture-from-file "yes" "Menu/yes.png" 'tex2d #t)
+(texture-from-file "no" "Menu/no.png" 'tex2d #t)
 
 (texture-from-file "test" "explosions-04.png" 'tex2d #t)
 

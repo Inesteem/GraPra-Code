@@ -459,7 +459,6 @@ void IconBar::draw(){
 	glUniformMatrix4fv(loc, 1, GL_FALSE, model_background.col_major);
 
 	glEnable(GL_BLEND);
-//	glBlendFunc(GL_SRC_ALPHA,GL_DST_ALPHA);
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 	glDepthMask(GL_TRUE);
 
@@ -624,6 +623,121 @@ void IconBar::draw_buttons_2(){
 	
 	unbind_texture(buttons[4].textures[buttons[4].state]);	
 	
+	if(open_menu){
+		//main_button
+		loc = glGetUniformLocation(gl_shader_object(shader), "depth");
+		glUniform1f(loc,depth_button_t);	
+
+		loc = glGetUniformLocation(gl_shader_object(shader), "model");
+		glUniformMatrix4fv(loc, 1, GL_FALSE, buttons[5].model.col_major);	
+
+		bind_texture(buttons[5].textures[buttons[5].state], 0);	
+
+		loc = glGetUniformLocation(gl_shader_object(shader), "tex");	
+		glUniform1i(loc, 0);	
+	
+		draw_mesh(mesh);	
+	
+		unbind_texture(buttons[5].textures[buttons[5].state]);		
+		
+		//pause/resume_button
+		loc = glGetUniformLocation(gl_shader_object(shader), "depth");
+		glUniform1f(loc,depth_button_s);	
+
+		loc = glGetUniformLocation(gl_shader_object(shader), "model");
+		glUniformMatrix4fv(loc, 1, GL_FALSE, buttons[6].model.col_major);	
+
+		bind_texture(buttons[6].textures[buttons[6].state], 0);	
+
+		loc = glGetUniformLocation(gl_shader_object(shader), "tex");	
+		glUniform1i(loc, 0);	
+	
+		draw_mesh(mesh);	
+	
+		unbind_texture(buttons[7].textures[buttons[7].state]);		
+		//exit_button
+		loc = glGetUniformLocation(gl_shader_object(shader), "depth");
+		glUniform1f(loc,depth_button_t);	
+
+		loc = glGetUniformLocation(gl_shader_object(shader), "model");
+		glUniformMatrix4fv(loc, 1, GL_FALSE, buttons[7].model.col_major);	
+
+		bind_texture(buttons[7].textures[buttons[7].state], 0);	
+
+		loc = glGetUniformLocation(gl_shader_object(shader), "tex");	
+		glUniform1i(loc, 0);	
+	
+		draw_mesh(mesh);	
+	
+		unbind_texture(buttons[7].textures[buttons[7].state]);		
+		
+	}
+	if(exit_game) {
+		
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+		
+			//game_exit_button
+		loc = glGetUniformLocation(gl_shader_object(shader), "depth");
+		glUniform1f(loc,depth_button);	
+
+		loc = glGetUniformLocation(gl_shader_object(shader), "model");
+		glUniformMatrix4fv(loc, 1, GL_FALSE, buttons[8].model.col_major);	
+
+		bind_texture(buttons[8].textures[buttons[8].state], 0);	
+
+		loc = glGetUniformLocation(gl_shader_object(shader), "tex");	
+		glUniform1i(loc, 0);	
+		
+		vec3f color = vec3f(0.8,0.2,0.8);
+		loc = glGetUniformLocation(gl_shader_object(shader), "color");
+		glUniform3fv(loc, 1,(float *)&color);			
+	
+		draw_mesh(mesh);	
+	
+		unbind_texture(buttons[8].textures[buttons[8].state]);
+		
+		glDisable(GL_BLEND);	
+		
+		//yes_button
+		loc = glGetUniformLocation(gl_shader_object(shader), "depth");
+		glUniform1f(loc,depth_button_s);	
+
+		loc = glGetUniformLocation(gl_shader_object(shader), "model");
+		glUniformMatrix4fv(loc, 1, GL_FALSE, buttons[9].model.col_major);	
+
+		bind_texture(buttons[9].textures[buttons[9].state], 0);	
+		
+
+		color = vec3f(-1,-1,-1);
+		loc = glGetUniformLocation(gl_shader_object(shader), "color");
+		glUniform3fv(loc, 1,(float *)&color);			
+
+		loc = glGetUniformLocation(gl_shader_object(shader), "tex");	
+		glUniform1i(loc, 0);	
+	
+		draw_mesh(mesh);	
+	
+		unbind_texture(buttons[9].textures[buttons[9].state]);	
+		
+		//no_button
+		loc = glGetUniformLocation(gl_shader_object(shader), "depth");
+		glUniform1f(loc,depth_button_t);	
+
+		loc = glGetUniformLocation(gl_shader_object(shader), "model");
+		glUniformMatrix4fv(loc, 1, GL_FALSE, buttons[10].model.col_major);	
+
+		bind_texture(buttons[10].textures[buttons[10].state], 0);	
+
+		loc = glGetUniformLocation(gl_shader_object(shader), "tex");	
+		glUniform1i(loc, 0);	
+	
+		draw_mesh(mesh);	
+	
+		unbind_texture(buttons[10].textures[buttons[10].state]);	
+	
+	}
+	
 	if(!building_selected) return;
 
 	//unit_count
@@ -769,40 +883,81 @@ void IconBar::init_modelmatrices(){
 }
 
 void IconBar::init_buttons(){
-	int tex_count[5] = 					{5,5,2,4,1};
-	int offsets[5] = 					{1,2,2,2};
-	const char *texture_names[17] = { 	"u_b_s2","u_b_s3","nu_b_s2", "nu_b_s3", "nu_b_sm",
+	const int button_num = 11;
+	
+	int tex_count[button_num] = 		{5,5,2,4,1,1,2,1,1,1,1};
+	int offsets[button_num] = 			{1,2,2,2,0,0,0,0,0,0,0};
+	const char *texture_names[24] = { 	"u_b_s2","u_b_s3","nu_b_s2", "nu_b_s3", "nu_b_sm",
 										"u_b_t1","u_b_t2","nu_b_t1", "nu_b_t2", "nu_b_tm",
 										"pacman_units","bbm_units",
 										"pacman_unit_production","pacman_defence","bbm_unit_production","bbm_defence",
-										"menu"};
+										"menu",
+										"main",
+										"pause", "resume",
+										"exit",
+										"exit_game",
+										"yes",
+										"no"};
 	vec3f black = 						{0.1,0.1,0.1};					
 	vec3f none = 						{-1,-1,-1};				
-	bool clickable[5] = 				{true,true,false,false, true};
-	float depth[5] = 					{depth_button_s,depth_button_t,depth_button,depth_button,depth_button_s};
-	float depth_acc[5] = 				{depth_acc_button_s,depth_acc_button_t,depth_button,depth_button,depth_acc_button_s};
+	bool clickable[button_num] = 		{true,true,false,false, true, true, true,true,false,true,true};
+	float depth[button_num] = 			{depth_button_s,depth_button_t,depth_button,depth_button,depth_button_s,depth_button_t,depth_button_s,depth_button_t,depth_button,depth_button_s,depth_button_t};
+	float depth_acc[button_num] = 		{depth_acc_button_s,depth_acc_button_t,depth_button,depth_button,depth_acc_button_s,depth_acc_button_t,depth_acc_button_s,depth_acc_button_t,depth_button,depth_acc_button_s,depth_acc_button_t};
 	
 
 	float x_offset = 1.5*offset_button_y;
+	float y_offset = 1.5*offset_button_y;
 	
 	matrix4x4f model;
 	int j = 0;
 	
-	for(int i = 0; i < 5; i++){
+	for(int i = 0; i < button_num; i++){
 		
 		make_unit_matrix4x4f(&model);
-		model.row_col(0,0) = 0.12 * fovy;	
-		model.row_col(1,1) = scale_button_y;
-		model.row_col(1,3) = offset_button_y;
-		model.row_col(0,3) = x_offset;
-		x_offset += model.row_col(0,0) + offsets[i]*offset_button_y;	
-	
+		if( i < 8){
+			model.row_col(0,0) = 0.12 * fovy;	
+			model.row_col(1,1) = scale_button_y;
+			model.row_col(1,3) = offset_button_y;
+			model.row_col(0,3) = x_offset;
+			x_offset += model.row_col(0,0) + offsets[i]*offset_button_y;	
+		}
+
 		if(i == 4){
 			model.row_col(0,0) = 0.09 * fovy;
 			model.row_col(1,1) = 0.04 * fovy;
 			model.row_col(0,3) = 3.9*offset_button_y;
 			model.row_col(1,3) = fovy - 0.85 * scale_button_y;
+			y_offset = model.row_col(1,3) - 0.85 * scale_button_y - offset_button_y;
 		}
+		
+		else if(i >= 8){
+			
+			model.row_col(0,0) = 0.9 * fovy;	
+			model.row_col(1,1) = 0.4 * fovy;
+			model.row_col(1,3) = y_offset;
+			model.row_col(0,3) = x_offset;
+			x_offset = model.row_col(0,3) + 2*x_offset;
+			if(i == 8){
+				model.row_col(0,0) = 0.4 * fovy;	
+				model.row_col(1,1) = 0.4 * fovy;
+				model.row_col(1,3) = 0.5 * fovy - (model.row_col(1,1))/2;
+				model.row_col(0,3) = 0.5 * fovy + (model.row_col(0,0))/2;
+				y_offset = model.row_col(1,3) - scale_button_y - offset_button_y;
+				x_offset = model.row_col(0,3) + x_offset;
+			}
+			
+		}
+		
+		else if(i >= 5){
+			
+			model.row_col(0,0) = 0.09 * fovy;
+			model.row_col(1,1) = 0.04 * fovy;
+			model.row_col(0,3) = 3.9*offset_button_y;
+			model.row_col(1,3) = y_offset;	
+		
+			y_offset = model.row_col(1,3) - 0.85 * scale_button_y - offset_button_y;	
+		}
+		
 		
 		buttons.push_back(Button(model,depth[i],depth_acc[i], none, false,clickable[i]));
 		int j_max = j+tex_count[i]; 
@@ -818,6 +973,7 @@ void IconBar::init_buttons(){
 		buttons[2].state = 0;
 	else 
 		buttons[2].state = 1;
+	buttons[8].use_alpha = true;
 }
 
 
@@ -836,9 +992,13 @@ int IconBar::click(int x, int y, vec3f (*ptr)(int x, int y)){
 
 	if(-rel_depth >= (depth_button_s - depth_acc_button_s) && -rel_depth <= (depth_button_s + depth_acc_button_s)){
 		
-		if(rel_y > 0.5){
+		if(rel_y > 0.9){
 			cout << "click_menu : " << rel_y << " : " << pos.y << endl;
 			return 4;
+		}
+		else if(rel_y > 0.8){
+			cout << "click_pause : " << rel_y << " : " << pos.y << endl;
+			return 6;
 		}
 		else {
 			cout << "click_settlement" << endl;
@@ -847,8 +1007,18 @@ int IconBar::click(int x, int y, vec3f (*ptr)(int x, int y)){
 	}
 	else if(-rel_depth >= (depth_button_t - depth_acc_button_t) && -rel_depth <= (depth_button_t + depth_acc_button_t)){	
 
-		cout << "click_turret" << endl;
-		return 1;
+		if(rel_y > 0.88){
+			cout << "click_main : " << rel_y << " : " << pos.y << endl;
+			return 5;
+		}
+		else if(rel_y > 0.5){
+			cout << "click_exit : " << rel_y << " : " << pos.y << endl;
+			return 7;
+		}
+		else {
+			cout << "click_turret" << endl;
+			return 1;
+		}
 	}
 
 	return -1;
@@ -856,8 +1026,28 @@ int IconBar::click(int x, int y, vec3f (*ptr)(int x, int y)){
 	
 }
 
-void IconBar::clicked_menu(){
-	open_menu = !open_menu;
+void IconBar::clicked_menu(int button){
+	
+	switch(button){
+		
+		case 4 : open_menu = !open_menu; break;
+		
+		case 6 : if(buttons[6].state == 1) {buttons[6].state = 0;}
+				 else buttons[6].state = 1; 
+				 break;
+		
+		case 7 : exit_game = true;
+				 open_menu = false;
+				 cout << "here" << endl;
+				 break;
+				 
+		case 9 : exit_game = false;
+				 break;
+				 
+		case 10 : exit(0); 
+
+		default : break;
+	}
 }
 
 int IconBar::scale_button(int b, bool smaller){

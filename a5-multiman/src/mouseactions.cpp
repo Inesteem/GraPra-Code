@@ -221,8 +221,17 @@ namespace moac {
 			case 1 : upgrade_turret();
 					break;
 			
-			case 4: iconbar->clicked_menu();
-					break;//todo render menu
+			case 4:  call_menu(button_pressed);
+					break;
+			
+			case 5: 
+					break;//todo render main menu
+
+			case 6:  call_menu(button_pressed);
+					break;//todo pause
+					
+			case 7: call_menu(button_pressed);
+					break;//todo pause
 			
 			default : return -1;
 		}
@@ -236,6 +245,10 @@ namespace moac {
 
 	void Action::update_iconbar(){
 		iconbar->update();	
+	}
+	void Action::call_menu(int button){
+		 iconbar->clicked_menu(button);	
+		 cout << button << endl;
 	}
 
 }

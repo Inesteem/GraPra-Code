@@ -230,6 +230,7 @@ class IconBar{
 	int loc = -1;
 	int button_pressed = -1;
 	bool open_menu = false;
+	bool exit_game = false;
 	
 	//0 = Pacman, 1 = Bomberman
 	unsigned int frac = 0;	
@@ -282,7 +283,7 @@ public:
 	int scale_button(int b, bool smaller);
 	void update();
 	void selected_building(Building *building);
-	void clicked_menu();
+	void clicked_menu(int button);
 	
 	
 };

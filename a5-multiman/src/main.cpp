@@ -498,6 +498,7 @@ void keyhandler(unsigned char key, int x, int y) {
     else if (key == 'p') game->get_planes();
     else if (key == 'r' || key == 'f'){//skip zoom with keyboard//
     }
+    else if (key ==  27){}
 
     
     else {
