@@ -164,10 +164,8 @@ void Game::add_stuff(unsigned int x, unsigned int y){
 
 
 void Game::upgrade_building(unsigned int buildingId, unsigned int state, FRACTIONS frac){
-			cout << "UPGRADEBUILDING " << buildingId <<  " of " << m_buildings.size() << "buildings" << endl;
     for(int i = 0; i < m_buildings.size(); i++){
 		if(m_buildings[i].get_id() == buildingId){
-			cout << "try to upgrade building " << buildingId << endl;
 			//TODO: const names
 			if(frac == PAC){
                 switch(state){

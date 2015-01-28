@@ -59,6 +59,7 @@ void simple_loop();
 
 //important game logic bools
 bool standard_mouse = false;
+bool init_menu = false;
 bool wireframe = false;
 bool screenshot = false;
 bool render_menu = true;
@@ -216,7 +217,7 @@ void mouse(int button, int state, int x, int y) {
 
     }
 
-    if(render_menu){
+    if(render_menu || !messageReader->m_init_done){
         return;
     }
 
@@ -347,17 +348,18 @@ void reset_hostname(){
 }
 
 void menu_keyhandler(unsigned char key, int state){
+	msg::client_left cl = make_message<msg::client_left>();
     switch(key){
 
     //Backspace
     case 8 :  if(eingabe == 1){
-            hostname[index_hostname+1] = '\0';
-            hostname[index_hostname] = '<';
+            hostname[index_hostname] = '\0';
             if(index_hostname > 0)
                 index_hostname--;
-        }
-        menu->set_hostname(hostname);
-        break;
+			}
+            hostname[index_hostname] = '<';
+			menu->set_hostname(hostname);
+			break;
 
         //Enter
         //host game
@@ -434,7 +436,10 @@ void menu_keyhandler(unsigned char key, int state){
 
         break;
         //esc
-    case 27 : exit(0); break;
+    case 27 : 	
+				cl.playerId = PLAYER_ID;
+				game->m_messageReader->send_message(cl);
+				exit(0); break;
 
     default : if(eingabe == 1 && index_hostname < max_length){
             hostname[index_hostname] = key;
@@ -481,6 +486,8 @@ void keyhandler(unsigned char key, int x, int y) {
         return;
 
     }
+	if(!messageReader->m_init_done) return;
+
 
     if (key == 'W')      wireframe = !wireframe;
     else if (key == 'R') reload_pending = true;
@@ -714,17 +721,40 @@ void load_configfile(const char *);
 
 
 void reset(){
-	
-    render_menu = true;
+	init_menu = false;
+
     register_display_function(simple_loop);
-    register_idle_function(simple_loop);		
-	
+    register_idle_function(simple_loop);
+
+	delete menu;	
+    menu = new Menu();
+    render_menu = true;
+    
+		
+	menu->reset_menu();
+	menu->init(game, &render_menu);
+    menu->set_mode(menu->GAMESTART);
+    
+    for(int i = 0; i < labels.size();i++){
+		delete labels[i];
+	}
+	labels.clear();
+    
     delete sh;
     delete game;
-    
+	delete messageReader;
+
     sh = new simple_heightmap();
     game = new Game(objhandler,sh, messageReader,menu);
+    messageReader = new client_message_reader(game);
     game->set_action(action);
+    
+    messageReader = new client_message_reader(game);
+    action = new Action(game, objhandler,&reset);
+    game->set_action(action);
+    	
+    init_menu = true;
+    
 }
 
 void simple_loop(){
@@ -778,7 +808,7 @@ void simple_loop(){
 			}
 		
 		
-		} else
+		} else if(init_menu)
 			menu->draw(false);
 		
 
@@ -841,18 +871,15 @@ void actual_main() {
     init_framebuffer();
     sh = new simple_heightmap();
 
-    bool initMenu = false;
-    if(menu == nullptr){
-        initMenu = true;
-        menu   = new Menu();
-    }
+
+    menu = new Menu();
 
     game = new Game(objhandler,sh, messageReader,menu);
 
-    if(initMenu) {
-        menu->init(game, &render_menu);
-        menu->set_mode(menu->GAMESTART);
-    }
+
+    menu->init(game, &render_menu);
+    menu->set_mode(menu->GAMESTART);
+	init_menu = true;
 
     messageReader = new client_message_reader(game);
     action = new Action(game, objhandler,&reset);

@@ -15,6 +15,11 @@
 #include <GL/freeglut.h>
 
 
+Menu::~Menu(){
+	for(int i = 0; i < labels.size(); i++)
+		delete labels[i];
+}
+
 void Menu::init(Game *game, bool *render_menu){
     m_game = game;
 
@@ -25,6 +30,8 @@ void Menu::init(Game *game, bool *render_menu){
 	float fovy = 50;
 	gamecam = make_orthographic_cam((char*)"gui cam", &cam_pos, &cam_dir, &cam_up, fovy, 0, 50, 0, 0.01, 1000);
 	
+	
+
 
 	gamemesh = make_mesh("quad", 2);
 	vec3f pos[4] = { {0,0,-10}, {1,0,-10}, {1,1,-10}, {0,1,-10} };
@@ -209,7 +216,7 @@ void Menu::update_label(bool choosen){
 				
  			s << color_names[nums[row]-1];	
 			if(nums[row] != 1)
-                labels[row]->set_color(m_game->player_colors[nums[row]-1]);
+                labels[row]->set_color(player_colors[nums[row]-1]);
 	
 		} else if(row == FRAKTION_ID) {
 			
