@@ -31,6 +31,7 @@ protected:
     virtual void handle_message(msg::building_upgrade *m);
     virtual void handle_message(msg::game_over *m);
     virtual void handle_message(msg::spawn_random_stuff *m);
+    virtual void handle_message(msg::new_player *m);
 };
 
 

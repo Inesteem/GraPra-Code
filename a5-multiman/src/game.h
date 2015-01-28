@@ -59,7 +59,12 @@ public:
     vec3f player_color;
     vector<vec3f> planes;
     Menu *menu; 
-    moac::Action *action;                      
+    moac::Action *action;
+
+    vector<vec3f> player_colors = { vec3f(1,0,0),vec3f(1,1,0),vec3f(1,0,1),vec3f(0,1,1),vec3f(0,0,1),
+                                    vec3f(0,1,0),vec3f(1,0.5,1),vec3f(0.5,1,1),vec3f(1,1,0.5),vec3f(0.7,0.7,0.7) };
+    unsigned int m_player_colors[10];
+    vec3f get_player_color(int playerId);
                                     
 private:
 
@@ -72,7 +77,6 @@ private:
    vector<RandomStuff> stuff;
    
    SnowEffect *m_snow;
-   
 };
 
 extern int PLAYER_ID;

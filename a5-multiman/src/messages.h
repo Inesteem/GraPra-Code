@@ -54,6 +54,7 @@ namespace msg {
 	namespace code {
 		enum {
 			init_game = 1,
+            new_player,
 			spawn_house,
 			spawn_tree,
             spawn_random_stuff,
@@ -85,6 +86,13 @@ namespace msg {
         uint16_t mapY;
         int8_t id;
         uint8_t level;
+    } __attribute__((aligned(8)));
+
+    struct new_player : public message {
+        new_player() : message(code::new_player) {}
+        uint8_t playerId;
+        uint8_t colorId;
+        uint8_t frac;
     } __attribute__((aligned(8)));
 
 	struct spawn_house : public message {
@@ -237,6 +245,9 @@ protected:
     virtual void handle_message(msg::game_over *m) { warn(m); }
     virtual void handle_message(msg::client_settings *m) { warn(m); }
     virtual void handle_message(msg::spawn_random_stuff *m) { warn(m); }
+    virtual void handle_message(msg::new_player *m) { warn(m); }
+
+
 
 };
 

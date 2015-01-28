@@ -91,6 +91,11 @@ void client_message_reader::handle_message(msg::spawn_house *m)
     std::cout << "Spawning house at (" << (unsigned int) m->x << "," << (unsigned int) m->y << ")" << std::endl;
 }
 
+void client_message_reader::handle_message(msg::new_player *m)
+{
+    game->m_player_colors[m->playerId] = m->colorId;
+}
+
 void client_message_reader::handle_message(msg::spawn_tree *m)
 {
     game->add_tree(m->x, m->y,m->type);

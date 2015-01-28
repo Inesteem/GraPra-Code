@@ -824,12 +824,6 @@ void actual_main() {
     // Dark blue background
     glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
 	
-	if(menu == nullptr){	
-		menu   = new Menu();
-		menu->init(&render_menu);
-		menu->set_mode(menu->GAMESTART);
-	}
-	
     objhandler = new ObjHandler();   
 //	t = new thread(start_threads,true);  
 //	t->join();
@@ -842,7 +836,20 @@ void actual_main() {
 
     init_framebuffer();
     sh = new simple_heightmap();
+
+    bool initMenu = false;
+    if(menu == nullptr){
+        initMenu = true;
+        menu   = new Menu();
+    }
+
     game = new Game(objhandler,sh, messageReader,menu);
+
+    if(initMenu) {
+        menu->init(game, &render_menu);
+        menu->set_mode(menu->GAMESTART);
+    }
+
     messageReader = new client_message_reader(game);
     action = new Action(game, objhandler,&reset);
     game->set_action(action);	

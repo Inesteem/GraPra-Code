@@ -59,6 +59,10 @@ void message_reader::handle_message() {
         case msg::code::game_over:                  handle_message((msg::game_over*)buffer); break;
         case msg::code::client_settings:            handle_message((msg::client_settings*)buffer); break;
         case msg::code::spawn_random_stuff:         handle_message((msg::spawn_random_stuff*)buffer); break;
+        case msg::code::new_player:                 handle_message((msg::new_player*)buffer); break;
+
+
+
 
 
 
