@@ -361,7 +361,7 @@ void menu_keyhandler(unsigned char key, int state){
         //Enter
         //host game
     case 13 : if(menu->get_row() == 0){
-            game->set_fraction(menu->get_frac());
+            game->deliver_settings(menu->get_frac(),menu->get_player_color()-1);
 			action->init_iconbar(menu->get_frac());
 			
 			
@@ -386,7 +386,7 @@ void menu_keyhandler(unsigned char key, int state){
                 str += level;
                 str += " $*; echo '-- '; echo 'press return to close this terminal'; read";
 
-                //execl("/usr/bin/xterm","/usr/bin/xterm", "-geometry", "200x100+0+900", "-e", str.c_str(), NULL);
+             //   execl("/usr/bin/xterm","/usr/bin/xterm", "-geometry", "200x100+0+900", "-e", str.c_str(), NULL);
                 execl(str_2.c_str(),str_2.c_str(), s.c_str(), l.c_str(), NULL);
 
             }
@@ -413,7 +413,8 @@ void menu_keyhandler(unsigned char key, int state){
                 hostname[index_hostname] = '<';
                 menu->set_enter(true);
                 menu->set_hostname(hostname);
-            } else {
+			} else {
+				game->deliver_settings(menu->get_frac(),menu->get_player_color()-1);
 				action->init_iconbar(menu->get_frac());
                 hostname[index_hostname] = '\0';
                 cout << ">" << hostname << "<" << endl;

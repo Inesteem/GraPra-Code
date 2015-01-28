@@ -13,7 +13,7 @@ class client_message_reader;
 class moac::Action;
 
 enum FRACTIONS {
-   PAC = 1,
+    PAC = 1,
     BOMB = 2
 };
 
@@ -34,7 +34,7 @@ public:
     
     void set_selected(Building *building);
     void set_action(moac::Action *action);
-    void set_fraction(unsigned int frac);
+    void deliver_settings(unsigned int frac, unsigned int colorId);
 
     void init(string filename, int widht, int height, int id);
     Building* get_building_at(vec3f pos);
@@ -61,8 +61,11 @@ public:
     Menu *menu; 
     moac::Action *action;
 
-    vector<vec3f> player_colors = { vec3f(1,0,0),vec3f(1,1,0),vec3f(1,0,1),vec3f(0,1,1),vec3f(0,0,1),
-                                    vec3f(0,1,0),vec3f(1,0.5,1),vec3f(0.5,1,1),vec3f(1,1,0.5),vec3f(0.7,0.7,0.7) };
+    vector<vec3f> player_colors = { vec3f(1.,1.,1.),vec3f(0.7,0.7,0.7), vec3f(1,0,0),vec3f(1,1,0),vec3f(1,0,1),vec3f(0,1,1),vec3f(0,0,1),
+                                                                vec3f(0,1,0),vec3f(1,0.5,1),vec3f(0.5,1,1),vec3f(1,1,0.5) };
+
+
+                                    
     unsigned int m_color_id_for_player[10];
     vec3f get_player_color(int playerId);
                                     

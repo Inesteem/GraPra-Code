@@ -251,6 +251,9 @@ int Menu::get_frac(){
 		
 	return FRAKTION;
 }
+int Menu::get_player_color(){
+	return COLOR;
+}
 
 void Menu::set_mode(Mode mode){ 
 	this->mode = mode;

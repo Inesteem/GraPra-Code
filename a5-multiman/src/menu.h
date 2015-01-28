@@ -109,7 +109,7 @@ public:
 	void set_render_menu(bool rm){*render_menu = rm;}
 
 	void reset_menu();
-
+	int get_player_color();
 };
 /*
 class MenuEntry {

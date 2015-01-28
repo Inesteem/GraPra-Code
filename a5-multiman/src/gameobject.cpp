@@ -575,7 +575,8 @@ void Building::upgrade(Obj *obj, int state){
 		settlement = true;
 		turret = false;
 	}
-	
+    vec3f color = m_game->get_player_color(m_owner);
+    label->set_color(color);
     //m_upgradeEffect->Start();
 }
 

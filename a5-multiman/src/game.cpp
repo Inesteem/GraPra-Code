@@ -7,6 +7,7 @@
 
 int PLAYER_ID;
 int FRACTION;
+int COLORID;
 wall_time_timer rot_timer;
 
 Game::Game(ObjHandler *objhandler, simple_heightmap *sh, client_message_reader *message_reader, Menu *menu): m_objhandler(objhandler), m_sh(sh), m_messageReader(message_reader),menu(menu)
@@ -100,12 +101,11 @@ void Game::init(string filename, int widht, int height, int id){
     PLAYER_ID = id;
 	
 	msg::client_settings cs = make_message<msg::client_settings>();
+	cout << id << ": sent message : " << FRACTION << endl;
 	cs.playerId = id;
-    cout << FRACTION << "frac" << endl;
 	cs.frac = FRACTION;
-	cs.colorId = 0;
+	cs.colorId = COLORID;
 	m_messageReader->send_message(cs);  
-        
     
     m_sh->init(filename, widht, height);
 
@@ -277,8 +277,9 @@ void Game::set_selected(Building *building){
 	
 }
 
-void Game::set_fraction(unsigned int frac){
+void Game::deliver_settings(unsigned int frac, unsigned int colorId){
 	FRACTION = frac;
+	COLORID = colorId;
 }	
 
 
