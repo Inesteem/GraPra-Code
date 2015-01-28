@@ -210,12 +210,6 @@ void mouse_move(int x, int y) {
 }
 
 void mouse(int button, int state, int x, int y) {
-    // TODO REMOVE
-    if(button == GLUT_MIDDLE_BUTTON && state == GLUT_DOWN) {
-        testEffect->Start();
-
-    }
-
     if(render_menu){
         return;
     }
@@ -283,7 +277,7 @@ void standard_keyboard(unsigned char key, int x, int y)
         break;
     case 'r':
 
-       if(dist > 25 ){
+       if(dist > 15 ){
             copy_vec3f(&tmp, &cam_dir);
             mul_vec3f_by_scalar(&tmp, &tmp, cgl_cam_move_factor);
             add_components_vec3f(&cam_pos, &cam_pos, &tmp);
