@@ -21,8 +21,35 @@ void GameStage::init(unsigned int x, unsigned int y)
     m_mapY = y;
 }
 
-void GameStage::handle_client_settings(unsigned int playerId, unsigned int colorId, unsigned int frac ){
-	player_frac[playerId] = frac;
+bool GameStage::playerColorAvailable(unsigned int colorId) {
+    for(auto& p : m_players) {
+        Player player = p;
+        if(player.m_colorId == colorId) return false;
+    }
+
+    return true;
+}
+
+void GameStage::handleClientSettings(unsigned int playerId, unsigned int colorId, unsigned int frac ){
+    unsigned int actualColorId = colorId;
+    if(!playerColorAvailable(colorId)) {
+        actualColorId = 0;
+        for(unsigned int i = 0; i < 10; i++) {
+            if(playerColorAvailable(i)) {
+                actualColorId = i;
+                break;
+            }
+        }
+    }
+
+    Player player(playerId, frac, actualColorId);
+    m_players.push_back(player);
+    msg::new_player np = make_message<msg::new_player>();
+    np.playerId = playerId;
+    np.colorId = player.m_colorId;
+    np.frac = frac;
+
+    broadcast(&np);
 }
 
 void GameStage::Update()
@@ -39,7 +66,6 @@ void GameStage::Update()
         broadcast(&go);
 
         exit(0);
-
         return;
     }
 
