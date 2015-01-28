@@ -119,10 +119,10 @@ public:
 struct Player
 {
     unsigned int m_id;
-    bool m_fraction; // 0: pacman, 1: bomberman
+    int m_fraction; // 1: pacman, 2: bomberman
     unsigned int m_colorId;
 
-    Player(unsigned int id, bool fraction, unsigned int colorId) : m_id(id), m_fraction(fraction), m_colorId(colorId) {}
+    Player(unsigned int id, int fraction, unsigned int colorId) : m_id(id), m_fraction(fraction), m_colorId(colorId) {}
 };
 
 class GameStage

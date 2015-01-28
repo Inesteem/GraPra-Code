@@ -21,7 +21,7 @@ void Game::set_action(moac::Action *action){
 
 void Game::add_building(string name, int size, int x, int y, unsigned int id){
 
-    m_buildings.push_back(Building(m_objhandler->getObjByName(name), m_objhandler->getObjByName("selection_circle"),m_objhandler->getObjByName("upgrade_arrow"), name,x,y, -1 ,size, m_sh->get_height(x,y), id));
+    m_buildings.push_back(Building(this,m_objhandler->getObjByName(name), m_objhandler->getObjByName("selection_circle"),m_objhandler->getObjByName("upgrade_arrow"), name,x,y, -1 ,size, m_sh->get_height(x,y), id));
     Building b = m_buildings.back();
     vec2f pos = b.get_pos();
     pos = vec2f(pos.x  , pos.y );
@@ -102,6 +102,7 @@ void Game::init(string filename, int widht, int height, int id){
 	
 	msg::client_settings cs = make_message<msg::client_settings>();
 	cs.playerId = id;
+    cout << FRACTION << "frac" << endl;
 	cs.frac = FRACTION;
 	cs.colorId = 0;
 	m_messageReader->send_message(cs);  

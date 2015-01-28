@@ -988,6 +988,7 @@ void UnitGroup::force_position(vec2f pos){
 
 
 void UnitGroup::update_model_matrices(){
+
 //    cout << m_units.size() << endl;
     for(int i = 0; i < m_units.size(); ++i){
 
@@ -1026,6 +1027,7 @@ void UnitGroup::update_model_matrices(){
 }
 
 void UnitGroup::move_to(vec2f pos, float time_to_reach){
+     cout << 123 << endl;
   //  force_position(m_end);
    // force_position(m_end);
 //	vec2f pos_1 = vec2f(m_model.col_major[3 * 4 + 0], m_model.col_major[3 * 4 + 2]);
@@ -1327,8 +1329,10 @@ void Unit::update(vec2f new_pos, float height){
 
     m_model.col_major[3 * 4 + 0] = m_pos.x * render_settings::tile_size_x;
     if(is_pac){
+
         m_model.col_major[3 * 4 + 1] = m_base_height + m_sh->get_height(m_pos.x,m_pos.y);
     } else{
+
         float x = wobble_timer.look()/100 + rand_start;
         m_model.col_major[3 * 4 + 1] = m_base_height + m_sh->get_height(m_pos.x,m_pos.y) + 0.6 + 0.6*sin(x)*cos(x);
     }

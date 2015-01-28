@@ -87,7 +87,7 @@ void client_message_reader::handle_message(msg::init_game *m)
 void client_message_reader::handle_message(msg::spawn_house *m)
 {
     // TODO add id (m->id) to building!!
-   game->add_building("building_lot", 1,m->x,m->y, m->id);
+   game->add_building("building_lot", 1,m->x,m->y, m->id );
     std::cout << "Spawning house at (" << (unsigned int) m->x << "," << (unsigned int) m->y << ")" << std::endl;
 }
 
@@ -111,8 +111,8 @@ void client_message_reader::handle_message(msg::init_done *m)
 
 void client_message_reader::handle_message(msg::spawn_troup_server *m) {
 
-    cout << "Spawning new troup..." << endl;
-    game->add_unit_group(m->sourceId, m->destinationId, m->unitCount, m->troupId,(FRACTIONS) m->frac,m->playerId);
+    cout << "Spawning new troup..." <<  "frac: " << (int) m->frac << endl;
+    game->add_unit_group(m->sourceId, m->destinationId, m->unitCount, m->troupId,(FRACTIONS) (int) m->frac,m->playerId);
 }
 
 
@@ -131,8 +131,8 @@ void client_message_reader::handle_message(msg::troup_arrived *m)
 void client_message_reader::handle_message(msg::building_owner_changed *m)
 {
 
-    cout << "Building owner changed (old: " << (int) m->oldOwner << ", new: " << (int) m->newOwner << ")" << endl;
-    game->change_building_owner(m->buildingId,m->newOwner,(FRACTIONS)m->frac);
+    cout << "Building owner changed (old: " << (int) m->oldOwner << ", new: " << (int) m->newOwner << "frac: " << (int)(int) m->frac <<")" << endl;
+    game->change_building_owner(m->buildingId,m->newOwner,(FRACTIONS)(int) m->frac);
 }
 
 void client_message_reader::handle_message(msg::building_unit_generated *m)
@@ -143,8 +143,8 @@ void client_message_reader::handle_message(msg::building_unit_generated *m)
 
 void client_message_reader::handle_message(msg::building_upgrade *m) {
 
-    cout << "Upgraded Building " << (unsigned int) m->buildingId << " to state : " << (unsigned int) m->state << endl;
-    game->upgrade_building(m->buildingId, m->state,(FRACTIONS)  m->frac);
+    cout << "Upgraded Building " << (unsigned int) m->buildingId << " to state : " << (unsigned int) m->state << "frac: " << (int) m->frac << endl;
+    game->upgrade_building(m->buildingId, m->state, (FRACTIONS) (int) m->frac);
 }
 
 void client_message_reader::handle_message(msg::game_over *m) {

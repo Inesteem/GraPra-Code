@@ -13,7 +13,7 @@ class client_message_reader;
 class moac::Action;
 
 enum FRACTIONS {
-    PAC = 1,
+   PAC = 1,
     BOMB = 2
 };
 
