@@ -158,6 +158,7 @@ public:
     unordered_map<unsigned int, Troup*> m_troups;
 
     vector<Player> m_players;
+	std::vector<Building *> start_buildings;
 };
 
 #endif

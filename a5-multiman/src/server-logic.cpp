@@ -9,6 +9,7 @@ using namespace std;
 unsigned int GameStage::s_nextBuilding = 0;
 unsigned int GameStage::s_nextTroup = 0;
 
+
 void GameStage::init(unsigned int x, unsigned int y)
 {
 		
@@ -43,6 +44,14 @@ void GameStage::handleClientSettings(unsigned int playerId, unsigned int colorId
     np.playerId = playerId;
     np.colorId = player.m_colorId;
     np.frac = frac;
+ 
+	for(int i = 0; i < start_buildings.size();i++){
+		if(start_buildings[i]->m_player == playerId){
+			upgrade_building_house(start_buildings[i]->m_id);
+			
+		}
+	}
+    
 
     broadcast(&np);
 }
@@ -260,7 +269,7 @@ void GameStage::upgrade_building_turret(unsigned int buildingId){
         if(units > building->m_unitCount) return; // not enough units
         building->m_state = msg::building_state::turret_lvl1;
 
-	} else if(building->m_state == msg::building_state::house_lvl2 || building->m_state == msg::building_state::house_lvl3){
+	}else if(building->m_state == msg::building_state::house_lvl2 || building->m_state == msg::building_state::house_lvl3){
         units = msg::upgrade_cost::RebuildingToTurretLvl1;
         if(units > building->m_unitCount) return; // not enough units
         building->m_state = msg::building_state::turret_lvl1;

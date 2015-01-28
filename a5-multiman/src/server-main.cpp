@@ -24,6 +24,7 @@ using namespace std;
 
 GameStage *gameStage;
 
+
 void blockMap(int r, int c, int maxX, int maxY) {
     if(r < 0 || c < 0 || r >= maxY || c >= maxX) return;
     gameStage->m_map[r][c] = false;
@@ -129,7 +130,7 @@ void initGame(unsigned int level) {
                 broadcast(&bug);
 
                 if(b->m_player != -1) {
-                    gameStage->upgrade_building_house(b->m_id);
+					 gameStage->start_buildings.push_back(b);
                 }
             }
             else if(color.y > 0.4f) { // green
@@ -185,7 +186,7 @@ int main(int argc, char **argv)
 	//parse_cmdline(argc, argv);
 
     if(argc != 3) {
-        cout << "Usage: ./multiman_server <num players> <levelname> [fraction]" << endl;
+        cout << "Usage: ./multiman_server <num players> <levelname>" << endl;
         exit(0);
     }
 

@@ -44,7 +44,6 @@ void Game::change_building_owner(int building_id, int new_owner, FRACTIONS frac)
 
             }
             m_buildings[i].change_owner(new_owner);
-
             return;
         }
     }
