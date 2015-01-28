@@ -917,9 +917,14 @@ void Building::draw_selection_circle(int size){
     loc = glGetUniformLocation(gl_shader_object(find_shader("selection_circle_shader")), "color");
     glUniform3fv(loc,1,(float *) &color);
 
+    loc = glGetUniformLocation(gl_shader_object(find_shader("selection_circle_shader")), "ctime");
+    glUniform1f(loc,rot_timer.look());
+
     bind_texture(find_texture("selection_circle"), 0);
     loc = glGetUniformLocation(gl_shader_object(find_shader("selection_circle_shader")), "tex");
     glUniform1i(loc, 0);
+
+
 
     bind_mesh_to_gl(selection_circle->mesh);
 

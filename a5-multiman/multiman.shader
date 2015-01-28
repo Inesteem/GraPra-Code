@@ -49,19 +49,21 @@
             return false;
         }
 
-        float compute_height(float new, float old){
-            return old*exp(-clamp(distance(old,new),0,1));
+        float compute_height(vec2 xy, vec2 pos, float old_h, float new_h){
+            float dist = distance(xy,pos);
+            return mix(old_h,new_h,exp(-dist));
+
+
         }
 
         void main() {
             ivec2 storePos = ivec2(gl_GlobalInvocationID.yx);
             ivec2 size = imageSize(height_map);
-//            if (outerhit(storePos)){
-//                float h = imageLoad(height_map, storePos.yx).x;
-//                h = compute_height(height,h);
-//                imageStore(height_map, storePos.yx, vec4(h,h,h,1));
-//            }else
-            if( hit(storePos) ){
+            if (outerhit(storePos)){
+                float h = imageLoad(height_map, storePos.yx).r;
+                h = compute_height(storePos,pos,h,height);
+                imageStore(height_map, storePos.yx, vec4(h,h,h,1));
+            }else if( hit(storePos) ){
 
                 imageStore(height_map, storePos.yx, vec4(height, height, height, 1));
             }
@@ -199,16 +201,18 @@
         uniform vec3 color;
         out vec4 out_col;
         uniform sampler2D tex;
+        uniform float time;
 
         void main() {
-            vec4 tex_col = texture(tex,tc);
+
+            vec4 tex_col = texture(tex,vec2(tc.x , tc.y));
 
 
-          if(tex_col.r >= 0.5 && tex_col.g > 0.05 && tex_col.b >= 0.5){
+          if(tex_col.r >= 0.5 && tex_col.g > 0.00 && tex_col.b >= 0.5){
                 out_col = vec4(color,clamp(1-tex_col.g,0,1));
 
           }
-            else if(!(tex_col.r >= 0.9 || tex_col.g <= 0.05 || tex_col.b >= 0.9))  {
+            else if(!(tex_col.r >= 0.9 || tex_col.g == 0.00 || tex_col.b >= 0.9))  {
                 out_col = tex_col;
           } else {
 
