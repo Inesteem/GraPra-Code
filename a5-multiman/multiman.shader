@@ -38,7 +38,7 @@
             float offset_y = radius*tile_size_y;
             float offset_x = radius*tile_size_x;
 
-            if(distance(hit,vec2(pos.x+((g_width/2)  ),pos.y+((g_width/2)))) < radius*g_width ) return true;
+            if(distance(hit,vec2(pos.x+((g_width/2)  ),pos.y+((g_width/2)))) <= radius*g_width ) return true;
 
             return false;
         }
@@ -50,10 +50,9 @@
         }
 
         float compute_height(vec2 xy, vec2 pos, float old_h, float new_h){
-            float dist = distance(xy,pos);
-            return mix(old_h,new_h,exp(-dist));
-
-
+            float dist = distance(xy,vec2(pos.x+((g_width/2)  ),pos.y+((g_width/2))));
+            dist = dist/((radius+1)*g_width);
+            return mix(new_h,old_h,dist*dist*dist);
         }
 
         void main() {
@@ -64,8 +63,10 @@
                 h = compute_height(storePos,pos,h,height);
                 imageStore(height_map, storePos.yx, vec4(h,h,h,1));
             }else if( hit(storePos) ){
-
-                imageStore(height_map, storePos.yx, vec4(height, height, height, 1));
+                float h = imageLoad(height_map, storePos.yx).r;
+                h = compute_height(storePos,pos,h,height);
+                imageStore(height_map, storePos.yx, vec4(h,h,h,1));
+//                imageStore(height_map, storePos.yx, vec4(height, height, height, 1));
             }
         }
 }
@@ -218,7 +219,7 @@
 
                  discard;
           }
-            gl_FragDepth = 0.3;
+//            gl_FragDepth = 0.3;
         }
 }
 #:inputs (list "in_pos" "in_tc")>
@@ -1153,6 +1154,60 @@ uniform float down;
 
          #:inputs (list "in_pos" "in_tc")>
 
+#<make-shader "boom-shader"
+#:vertex-shader #{
+#version 150 core
+
+in vec3 in_pos;
+in vec2 in_tc;
+uniform mat4 proj;
+uniform mat4 view;
+uniform mat4 model;
+uniform vec3 CameraRight_worldspace;
+uniform vec3 CameraUp_worldspace;
+uniform vec3 BillboardPos;
+uniform vec2 BillboardSize;
+out vec2 tc;
+
+               void main() {
+                       vec3 vp_w =
+                               BillboardPos
+                               + CameraRight_worldspace * in_pos.x  * BillboardSize.x
+                               + CameraUp_worldspace * in_pos.y * BillboardSize.y;
+
+                       gl_Position = proj * view * vec4(vp_w , 1.);
+                       tc = in_tc;
+               }
+}
+#:fragment-shader #{
+#version 150 core
+
+in vec2 tc;
+uniform vec3 color;
+out vec4 out_col;
+uniform sampler2D tex;
+uniform float time;
+
+void main() {
+
+    vec4 tex_col = texture(tex,vec2(tc.x , tc.y));
+
+
+  if(tex_col.r >= 0.5 && tex_col.g > 0.00 && tex_col.b >= 0.5){
+        out_col = vec4(color,clamp(1-tex_col.g,0,1));
+
+  }
+    else if(!(tex_col.r >= 0.9 || tex_col.g == 0.00 || tex_col.b >= 0.9))  {
+        out_col = tex_col;
+  } else {
+
+         discard;
+  }
+    gl_FragDepth = 0.3;
+}
+}
+
+ #:inputs (list "in_pos" "in_tc")>
 
 
 #<make-shader "menu-building-shader"

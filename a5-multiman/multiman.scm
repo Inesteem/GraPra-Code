@@ -29,6 +29,8 @@
 (texture-from-file "none" "exchange_1.png" 'tex2d #t)
 (texture-from-file "alpha_mask_1" "alpha_mask_2.png" 'tex2d #t)
 
+(texture-from-file "boom" "boom.png" 'tex2d #t)
+
 (texture-from-file "game_won" "Menu/game_won.png" 'tex2d #t)
 (texture-from-file "game_loose" "Menu/game_loose.png" 'tex2d #t)
 (texture-from-file "game_paused" "Menu/game_paused.png" 'tex2d #t)

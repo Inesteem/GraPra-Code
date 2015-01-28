@@ -130,6 +130,12 @@ ObjHandler* Game::get_objhandler(){
 	return m_objhandler;
 }
 
+vector<Building>* Game::get_buildings(){
+
+            return &m_buildings;
+
+}
+
 void Game::update_unit_group(unsigned int x, unsigned int y, unsigned int troupId, unsigned int time){	
 
     for(int i = 0; i < m_unitgroups.size(); ++i){

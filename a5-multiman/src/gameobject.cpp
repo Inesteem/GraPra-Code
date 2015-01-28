@@ -470,6 +470,7 @@ Building::Building(Game *game, Obj *obj,Obj *selection_circle,Obj *upgrade_arrow
     m_owner(owner) , m_size(size), selection_circle(selection_circle), upgrade_arrow(upgrade_arrow)
 
 {
+    m_boom = m_game->get_objhandler()->getObjByName("boom");
 	settlement = true;
     turret = false;
     selection_circle->mesh;
@@ -583,6 +584,86 @@ void Building::upgrade(Obj *obj, int state){
 }
 
 
+void Building::send_unit_kill_message(int unit_id){
+
+    return;
+}
+
+void Building::unit_in_range(int unit_id){
+    if(turret){
+    if(attack_timer.look() > 4000){
+        m_attacke_unit_id = unit_id;
+
+           attack_timer.restart();
+    }
+    else if(attack_timer.look() > 500 && m_attacke_unit_id != -1){
+        send_unit_kill_message(unit_id);
+        m_attacke_unit_id = -1;
+    }
+
+    }
+}
+
+void Building::draw_boooom(vec2f pos, float time, float dest_height){
+    cout << "boom" << endl;
+    bind_shader(find_shader("boom-shader"));
+    make_unit_matrix4x4f(&m_boom_model);
+    m_boom_model.col_major[3*4+0] = m_pos.x /* * (1 - time/500) + pos.x * (time/500)*/;
+    m_boom_model.col_major[3*4+1] = m_center.y + m_height +20 /** (1 - time/500) + pos.y * (time/500)*/;
+    m_boom_model.col_major[3*4+2] = m_pos.y /** (1 - time/500)*(1 - time/500)+ (time/500)*(time/500)*dest_height*/;
+
+
+    vec2f BillboardSize = vec2f(2,2);
+    vec3f color = m_game->get_player_color(PLAYER_ID);
+    matrix4x4f view = *gl_view_matrix_of_cam(current_camera());
+    vec3f CameraRight_worldspace = {view.row_col(0,0), view.row_col(0,1), view.row_col(0,2)};
+    vec3f CameraUp_worldspace = {view.row_col(1,0), view.row_col(1,1), view.row_col(1,2)};
+    int loc = glGetUniformLocation(gl_shader_object(find_shader("boom-shader")), "CameraRight_worldspace");
+    glUniform3fv(loc, 1,(float *)&CameraRight_worldspace);
+
+     loc = glGetUniformLocation(gl_shader_object(find_shader("boom-shader")), "CameraUp_worldspace");
+    glUniform3fv(loc, 1,(float *)&CameraUp_worldspace);
+
+    loc = glGetUniformLocation(gl_shader_object(find_shader("boom-shader")), "BillboardPos");
+    glUniform3fv(loc, 1,(float *)&pos);
+
+    loc = glGetUniformLocation(gl_shader_object(find_shader("boom-shader")), "BillboardSize");
+    glUniform2fv(loc, 1,(float *)&BillboardSize);
+
+     loc = glGetUniformLocation(gl_shader_object(find_shader("boom-shader")), "proj");
+    glUniformMatrix4fv(loc, 1, GL_FALSE, projection_matrix_of_cam(current_camera())->col_major);
+
+    loc = glGetUniformLocation(gl_shader_object(find_shader("boom-shader")), "view");
+    glUniformMatrix4fv(loc, 1, GL_FALSE, gl_view_matrix_of_cam(current_camera())->col_major);
+
+    loc = glGetUniformLocation(gl_shader_object(find_shader("boom-shader")), "model");
+    glUniformMatrix4fv(loc, 1, GL_FALSE, m_boom_model.col_major);
+
+    loc = glGetUniformLocation(gl_shader_object(find_shader("boom-shader")), "color");
+    glUniform3fv(loc,1,(float *) &color);
+
+
+
+    bind_texture(find_texture("boom"), 0);
+    loc = glGetUniformLocation(gl_shader_object(find_shader("boom-shader")), "tex");
+    glUniform1i(loc, 0);
+
+
+
+    bind_mesh_to_gl(m_boom->mesh);
+
+    draw_mesh(m_boom->mesh);
+
+    unbind_mesh_from_gl(m_boom->mesh);
+    unbind_shader(find_shader("boom-shader"));
+
+    unbind_texture(find_texture("boom"));
+    glDisable(GL_BLEND);
+
+
+}
+
+
 void Building::draw(){
 	
 	int loc;
@@ -652,8 +733,16 @@ void Building::draw(){
 
 	//check for upgrade
 	bool upgradeable = check_for_upgrade_settlement(state+1);
-	if(turret)
+    if(turret){
+//        if(m_attacke_unit_id != -1){
+//            UnitGroup* ug = m_game->get_unit(m_attacke_unit_id);
+//            cout << "unit in range" << endl;
+//            if(m_attacke_unit_id != -1 && attack_timer.look() < 500){
+//                draw_boooom(ug->get_cur_pos(),attack_timer.look(),ug->get_height(ug->get_cur_pos().x,ug->get_cur_pos().y));
+//            }
+//        }
 		upgradeable = check_for_upgrade_turret(state+1);
+    }
 	
 	if(upgradeable && PLAYER_ID == m_owner){
 		matrix4x4f arrow_model_2;
@@ -683,6 +772,7 @@ void Building::draw(){
 		}		
 		
 	}
+
 
 //    draw_selection_circle(3);
 }
@@ -1111,7 +1201,7 @@ void UnitGroup::update(){
             m_model.col_major[3 * 4 + 0] = x * render_settings::tile_size_x;
             m_model.col_major[3 * 4 + 1] = m_center.y + m_sh->get_height(x, y);
             m_model.col_major[3 * 4 + 2] = y * render_settings::tile_size_y;
-
+             check_turret_in_range();
             update_model_matrices();
         }
     }
@@ -1307,6 +1397,7 @@ void Unit::update(vec2f new_pos, float height){
 
 
 
+
 //        cout << "m_pos " << m_pos.x << " " << m_pos.y << endl;
 //        cout << "m_start " << m_start.x << " " << m_start.y << endl;
 //        cout << "m_end " << m_end.x << " " << m_end.y << endl;
@@ -1369,10 +1460,28 @@ void Unit::update(vec2f new_pos, float height){
     if(m_bombermanEffect) {
         vec3f p = vec3f(m_pos.x * render_settings::tile_size_x, m_model.col_major[3 * 4 + 1], m_pos.y * render_settings::tile_size_y);
         m_bombermanEffect->Update(p);
+
     }
 //    movement_timer.restart();
 
 }
+
+
+
+void UnitGroup::check_turret_in_range(){
+
+    vector<Building> *bu = m_game->get_buildings();
+    Unit u = m_units[0];
+    vec2f pos = u.get_pos();
+    vec3f pos3 = vec3f(pos.x,m_sh->get_height(pos.x,pos.y),pos.y);
+    for(int i = 0; i < bu->size(); ++i){
+        if(bu->at(i).turret && bu->at(i).dist_to(pos3) < 1000000){
+
+            bu->at(i).unit_in_range(m_id);
+        }
+
+    }
+    }
 
 
 Pacman::Pacman(Game *game, Obj *obj, unsigned int owner, unsigned m_id, int height, float time) :  GameObject(game, obj, obj->name ,obj->shader, height), owner(owner), m_id(m_id), time(time)  {
