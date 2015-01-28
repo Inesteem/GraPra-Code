@@ -682,7 +682,7 @@ void Building::draw(){
 		
 	}
 
-    draw_selection_circle(3);
+//    draw_selection_circle(3);
 }
 
 void Building::draw_bbm_house(){
@@ -864,25 +864,45 @@ unsigned int Building::get_id(){
 
 void Building::draw_selection_circle(int size){
     glEnable(GL_BLEND);
-   // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glBlendFunc(GL_ONE, GL_ONE);
+    glBlendFunc( GL_ONE_MINUS_SRC_ALPHA,GL_SRC_ALPHA);
+//    glBlendFunc(GL_ONE, GL_ONE);
 //    glDepthMask(GL_TRUE);
     vec3f color = m_game->get_player_color(m_owner);
     bind_shader(find_shader("selection_circle_shader"));
 
     matrix4x4f tmp;
     make_unit_matrix4x4f(&tmp);
+    matrix4x4f rot;
+    vec3f axis = vec3f(0,1,0);
+    float angle = rot_timer.look()/1000;
+     make_rotation_matrix4x4f(&rot,&axis, angle);
 
-    tmp = tmp*m_model;
+
 
 
 
     tmp.col_major[0 * 4 + 0] =  /*m_model.col_major[0 * 4 + 0] **/ (render_settings::tile_size_x+2) * size;
     tmp.col_major[1 * 4 + 1] =  /*m_model.col_major[1 * 4 + 1] * */(render_settings::tile_size_x+2) * size;
     tmp.col_major[2 * 4 + 2] =  /*m_model.col_major[2 * 4 + 2] * */(render_settings::tile_size_y+2) * size;
-    tmp.col_major[3 * 4 + 0] =  m_pos.x * render_settings::tile_size_x - ((render_settings::tile_size_x+2) * size )/2.0f;
-    tmp.col_major[3 * 4 + 1] =  m_height+0.4;
-    tmp.col_major[3 * 4 + 2] =  m_pos.y * render_settings::tile_size_y - ((render_settings::tile_size_y+2) * size )/2.0f;
+
+
+
+    matrix4x4f translate;
+    make_unit_matrix4x4f(&translate);
+    matrix4x4f translate2;
+    make_unit_matrix4x4f(&translate2);
+    translate2.col_major[3 * 4 + 0] = -0.5;
+     translate2.col_major[3 * 4 + 2] = -0.5;
+     matrix4x4f translate3;
+     make_unit_matrix4x4f(&translate3);
+     translate3.col_major[3 * 4 + 0] = 0.5;
+      translate3.col_major[3 * 4 + 2] = 0.5;
+    translate.col_major[3 * 4 + 0] =  m_pos.x * render_settings::tile_size_x /*- ((render_settings::tile_size_x+2) * size )/4*/;
+    translate.col_major[3 * 4 + 1] =  m_height+0.4;
+    translate.col_major[3 * 4 + 2] =  m_pos.y * render_settings::tile_size_y /*- ((render_settings::tile_size_y+2) * size )/4*/;
+
+    tmp = translate*tmp*rot*translate2;
+
 
     int loc = glGetUniformLocation(gl_shader_object(find_shader("selection_circle_shader")), "proj");
     glUniformMatrix4fv(loc, 1, GL_FALSE, projection_matrix_of_cam(current_camera())->col_major);
@@ -1027,7 +1047,7 @@ void UnitGroup::update_model_matrices(){
 }
 
 void UnitGroup::move_to(vec2f pos, float time_to_reach){
-     cout << 123 << endl;
+
   //  force_position(m_end);
    // force_position(m_end);
 //	vec2f pos_1 = vec2f(m_model.col_major[3 * 4 + 0], m_model.col_major[3 * 4 + 2]);

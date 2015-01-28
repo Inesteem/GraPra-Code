@@ -131,6 +131,7 @@ public:
 
 
 private:
+    wall_time_timer rot_timer;
     Obj *selection_circle;
     Obj *upgrade_arrow;
     matrix4x4f arrow_model;

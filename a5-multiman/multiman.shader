@@ -56,11 +56,12 @@
         void main() {
             ivec2 storePos = ivec2(gl_GlobalInvocationID.yx);
             ivec2 size = imageSize(height_map);
-            if (outerhit(storePos)){
-                float h = imageLoad(height_map, storePos.yx).x;
-                h = compute_height(height,h);
-                imageStore(height_map, storePos.yx, vec4(h,h,h,1));
-            }else if( hit(storePos) ){
+//            if (outerhit(storePos)){
+//                float h = imageLoad(height_map, storePos.yx).x;
+//                h = compute_height(height,h);
+//                imageStore(height_map, storePos.yx, vec4(h,h,h,1));
+//            }else
+            if( hit(storePos) ){
 
                 imageStore(height_map, storePos.yx, vec4(height, height, height, 1));
             }
@@ -203,17 +204,17 @@
             vec4 tex_col = texture(tex,tc);
 
 
-          if(tex_col.r >= 0.5 && tex_col.g >= 0.5 && tex_col.b >= 0.5){
-                out_col = vec4(color,0.5);
-				gl_FragDepth = 0.3;
+          if(tex_col.r >= 0.5 && tex_col.g > 0.05 && tex_col.b >= 0.5){
+                out_col = vec4(color,clamp(1-tex_col.g,0,1));
+
           }
-            else if(!(tex_col.r >= 0.9 || tex_col.g <= 0.1 || tex_col.b >= 0.9))  {
+            else if(!(tex_col.r >= 0.9 || tex_col.g <= 0.05 || tex_col.b >= 0.9))  {
                 out_col = tex_col;
           } else {
 
                  discard;
           }
-
+            gl_FragDepth = 0.3;
         }
 }
 #:inputs (list "in_pos" "in_tc")>
