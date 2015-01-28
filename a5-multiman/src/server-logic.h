@@ -148,7 +148,8 @@ public:
     Building* spawnHouse(unsigned int x, unsigned int y);
     void upgrade_building_house(unsigned int buildingId);
     void upgrade_building_turret(unsigned int buildingId);
-    int checkGameOver();
+    int  checkGameOver();
+    void lostClient(int playerId);
 
     void addArmy(unsigned int sourceBuildingID, unsigned int destinationBuildingID, unsigned int unitCount);
     void addTroup(Troup *troup);

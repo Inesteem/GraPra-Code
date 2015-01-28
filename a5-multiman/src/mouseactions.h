@@ -68,6 +68,7 @@ namespace moac {
         void reset( );
         void init_iconbar(int fraction);
         void call_menu(int button);
+        void lost_building(int id);
 	
 	};	
 	

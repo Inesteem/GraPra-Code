@@ -42,7 +42,10 @@ void Game::change_building_owner(int building_id, int new_owner, FRACTIONS frac)
         if(m_buildings[i].get_id() == building_id){
             if(m_buildings[i].get_owner_id() == -1 && new_owner != -1) {
                 this->upgrade_building(i, msg::building_state::house_lvl1,frac);
-
+				if(m_selected != nullptr && building_id == m_selected->get_id()){
+					m_selected == nullptr;
+					action->lost_building(building_id);
+				}
             }
             m_buildings[i].change_owner(new_owner);
             return;
@@ -166,7 +169,7 @@ void Game::upgrade_building(unsigned int buildingId, unsigned int state, FRACTIO
 		if(m_buildings[i].get_id() == buildingId){
 			cout << "try to upgrade building " << buildingId << endl;
 			//TODO: const names
-			if(FRACTION == PAC){
+			if(frac == PAC){
                 switch(state){
                 case msg::building_state::house_lvl1 : {m_buildings[i].upgrade(m_objhandler->getObjByName("house_pacman_lvl1"),state);
                     m_buildings[i].change_size(2);

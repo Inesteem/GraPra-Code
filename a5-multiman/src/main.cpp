@@ -55,6 +55,7 @@ void init_matrices();
 void render_gui_overlay(bool gameover);
 void actual_main();
 void reset();
+void simple_loop();
 
 //important game logic bools
 bool standard_mouse = false;
@@ -713,15 +714,16 @@ void load_configfile(const char *);
 
 
 void reset(){
+	
+    render_menu = true;
+    register_display_function(simple_loop);
+    register_idle_function(simple_loop);		
+	
     delete sh;
     delete game;
-    delete messageReader;
-    delete action;
     
     sh = new simple_heightmap();
     game = new Game(objhandler,sh, messageReader,menu);
-    messageReader = new client_message_reader(game);
-    action = new Action(game, objhandler, &reset);
     game->set_action(action);
 }
 

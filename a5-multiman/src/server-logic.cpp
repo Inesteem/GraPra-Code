@@ -26,6 +26,44 @@ bool GameStage::playerColorAvailable(unsigned int colorId) {
     return true;
 }
 
+void GameStage::lostClient(int playerId){
+	if(playerId == 0){//hoster
+		cout << "Host left the game, I'm leavin' too" << endl;
+		exit(0);
+	}
+	//todo:kill troups
+	
+	for(int i = 0; i < m_buildings.size(); i++){
+		if(m_buildings[i]->m_player == playerId){
+			
+			msg::building_upgrade bu = make_message<msg::building_upgrade>();
+			bu.buildingId = m_buildings[i]->m_id;
+			bu.state = msg::building_state::construction_site;
+			bu.frac = 1;
+			broadcast(&bu);
+	
+	        msg::building_owner_changed boc = make_message<msg::building_owner_changed>();
+            boc.buildingId = m_buildings[i]->m_id;
+            boc.oldOwner = playerId;
+            boc.newOwner = -1;
+            boc.frac = 1;
+            
+			broadcast(&boc);
+			cout << "resetet building " << m_buildings[i]->m_id << endl;
+	
+		}
+	}
+	
+	//erase playerid
+	for (std::vector<Player>::iterator it = m_players.begin(); it != m_players.end(); it++){
+		if((*it).m_id == playerId){
+			m_players.erase(it);
+			cout << "erased player from lilst " << endl;
+			break;
+		}
+	}
+}
+
 void GameStage::handleClientSettings(unsigned int playerId, unsigned int colorId, unsigned int frac ){
     unsigned int actualColorId = colorId;
     if(!playerColorAvailable(colorId)) {
