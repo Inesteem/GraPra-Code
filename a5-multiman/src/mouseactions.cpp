@@ -221,7 +221,8 @@ namespace moac {
 			case 1 : upgrade_turret();
 					break;
 			
-			case 4: break;//todo render menu
+			case 4: iconbar->clicked_menu();
+					break;//todo render menu
 			
 			default : return -1;
 		}

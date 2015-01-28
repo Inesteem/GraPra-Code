@@ -405,11 +405,11 @@ IconBar::IconBar(int fraction){
 	player_color = get_player_color(PLAYER_ID);
 	
 	background =					find_texture("interface_pm");
-	if(fraction == 2)
+	background_menu =				find_texture("interface_pm_menu");
+	if(fraction == 2){
 		background =				find_texture("interface_bbm");
-	picture[0] =					find_texture("terrain_hm");
-	picture[1] =					find_texture("dorf");
-	
+		background_menu =			find_texture("interface_bbm_menu");
+	}
 	shader = find_shader("simple-menu-shader");
 	
 	init_modelmatrices();
@@ -471,7 +471,11 @@ void IconBar::draw(){
 	loc = glGetUniformLocation(gl_shader_object(shader), "p_color");
 	glUniform3fv(loc, 1,(float *)&player_color);	
 
-	bind_texture(background, 0);
+	if(!open_menu)
+		bind_texture(background, 0);
+	else
+		bind_texture(background_menu, 0);
+	
 	loc = glGetUniformLocation(gl_shader_object(shader), "tex");
 	glUniform1i(loc, 0);
 
@@ -482,7 +486,10 @@ void IconBar::draw(){
 	bind_mesh_to_gl(mesh);
 	draw_mesh(mesh);
 	
-	unbind_texture(background);
+	if(!open_menu)
+		unbind_texture(background);
+	else
+		unbind_texture(background_menu);
 	
 	
 	//buttons etc
@@ -793,8 +800,8 @@ void IconBar::init_buttons(){
 		if(i == 4){
 			model.row_col(0,0) = 0.09 * fovy;
 			model.row_col(1,1) = 0.04 * fovy;
-			model.row_col(0,3) = offset_button_y;
-			model.row_col(1,3) = fovy - 0.8 * scale_button_y;
+			model.row_col(0,3) = 3.9*offset_button_y;
+			model.row_col(1,3) = fovy - 0.85 * scale_button_y;
 		}
 		
 		buttons.push_back(Button(model,depth[i],depth_acc[i], none, false,clickable[i]));
@@ -847,6 +854,10 @@ int IconBar::click(int x, int y, vec3f (*ptr)(int x, int y)){
 	return -1;
 
 	
+}
+
+void IconBar::clicked_menu(){
+	open_menu = !open_menu;
 }
 
 int IconBar::scale_button(int b, bool smaller){
