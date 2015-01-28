@@ -875,7 +875,7 @@ void Building::draw_selection_circle(int size){
     make_unit_matrix4x4f(&tmp);
     matrix4x4f rot;
     vec3f axis = vec3f(0,1,0);
-    float angle = rot_timer.look()/1000;
+    float angle = -rot_timer.look()/1000;
      make_rotation_matrix4x4f(&rot,&axis, angle);
 
 
