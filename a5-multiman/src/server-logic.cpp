@@ -238,6 +238,8 @@ void GameStage::addTroup(Troup *troup)
 void GameStage::upgrade_building_house(unsigned int buildingId){
     Building *building = m_buildings[buildingId];
 
+	cout << building->m_state << endl;
+
     if(building->m_state == msg::building_state::house_lvl3) return; // already highest level
 
     msg::building_upgrade bu = make_message<msg::building_upgrade>();
@@ -429,10 +431,10 @@ void Building::IncomingTroup(Troup *troup)
             broadcast(&bug);
         } else {           
             dest->m_state = msg::building_state::house_lvl1;
-            //msg::building_upgrade bu = make_message<msg::building_upgrade>();
-            //bu.buildingId = dest->m_id;
-            //bu.state = dest->m_state;
-            //broadcast(&bu);
+            msg::building_upgrade bu = make_message<msg::building_upgrade>();
+            bu.buildingId = dest->m_id;
+            bu.state = dest->m_state;
+            broadcast(&bu);
 
             msg::building_owner_changed boc = make_message<msg::building_owner_changed>();
             boc.buildingId = dest->m_id;

@@ -12,6 +12,7 @@ wall_time_timer rot_timer;
 
 Game::Game(ObjHandler *objhandler, simple_heightmap *sh, client_message_reader *message_reader, Menu *menu): m_objhandler(objhandler), m_sh(sh), m_messageReader(message_reader),menu(menu)
 {
+	rot_timer.restart();
 	player_color = vec3f(0,0,1);
 }
 
@@ -28,8 +29,7 @@ void Game::add_building(string name, int size, int x, int y, unsigned int id){
     pos = vec2f(pos.x  , pos.y );
     m_sh->set_heights(pos,m_sh->get_height(x,y),b.m_size);
 
-    m_buildings.push_back(Building(this, m_objhandler->getObjByName(name), m_objhandler->getObjByName("selection_circle"),m_objhandler->getObjByName("upgrade_arrow"), name,x,y, -1 ,size, m_sh->get_height(x,y), id));
-
+ 
 
 	planes.push_back(vec3f(x,-1,y));		
 		
@@ -161,8 +161,10 @@ void Game::add_stuff(unsigned int x, unsigned int y){
 
 
 void Game::upgrade_building(unsigned int buildingId, unsigned int state, FRACTIONS frac){
+			cout << "UPGRADEBUILDING " << buildingId <<  " of " << m_buildings.size() << "buildings" << endl;
     for(int i = 0; i < m_buildings.size(); i++){
 		if(m_buildings[i].get_id() == buildingId){
+			cout << "try to upgrade building " << buildingId << endl;
 			//TODO: const names
 			if(FRACTION == PAC){
                 switch(state){
@@ -238,7 +240,7 @@ void Game::upgrade_building(unsigned int buildingId, unsigned int state, FRACTIO
                     pos = vec2f(pos.x /** render_settings::tile_size_x - ((render_settings::tile_size_x)*b.m_size)/2.0f */ , pos.y /** render_settings::tile_size_y - ((render_settings::tile_size_y)*b.m_size)/2.0f*/);
                     m_sh->set_heights(pos,m_sh->get_height(pos.x,pos.y),b.m_size);}
 				} 					
-			}
+			} 
 			return;
 		}
 	}	

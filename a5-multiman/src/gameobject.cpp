@@ -564,6 +564,7 @@ int Building::get_level(){
 
 
 void Building::upgrade(Obj *obj, int state){
+	
 	m_obj = obj;
 	this->state = state;
 	
@@ -577,6 +578,7 @@ void Building::upgrade(Obj *obj, int state){
 	}
     vec3f color = m_game->get_player_color(m_owner);
     label->set_color(color);
+    cout << "upgraded building... " << endl;
     //m_upgradeEffect->Start();
 }
 
@@ -592,42 +594,41 @@ void Building::draw(){
 	float rotation = rot_timer.look()/1000;
 		//buildinglot
         if(state <= msg::building_state::construction_site){
-		matrix4x4f shovel_model;
-		
-		vec3f rot_vec = vec3f(0,1,0);
-		make_rotation_matrix4x4f(&shovel_model,&rot_vec, rotation);
-		shovel_model =  m_model * shovel_model;
-		int i = 0;
-		for(vector<drawelement*>::iterator it = m_obj->drawelements->begin(); it != m_obj->drawelements->end(); ++it) {
-			drawelement *de = *it;
-			de->Modelmatrix(&m_model);
-			if(i==1)
-				de->Modelmatrix(&shovel_model);
-			de->bind();
-			setup_dir_light(shader_t);
-			de->apply_default_matrix_uniforms();
-			de->apply_default_tex_uniforms_and_bind_textures();
+			matrix4x4f shovel_model;
+			vec3f rot_vec = vec3f(0,1,0);
+			make_rotation_matrix4x4f(&shovel_model,&rot_vec, rotation);
+			shovel_model =  m_model * shovel_model;
+			int i = 0;
+			for(vector<drawelement*>::iterator it = m_obj->drawelements->begin(); it != m_obj->drawelements->end(); ++it) {
+				drawelement *de = *it;
+				de->Modelmatrix(&m_model);
+				if(i==1)
+					de->Modelmatrix(&shovel_model);
+				de->bind();
+				setup_dir_light(shader_t);
+				de->apply_default_matrix_uniforms();
+				de->apply_default_tex_uniforms_and_bind_textures();
 
-            vec3f color = m_game->get_player_color(m_owner);
-			loc = glGetUniformLocation(gl_shader_object(shader_t), "color");
-			glUniform3fv(loc, 1,(float *)&color);				
+				vec3f color = m_game->get_player_color(m_owner);
+				loc = glGetUniformLocation(gl_shader_object(shader_t), "color");
+				glUniform3fv(loc, 1,(float *)&color);				
 
-			float use_alpha = -1;
-			loc = glGetUniformLocation(gl_shader_object(shader_t), "use_alpha");
-			glUniform1f(loc,use_alpha);
+				float use_alpha = -1;
+				loc = glGetUniformLocation(gl_shader_object(shader_t), "use_alpha");
+				glUniform1f(loc,use_alpha);
 
-			float lighting = 1; //use lighting 
-			loc = glGetUniformLocation(gl_shader_object(shader_t), "use_lighting");
-			glUniform1f(loc,lighting);
+				float lighting = 1; //use lighting 
+				loc = glGetUniformLocation(gl_shader_object(shader_t), "use_lighting");
+				glUniform1f(loc,lighting);
 
-			float depth = -1; // normal depth 
-			loc = glGetUniformLocation(gl_shader_object(shader_t), "depth");
-			glUniform1f(loc,depth);
+				float depth = -1; // normal depth 
+				loc = glGetUniformLocation(gl_shader_object(shader_t), "depth");
+				glUniform1f(loc,depth);
+				i++;
 
-
-			de->draw_em();
-			de->unbind();
-		}
+				de->draw_em();
+				de->unbind();
+			}
 		
     } else if (FRACTION == 1 && state == msg::building_state::house_lvl1 || state == msg::building_state::house_lvl2 || state == msg::building_state::house_lvl3) {
 		draw_bbm_house();

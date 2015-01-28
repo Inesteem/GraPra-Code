@@ -62,7 +62,6 @@ void initGame(unsigned int level) {
             gameStage->m_map[r][c] = true;
         }
     }
-
 	for(unsigned int r = 0; r < y; r++) {
 		for(unsigned int c = 0; c < x; c++) {
 		
@@ -80,7 +79,6 @@ void initGame(unsigned int level) {
             }
             else if(color.x > 0.9f) { // red
                 Building *b = gameStage->spawnHouse(c, r);
-
 				msg::spawn_house sh = make_message<msg::spawn_house>();
                 sh.x = c;
                 sh.y = r;
@@ -105,7 +103,6 @@ void initGame(unsigned int level) {
             }
             else if(color.z > 0.9f) { // blue
                 Building *b = gameStage->spawnHouse(c, r);
-
                 msg::spawn_house sh = make_message<msg::spawn_house>();
                 sh.x = c;
                 sh.y = r;
@@ -158,7 +155,6 @@ void initGame(unsigned int level) {
             }
 		}
     }
-
     if(buildingPlayerIndex < client_connections::sockets) {
         cout << "Not enough buildings on level to give every player a home :(" << endl;
     }
