@@ -177,24 +177,24 @@ void standard_keyboard(unsigned char key, int x, int y)
     pos = pos - cam_pos;
       float dist = length_of_vec3f(&pos);
     switch (key) {
-    case 'e' : game->getBuilding(0)->change_size(10); break;
+//    case 'e' : game->getBuilding(0)->change_size(10); break;
     case 27:
         quit(0);
     case 'f':
 
-    //    if( dist < 60){
+        if( dist < 60){
             copy_vec3f(&tmp, &cam_dir);
             mul_vec3f_by_scalar(&tmp, &tmp, -cgl_cam_move_factor);
             add_components_vec3f(&cam_pos, &cam_pos, &tmp);
-   //     }
+        }
         break;
     case 'r':
 
-   //    if(dist > 25 ){
+       if(dist > 25 ){
             copy_vec3f(&tmp, &cam_dir);
             mul_vec3f_by_scalar(&tmp, &tmp, cgl_cam_move_factor);
             add_components_vec3f(&cam_pos, &cam_pos, &tmp);
-    //    }
+        }
         break;
     case 'a':
         if(cam_pos.x < sh->get_size().x){
