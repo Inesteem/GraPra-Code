@@ -925,19 +925,20 @@ void IconBar::init_buttons(){
 		
 		else if(i >= 8){
 			
-			model.row_col(0,0) = 0.9 * fovy;	
-			model.row_col(1,1) = 0.4 * fovy;
-			model.row_col(1,3) = y_offset;
-			model.row_col(0,3) = x_offset;
+			model.row_col(0,0) = 0.12 * fovy;
+			model.row_col(1,1) = scale_button_y;
+			model.row_col(0,3) =  0.5 * fovy - (0.4 * fovy)/2 + offset_button_y;
+			model.row_col(1,3) =  0.5 * fovy - (0.4 * fovy)/2 + 3*offset_button_y;
 			x_offset = model.row_col(0,3) + 2*x_offset;
 			if(i == 8){
 				model.row_col(0,0) = 0.4 * fovy;	
 				model.row_col(1,1) = 0.4 * fovy;
+				model.row_col(0,3) = 0.5 * fovy - (model.row_col(0,0))/2;
 				model.row_col(1,3) = 0.5 * fovy - (model.row_col(1,1))/2;
-				model.row_col(0,3) = 0.5 * fovy + (model.row_col(0,0))/2;
-				y_offset = model.row_col(1,3) - scale_button_y - offset_button_y;
-				x_offset = model.row_col(0,3) + x_offset;
 			}
+			else if( i == 10)
+				model.row_col(0,3) =  0.5 * fovy - (0.4 * fovy)/2 + 2 * offset_button_y + 0.12 * fovy;
+			
 			
 		}
 		
