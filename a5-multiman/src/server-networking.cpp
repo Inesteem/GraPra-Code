@@ -40,8 +40,8 @@ void server_message_reader::handle_message(msg::spawn_troup_client *m) {
 }
 
 void server_message_reader::handle_message(msg::building_upgrade_house *m) {
-    cout << "Upgrading building house " << m->buildingId << endl;
-    m_gameStage->upgrade_building_house(m->buildingId);
+    cout << "Upgrading building house " << (int)m->buildingId << endl;
+    m_gameStage->upgrade_building_house((int)m->buildingId);
 }
 
 void server_message_reader::handle_message(msg::building_upgrade_turret *m) {
