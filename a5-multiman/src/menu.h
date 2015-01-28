@@ -63,8 +63,7 @@ protected:
 	vector<std::string> strings = {"Host Game", "Fraktion", "Level","Color", "Players", "Join Game"};
     vector<const char*> level_names = {"Level 1","Level 2", "Level 3", "Level 4"};
 	vector<const char*> color_names = {"Color","Grey","Red", "Yellow", "Violet", "Cyan","Blue","Green", "Pink","LightBlue","PaleYellow"};
-    vector<vec3f> player_colors = { vec3f(1.,1.,1.),vec3f(0.7,0.7,0.7), vec3f(1,0,0),vec3f(1,1,0),vec3f(1,0,1),vec3f(0,1,1),vec3f(0,0,1),
-								vec3f(0,1,0),vec3f(1,0.5,1),vec3f(0.5,1,1),vec3f(1,1,0.5) };
+
 	vector<int> nums = {-1,1,1,1,1,-1};
     vector<int> max_nums = {-1,2,4,11,4,-1};
 	vector<int> min_nums = {-1,1,1,1,1,-1};
@@ -75,11 +74,11 @@ protected:
 	bool enter;
 	bool *render_menu;
 	
+    Game *m_game;
+
 public:
 
-
-
-	void init(bool *render_menu);
+    void init(Game *game, bool *render_menu);
 	//0 = paused_game, 1 = start_game, 2 = game_loose, 3 = game_won
 	void draw_background(bool blend);
 	void draw_font();
@@ -94,7 +93,6 @@ public:
 	 */
 	int get_row();
 	int get_row_max(){return max_rows;}
-	vec3f get_player_color();
 	int get_num_players();
 	int get_frac();
     unsigned int get_level();
@@ -275,9 +273,11 @@ class IconBar{
 	void draw_buttons_2();
 	void draw_building();
 	
+    Game *m_game;
+
 public: 
 
-	IconBar(int fraction);
+    IconBar(Game *game, int fraction);
 	void draw();
 	int click(int x, int y, vec3f (*ptr)(int x, int y));
 	int scale_button(int b, bool smaller);

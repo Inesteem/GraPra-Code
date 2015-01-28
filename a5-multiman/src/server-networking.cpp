@@ -51,5 +51,5 @@ void server_message_reader::handle_message(msg::building_upgrade_turret *m) {
 
 void server_message_reader::handle_message(msg::client_settings *m) {
     cout << "Got settings from player " << m->playerId << endl;
-    m_gameStage->handle_client_settings(m->playerId, m->colorId, m->frac);
+    m_gameStage->handleClientSettings(m->playerId, m->colorId, m->frac);
 }

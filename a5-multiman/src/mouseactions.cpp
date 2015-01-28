@@ -240,7 +240,7 @@ namespace moac {
 	}
 
 	void Action::init_iconbar(int fraction){
-		iconbar = new IconBar(fraction);	
+        iconbar = new IconBar(game, fraction);
 	}
 
 	void Action::update_iconbar(){

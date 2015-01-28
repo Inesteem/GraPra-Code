@@ -20,7 +20,7 @@ void Game::set_action(moac::Action *action){
 
 
 void Game::add_building(string name, int size, int x, int y, unsigned int id){
-    m_buildings.push_back(Building(m_objhandler->getObjByName(name), m_objhandler->getObjByName("selection_circle"),m_objhandler->getObjByName("upgrade_arrow"), name,x,y, -1 ,size, m_sh->get_height(x,y), id));
+    m_buildings.push_back(Building(this, m_objhandler->getObjByName(name), m_objhandler->getObjByName("selection_circle"),m_objhandler->getObjByName("upgrade_arrow"), name,x,y, -1 ,size, m_sh->get_height(x,y), id));
     m_sh->set_heights(vec2f(x,y),m_sh->get_height(x,y),size);
 	planes.push_back(vec3f(x,-1,y));		
 		
@@ -74,8 +74,8 @@ void Game::troup_arrived(unsigned int troupId){
 
 void Game::add_tree(int x, int y, int type){
 	switch(type){
-		case 1 : m_trees.push_back(Tree(m_objhandler->getObjByName("tropical_tree"),"tropical_tree",x,y,m_sh->get_height(x,y))); break;
-		default : m_trees.push_back(Tree(m_objhandler->getObjByName("tree"),"tree",x,y,m_sh->get_height(x,y)));
+        case 1 : m_trees.push_back(Tree(this, m_objhandler->getObjByName("tropical_tree"),"tropical_tree",x,y,m_sh->get_height(x,y))); break;
+        default : m_trees.push_back(Tree(this, m_objhandler->getObjByName("tree"),"tree",x,y,m_sh->get_height(x,y)));
 	}
 }
 
@@ -91,10 +91,6 @@ vector<vec3f> *Game::get_planes(){
 void Game::init(string filename, int widht, int height, int id){
     m_player_id = id;
     PLAYER_ID = id;
-    vec3f color = menu->get_player_color();
-    if(color.x != -1){
-		set_player_color(id,color);
-	}
 	
 	msg::client_settings cs = make_message<msg::client_settings>();
 	cs.playerId = id;
@@ -106,6 +102,20 @@ void Game::init(string filename, int widht, int height, int id){
     m_sh->init(filename, widht, height);
 
     m_snow = new SnowEffect(vec3f(widht * render_settings::tile_size_x / 2.0 ,10 , height * render_settings::tile_size_y / 2.0), 100);
+}
+
+vec3f Game::get_player_color(int playerId){
+    if(playerId == -1) {
+        return vec3f(0.2,0.2,0.2);
+    }
+
+    try {
+        return player_colors.at(m_color_id_for_player[playerId]);
+    } catch (...){
+
+    }
+
+    return vec3f(0.2,0.2,0.2);
 }
 
 ObjHandler* Game::get_objhandler(){
@@ -129,16 +139,16 @@ void Game::add_unit_group(unsigned int sourceId, unsigned int destinationId, uns
 
     cout << "spawning enemies at: " << start.x << "," << start.y << " count: " << count << " frac : " << frac  << endl;
     if(frac == PAC ){
-        m_unitgroups.push_back(UnitGroup(m_objhandler->getObjByName("pacman"),m_sh,"pacman",start,end,owner,count, 10000, m_sh->get_height(start.x, start.y), troupId, 0.5f,true));
+        m_unitgroups.push_back(UnitGroup(this, m_objhandler->getObjByName("pacman"),m_sh,"pacman",start,end,owner,count, 10000, m_sh->get_height(start.x, start.y), troupId, 0.5f,true));
     } else if(frac == BOMB) {
-        m_unitgroups.push_back(UnitGroup(m_objhandler->getObjByName("bomberman"),m_sh,"bomberman",start,end,owner,count,10000,m_sh->get_height(start.x, start.y), troupId, 0.5f, false));
+        m_unitgroups.push_back(UnitGroup(this, m_objhandler->getObjByName("bomberman"),m_sh,"bomberman",start,end,owner,count,10000,m_sh->get_height(start.x, start.y), troupId, 0.5f, false));
     }
 }
 
 void Game::add_stuff(unsigned int x, unsigned int y){
 	//todo: more stuff
 	//stuff.push_back(RandomStuff(m_objhandler->getObjByName("tonkrug"),"tonkrug",x,y,m_sh->get_height(x,y)));
-	stuff.push_back(RandomStuff(m_objhandler->getObjByName("plants"),"plants",x,y,m_sh->get_height(x,y), 1));
+    stuff.push_back(RandomStuff(this, m_objhandler->getObjByName("plants"),"plants",x,y,m_sh->get_height(x,y), 1));
 }
 
 

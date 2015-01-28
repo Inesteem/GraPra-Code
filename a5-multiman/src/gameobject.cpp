@@ -283,7 +283,7 @@ Obj *ObjHandler::get_selection_circle(){
 
 //GAMEOBJECT
 //represents a gameobject
-GameObject::GameObject(Obj *obj, std::string name, shader_ref shader, float height):m_obj(obj),m_name(name), m_shader(shader), m_height(height)
+GameObject::GameObject(Game* game, Obj *obj, std::string name, shader_ref shader, float height): m_game(game), m_obj(obj),m_name(name), m_shader(shader), m_height(height)
 {
     vec3f tmp = obj->bb_min + obj->bb_max;
     tmp /= 2;
@@ -334,7 +334,7 @@ void GameObject::draw(){
     }
 }
 //TREE
-Tree::Tree(Obj *obj, string name, int x, int y, float height): GameObject(obj,name, find_shader("pos+norm+tc"), height){
+Tree::Tree(Game *game, Obj *obj, string name, int x, int y, float height): GameObject(game, obj,name, find_shader("pos+norm+tc"), height){
     identifier = 't';
     m_pos = vec2f(x,y);
     vec2f add= vec2f(random_float()*0.2,random_float()*0.2);
@@ -360,7 +360,7 @@ Tree::Tree(Obj *obj, string name, int x, int y, float height): GameObject(obj,na
 
     m_model = m_model*tmp*scale;
 }
-RandomStuff::RandomStuff(Obj *obj, string name, int x, int y, float height, int type): GameObject(obj,name, find_shader("pos+norm+tc"), height), type(type){
+RandomStuff::RandomStuff(Game *game, Obj *obj, string name, int x, int y, float height, int type): GameObject(game, obj,name, find_shader("pos+norm+tc"), height), type(type){
     identifier = 'r';
     m_pos = vec2f(x,y);
     vec2f add= vec2f(random_float()*0.2,random_float()*0.2);
@@ -465,8 +465,8 @@ void RandomStuff::draw(){
 }
 
 //BUILDINGS
-Building::Building(Obj *obj,Obj *selection_circle,Obj *upgrade_arrow, string name, int x, int y, unsigned int owner,int size, float height,unsigned int id):
-    GameObject(obj, name ,find_shader("pos+norm+tc"), height), id(id),
+Building::Building(Game *game, Obj *obj,Obj *selection_circle,Obj *upgrade_arrow, string name, int x, int y, unsigned int owner,int size, float height,unsigned int id):
+    GameObject(game, obj, name ,find_shader("pos+norm+tc"), height), id(id),
     m_owner(owner) , m_size(size), selection_circle(selection_circle), upgrade_arrow(upgrade_arrow)
 
 {
@@ -499,7 +499,7 @@ Building::Building(Obj *obj,Obj *selection_circle,Obj *upgrade_arrow, string nam
     label= new Label();
     label->setup_display();
     label->update_label_pos(2*x, 2*y, height+2);
-    vec3f color = get_player_color(m_owner);
+    vec3f color = m_game->get_player_color(m_owner);
     label->set_color(color);
     label->recalculate_pos();
     labels.push_back(label);
@@ -607,7 +607,7 @@ void Building::draw(){
 			de->apply_default_matrix_uniforms();
 			de->apply_default_tex_uniforms_and_bind_textures();
 
-			vec3f color = get_player_color(m_owner);
+            vec3f color = m_game->get_player_color(m_owner);
 			loc = glGetUniformLocation(gl_shader_object(shader_t), "color");
 			glUniform3fv(loc, 1,(float *)&color);				
 
@@ -707,7 +707,7 @@ void Building::draw_bbm_house(){
 		de->apply_default_matrix_uniforms(shader_t);
 		de->apply_default_tex_uniforms_and_bind_textures(shader_t);
 		
-		vec3f color = get_player_color(m_owner);
+        vec3f color = m_game->get_player_color(m_owner);
 		loc = glGetUniformLocation(gl_shader_object(shader_t), "color");
 		glUniform3fv(loc, 1,(float *)&color);				
 
@@ -760,7 +760,7 @@ void Building::draw_pm_house(){
 //		cout << mesh_name(mesh_1) << endl;
 //		cout << de->name << endl;
 		
-		vec3f color = get_player_color(m_owner);
+        vec3f color = m_game->get_player_color(m_owner);
 		loc = glGetUniformLocation(gl_shader_object(shader_t), "color");
 		glUniform3fv(loc, 1,(float *)&color);				
 
@@ -867,7 +867,7 @@ void Building::draw_selection_circle(int size){
    // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glBlendFunc(GL_ONE, GL_ONE);
 //    glDepthMask(GL_TRUE);
-    vec3f color = get_player_color(m_owner);
+    vec3f color = m_game->get_player_color(m_owner);
     bind_shader(find_shader("selection_circle_shader"));
 
     matrix4x4f tmp;
@@ -915,7 +915,7 @@ void Building::draw_selection_circle(int size){
 
 void Building::change_owner(unsigned int owner){
     m_owner = owner;
-    vec3f color = get_player_color(m_owner);
+    vec3f color = m_game->get_player_color(m_owner);
 	label->set_color(color);    
 
     m_upgradeEffect->ChangeParticleColor(color);
@@ -924,8 +924,8 @@ void Building::change_owner(unsigned int owner){
 
 //UNITGROUP
 
-UnitGroup::UnitGroup(Obj *obj, simple_heightmap *sh, string name, vec2f start, vec2f end, unsigned int owner, unsigned int unit_count, float time_to_rech_end, float height, unsigned int m_id, float scale,bool draw_as_mesh):
-    GameObject(obj,name,find_shader("pos+norm+tc"), height),
+UnitGroup::UnitGroup(Game *game, Obj *obj, simple_heightmap *sh, string name, vec2f start, vec2f end, unsigned int owner, unsigned int unit_count, float time_to_rech_end, float height, unsigned int m_id, float scale,bool draw_as_mesh):
+    GameObject(game, obj,name,find_shader("pos+norm+tc"), height),
     m_owner(owner), m_start(start), m_end(end),
     m_unit_count(unit_count), m_sh(sh), m_id(m_id),
     m_time_to_reach_end(time_to_rech_end), m_spawned(0), m_start_b(start), m_end_b(end),m_scale(scale), draw_as_mesh(draw_as_mesh)
@@ -1121,7 +1121,7 @@ void UnitGroup::draw(){
             loc = glGetUniformLocation(gl_shader_object(m_obj->shader), "light_dir");
             glUniform3f(loc, 0.7, 1.2,0.3);
 
-            vec3f color = get_player_color(m_owner);
+            vec3f color = m_game->get_player_color(m_owner);
 
             loc = glGetUniformLocation(gl_shader_object(m_obj->shader), "color");
             glUniform3f(loc, color.x, color.y, color.z);
@@ -1159,7 +1159,7 @@ void UnitGroup::draw(){
 
             de->Modelmatrix(m_units[i].getModel());
 			de->bind();
-            vec3f color = get_player_color(m_owner);
+            vec3f color = m_game->get_player_color(m_owner);
 
             int loc = glGetUniformLocation(gl_shader_object(m_obj->shader), "p_color");
             glUniform3f(loc, color.x, color.y, color.z);
@@ -1199,7 +1199,7 @@ void UnitGroup::spawn_unit_row(unsigned int size){
 
 
 
-            m_units.push_back(Unit(pos
+            m_units.push_back(Unit(m_game,pos
                                   ,m_view_dir
                                    , vec2f(i,m_rows)
                                    ,start
@@ -1223,7 +1223,7 @@ void UnitGroup::spawn_unit_row(unsigned int size){
             vec2f end = vec2f(m_end.x + ortho.x * (float) i -  m_view_dir.x * (float) m_rows,m_end.y + ortho.y * (float) i -  m_view_dir.y * (float) m_rows) ;
 
 
-            m_units.push_back(Unit(pos
+            m_units.push_back(Unit(m_game,pos
                                   ,m_view_dir
                                    , vec2f(i,m_rows)
                                    ,start
@@ -1240,7 +1240,7 @@ void UnitGroup::spawn_unit_row(unsigned int size){
 
 // UNIT
 
-Unit::Unit(vec2f pos, vec2f view_dir, vec2f pos_group, vec2f start, vec2f end, simple_heightmap *sh, float base_height, float scale, float rot_angle, bool is_pac,unsigned int m_owner): m_pos(pos), m_view_dir(view_dir),is_pac(is_pac), m_pos_group(pos_group), m_start(start), m_end(end), m_sh(sh), m_base_height(base_height),m_owner(m_owner){
+Unit::Unit(Game *game, vec2f pos, vec2f view_dir, vec2f pos_group, vec2f start, vec2f end, simple_heightmap *sh, float base_height, float scale, float rot_angle, bool is_pac,unsigned int m_owner): m_game(game), m_pos(pos), m_view_dir(view_dir),is_pac(is_pac), m_pos_group(pos_group), m_start(start), m_end(end), m_sh(sh), m_base_height(base_height),m_owner(m_owner){
     make_unit_matrix4x4f(&m_model);
     m_model.col_major[0 * 4 + 0] = scale;
     m_model.col_major[1 * 4 + 1] = scale;
@@ -1255,7 +1255,7 @@ Unit::Unit(vec2f pos, vec2f view_dir, vec2f pos_group, vec2f start, vec2f end, s
     move = true;
 
     if(!is_pac) {
-        vec3f color = get_player_color(m_owner);
+        vec3f color = m_game->get_player_color(m_owner);
         vec3f position = vec3f(pos.x, base_height, pos.y);
         m_bombermanEffect = new BombermanEffect(position, color);
     }
@@ -1344,7 +1344,7 @@ void Unit::update(vec2f new_pos, float height){
 }
 
 
-Pacman::Pacman(Obj *obj, unsigned int owner, unsigned m_id, int height, float time) :  GameObject(obj, obj->name ,obj->shader, height), owner(owner), m_id(m_id), time(time)  {
+Pacman::Pacman(Game *game, Obj *obj, unsigned int owner, unsigned m_id, int height, float time) :  GameObject(game, obj, obj->name ,obj->shader, height), owner(owner), m_id(m_id), time(time)  {
 	
 }
 

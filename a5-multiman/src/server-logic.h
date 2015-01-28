@@ -116,12 +116,24 @@ public:
     bool Update();
 };
 
+struct Player
+{
+    unsigned int m_id;
+    bool m_fraction; // 0: pacman, 1: bomberman
+    unsigned int m_colorId;
+
+    Player(unsigned int id, bool fraction, unsigned int colorId) : m_id(id), m_fraction(fraction), m_colorId(colorId) {}
+};
+
 class GameStage
 {
 
     bool m_gameOver;
 
     vector<Army*> m_armies;
+
+    bool playerColorAvailable(unsigned int id);
+
 public:
     static unsigned int s_nextBuilding;
     static unsigned int s_nextTroup;
@@ -140,11 +152,12 @@ public:
 
     void addArmy(unsigned int sourceBuildingID, unsigned int destinationBuildingID, unsigned int unitCount);
     void addTroup(Troup *troup);
-    void handle_client_settings(unsigned int playerId, unsigned int colorId, unsigned int frac );
+    void handleClientSettings(unsigned int playerId, unsigned int colorId, unsigned int frac);
 
     unordered_map<unsigned int, Building*> m_buildings;
     unordered_map<unsigned int, Troup*> m_troups;
+
+    vector<Player> m_players;
 };
 
-   extern int player_frac[10];
 #endif

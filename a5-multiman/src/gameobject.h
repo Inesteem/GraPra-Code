@@ -59,7 +59,7 @@ private:
 };
 
 
-
+class Game;
 class GameObject
 {
 public:
@@ -77,7 +77,7 @@ public:
 	Obj *get_obj(){return m_obj;}
 
 protected:
-    GameObject(Obj *obj, std::string name, shader_ref shader, float height);
+    GameObject(Game *game, Obj *obj, std::string name, shader_ref shader, float height);
     string m_name;
     char identifier;
     Obj *m_obj;
@@ -88,16 +88,18 @@ protected:
     vector<texture_ref> textures;
     float m_height;
 
+    Game *m_game;
+
 };
 
 class Tree: public GameObject{
 public:
-    Tree(Obj *obj, string name , int x, int y, float height);
+    Tree(Game *game, Obj *obj, string name , int x, int y, float height);
 };
 
 class Building:public GameObject{
 public:
-    Building(Obj *obj, Obj *selection_circle, Obj *upgrade_arrow, string name, int x, int y, unsigned int owner, int size, float height, unsigned int id);
+    Building(Game *game, Obj *obj, Obj *selection_circle, Obj *upgrade_arrow, string name, int x, int y, unsigned int owner, int size, float height, unsigned int id);
     ~Building();
 
     void upgrade(Obj *obj, int state);
@@ -150,7 +152,7 @@ private:
 class Unit {
 
 public:
-    Unit(vec2f pos, vec2f view_dir, vec2f pos_group, vec2f start, vec2f end, simple_heightmap *sh, float base_height, float scale, float rot_angle, bool is_pac, unsigned int m_owner);
+    Unit(Game *game, vec2f pos, vec2f view_dir, vec2f pos_group, vec2f start, vec2f end, simple_heightmap *sh, float base_height, float scale, float rot_angle, bool is_pac, unsigned int m_owner);
     matrix4x4f *getModel();
     void update(vec2f new_pos,float height);
         vec2f m_pos_group;
@@ -177,6 +179,8 @@ private:
 
     matrix4x4f m_model;
 
+    Game *m_game;
+
     BombermanEffect *m_bombermanEffect = 0;
 };
 
@@ -184,7 +188,7 @@ private:
 class UnitGroup: public GameObject{
 public:
 
-    UnitGroup(Obj *obj,simple_heightmap *sh, string name, vec2f start, vec2f end, unsigned int owner, unsigned int unit_count, float time_to_rech_end, float height, unsigned m_id, float scale, bool draw_as_mesh);
+    UnitGroup(Game *game, Obj *obj,simple_heightmap *sh, string name, vec2f start, vec2f end, unsigned int owner, unsigned int unit_count, float time_to_rech_end, float height, unsigned m_id, float scale, bool draw_as_mesh);
     void update();
     void draw();
 //    void draw_mesh();
@@ -233,7 +237,7 @@ private:
 class Pacman: public GameObject{
 public:
 
-    Pacman(Obj *obj, unsigned int owner, unsigned m_id, int height, float time);
+    Pacman(Game *game, Obj *obj, unsigned int owner, unsigned m_id, int height, float time);
 	
 	void draw();
 	
@@ -247,7 +251,7 @@ private:
 
 class RandomStuff: public GameObject{
 public:
-	RandomStuff(Obj *obj, string name, int x, int y, float height, int type);	
+    RandomStuff(Game *game, Obj *obj, string name, int x, int y, float height, int type);
 	
 	void draw();
 	int type;

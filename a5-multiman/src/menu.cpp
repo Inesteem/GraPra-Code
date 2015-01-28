@@ -15,7 +15,9 @@
 #include <GL/freeglut.h>
 
 
-void Menu::init(bool *render_menu){
+void Menu::init(Game *game, bool *render_menu){
+    m_game = game;
+
 	this->render_menu = render_menu;
 	enter = false;
 
@@ -207,7 +209,7 @@ void Menu::update_label(bool choosen){
 				
  			s << color_names[nums[row]-1];	
 			if(nums[row] != 1)
-				labels[row]->set_color(player_colors[nums[row]-1]);
+                labels[row]->set_color(m_game->player_colors[nums[row]-1]);
 	
 		} else if(row == FRAKTION_ID) {
 			
@@ -243,15 +245,6 @@ int Menu::get_num_players(){
 }
 unsigned int Menu::get_level(){
     return LEVEL;
-}
-
-
-vec3f Menu::get_player_color(){
-
-	if(COLOR == 1)
-		return vec3f(1,1,1);
-		
-	return player_colors[COLOR-1];
 }
 
 int Menu::get_frac(){
@@ -396,13 +389,13 @@ MenuEntry *EntryManager::previous_entry(){
 
 
 
-IconBar::IconBar(int fraction){
+IconBar::IconBar(Game *game, int fraction) : m_game(game) {
 	this->fraction = fraction;
 	
 	vec3f cam_pos = {0,0,0}, cam_dir = {0,0,-1}, cam_up = {0,1,0};
 	cam = make_orthographic_cam((char*)"gui cam", &cam_pos, &cam_dir, &cam_up, fovy, 0, 50, 0, near, far);	
 	
-	player_color = get_player_color(PLAYER_ID);
+    player_color = m_game->get_player_color(PLAYER_ID);
 	
 	background =					find_texture("interface_pm");
 	background_menu =				find_texture("interface_pm_menu");
@@ -445,7 +438,7 @@ IconBar::IconBar(int fraction){
 void IconBar::draw(){
 	
 
-	player_color = get_player_color(PLAYER_ID);
+    player_color = m_game->get_player_color(PLAYER_ID);
 	camera_ref old_cam = current_camera();
 	use_camera(cam);
 	bind_shader(shader);

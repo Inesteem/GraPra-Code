@@ -10,22 +10,12 @@ using namespace std;
 namespace render_settings {
 	int screenres_x = 1000, screenres_y = 1000;
     float tile_size_x = 2, tile_size_y = 2;
-    float height_factor = 10;
-
-    vector<vec3f> player_colors = { vec3f(1,0,0),vec3f(1,1,0),vec3f(1,0,1),vec3f(0,1,1),vec3f(0,0,1),
-                                    vec3f(0,1,0),vec3f(1,0.5,1),vec3f(0.5,1,1),vec3f(1,1,0.5),vec3f(0.7,0.7,0.7) };
-};
-
-vec3f get_player_color(int id){
-    try {
-        return render_settings::player_colors.at(id);
-    } catch (...){
-
-    }
-
-    return vec3f(0.2,0.2,0.2);
+    float height_factor = 10; 
 }
 
+
+
+/* REMOVE
 void set_player_color(int id, vec3f color){
 	using namespace render_settings;
 	for(int i = 0; i < player_colors.size(); i++){
@@ -36,7 +26,7 @@ void set_player_color(int id, vec3f color){
 		}
 	}
 	
-}
+}*/
 
 
 void setup_dir_light(shader_ref shader) {
