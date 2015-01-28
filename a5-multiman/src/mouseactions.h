@@ -32,7 +32,6 @@
 class Building;
 class ObjHandler;
 class SlideBar;
-class StatusBar;
 class IconBar;
 class Game;
 class client_message_reader;
@@ -48,7 +47,6 @@ namespace moac {
 		Building *enemys_building;
 		bool ob_set, eb_set, prepare_attack, render_status_bar;
 		SlideBar *slidebar;
-		StatusBar *statusbar;
 		IconBar *iconbar;
 		Game *game;
         void (*ptr)();
@@ -65,7 +63,7 @@ namespace moac {
 		void draw();
 		void upgrade_settlement();
 		void upgrade_turret();
-		void check_button_clicked(int x, int y, int state);
+		int check_button_clicked(int x, int y, int state);
 		void update_iconbar();
         void reset( );
         void init_iconbar(int fraction);

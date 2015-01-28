@@ -402,7 +402,7 @@ IconBar::IconBar(int fraction){
 	vec3f cam_pos = {0,0,0}, cam_dir = {0,0,-1}, cam_up = {0,1,0};
 	cam = make_orthographic_cam((char*)"gui cam", &cam_pos, &cam_dir, &cam_up, fovy, 0, 50, 0, near, far);	
 	
-//	player_color = get_player_color(PLAYER_ID);
+	player_color = get_player_color(PLAYER_ID);
 	
 	background =					find_texture("interface_pm");
 	if(fraction == 2)
@@ -496,15 +496,17 @@ void IconBar::draw(){
 	loc = glGetUniformLocation(gl_shader_object(shader), "color");
 	glUniform3fv(loc, 1,(float *)&color);	
 	
+	
+	draw_buttons_2();
+		
+	
 	if(building_selected){
-		draw_buttons_2();
+	
 		label_1->render_gui_overlay();
 		label_2->render_gui_overlay();
 	}
 
-
 	unbind_mesh_from_gl(mesh);
-	
 	
 	unbind_shader(shader);
 
@@ -598,6 +600,25 @@ void IconBar::draw_building(){
 
 void IconBar::draw_buttons_2(){
 	
+	//menu_button
+
+	loc = glGetUniformLocation(gl_shader_object(shader), "depth");
+	glUniform1f(loc,depth_button_s);	
+
+	loc = glGetUniformLocation(gl_shader_object(shader), "model");
+	glUniformMatrix4fv(loc, 1, GL_FALSE, buttons[4].model.col_major);	
+
+	bind_texture(buttons[4].textures[buttons[4].state], 0);	
+
+	loc = glGetUniformLocation(gl_shader_object(shader), "tex");	
+	glUniform1i(loc, 0);	
+	
+	draw_mesh(mesh);	
+	
+	unbind_texture(buttons[4].textures[buttons[4].state]);	
+	
+	if(!building_selected) return;
+
 	//unit_count
 	
 	vec3f color = vec3f(-1,-1,-1);
@@ -640,9 +661,7 @@ void IconBar::draw_buttons_2(){
 
 	loc = glGetUniformLocation(gl_shader_object(shader), "tex");	
 	glUniform1i(loc, 0);	
-	
-	
-	
+
 	draw_mesh(mesh);	
 	
 	unbind_texture(buttons[0].textures[buttons[0].state]);
@@ -743,41 +762,50 @@ void IconBar::init_modelmatrices(){
 }
 
 void IconBar::init_buttons(){
-	int tex_count[4] = 					{5,5,2,4};
-	int offsets[4] = 					{1,2,2,2};
-	const char *texture_names[16] = { 	"u_b_s2","u_b_s3","nu_b_s2", "nu_b_s3", "terrain_hm",
-										"u_b_t1","u_b_t2","nu_b_t1", "nu_b_t2", "terrain_hm",
+	int tex_count[5] = 					{5,5,2,4,1};
+	int offsets[5] = 					{1,2,2,2};
+	const char *texture_names[17] = { 	"u_b_s2","u_b_s3","nu_b_s2", "nu_b_s3", "nu_b_sm",
+										"u_b_t1","u_b_t2","nu_b_t1", "nu_b_t2", "nu_b_tm",
 										"pacman_units","bbm_units",
-										"pacman_unit_production","pacman_defence","bbm_unit_production","bbm_defence"};
+										"pacman_unit_production","pacman_defence","bbm_unit_production","bbm_defence",
+										"menu"};
 	vec3f black = 						{0.1,0.1,0.1};					
 	vec3f none = 						{-1,-1,-1};				
-	bool u_a[4] = 						{false,false,false,false};
-	bool clickable[5] = 				{true,true,false,false};
-	float depth[4] = 					{depth_button_s,depth_button_t,depth_button,depth_button};
-	float depth_acc[4] = 				{depth_acc_button_s,depth_acc_button_t,depth_button,depth_button};
+	bool clickable[5] = 				{true,true,false,false, true};
+	float depth[5] = 					{depth_button_s,depth_button_t,depth_button,depth_button,depth_button_s};
+	float depth_acc[5] = 				{depth_acc_button_s,depth_acc_button_t,depth_button,depth_button,depth_acc_button_s};
 	
+
+	float x_offset = 1.5*offset_button_y;
 	
-	float x_offset = offset_button_y;
 	matrix4x4f model;
 	int j = 0;
 	
-	for(int i = 0; i < 4; i++){
+	for(int i = 0; i < 5; i++){
 		
 		make_unit_matrix4x4f(&model);
+		model.row_col(0,0) = 0.12 * fovy;	
 		model.row_col(1,1) = scale_button_y;
 		model.row_col(1,3) = offset_button_y;
 		model.row_col(0,3) = x_offset;
-
-		model.row_col(0,0) = 0.12 * fovy;	
-		
 		x_offset += model.row_col(0,0) + offsets[i]*offset_button_y;	
+	
+		if(i == 4){
+			model.row_col(0,0) = 0.09 * fovy;
+			model.row_col(1,1) = 0.04 * fovy;
+			model.row_col(0,3) = offset_button_y;
+			model.row_col(1,3) = fovy - 0.8 * scale_button_y;
+		}
 		
-		buttons.push_back(Button(model,depth[i],depth_acc[i], none, u_a[i],clickable[i]));
+		buttons.push_back(Button(model,depth[i],depth_acc[i], none, false,clickable[i]));
 		int j_max = j+tex_count[i]; 
 		for(;j < j_max; j++){
 			buttons[i].add_texture(texture_names[j]);
 			cout << i << " : " << texture_names[j] << endl;
 		}
+		
+
+		
 	}
 	if(fraction == 1)
 		buttons[2].state = 0;
@@ -795,18 +823,25 @@ int IconBar::click(int x, int y, vec3f (*ptr)(int x, int y)){
     use_camera(old_camera);
 
 
-	float rel_depth=(pos.z-near)/(far-near);
-	
+	float rel_depth = (pos.z-near)/(far-near);
+	float rel_y = pos.y/fovy;
 
 
 	if(-rel_depth >= (depth_button_s - depth_acc_button_s) && -rel_depth <= (depth_button_s + depth_acc_button_s)){
+		
+		if(rel_y > 0.5){
+			cout << "click_menu : " << rel_y << " : " << pos.y << endl;
+			return 4;
+		}
+		else {
 			cout << "click_settlement" << endl;
 			return 0;
-			
+		}	
 	}
-	else if(-rel_depth >= (depth_button_t - depth_acc_button_t) && -rel_depth <= (depth_button_t + depth_acc_button_t)){
-			cout << "click_turret" << endl;
-			return 1;
+	else if(-rel_depth >= (depth_button_t - depth_acc_button_t) && -rel_depth <= (depth_button_t + depth_acc_button_t)){	
+
+		cout << "click_turret" << endl;
+		return 1;
 	}
 
 	return -1;
@@ -832,11 +867,11 @@ int IconBar::scale_button(int b, bool smaller){
 	float scale = 0.008 * fovy * i;
 	float offset = -0.5*scale;
 
-	if( buttons[index-1].clickable && buttons[index-1].state <= 1){
-		buttons[index-1].model.row_col(0,0) += scale;
-		buttons[index-1].model.row_col(1,1) += scale;
-		buttons[index-1].model.row_col(0,3) += offset;
-		buttons[index-1].model.row_col(1,3) += offset;
+	if( buttons[index].clickable && buttons[index].state <= 1){
+		buttons[index].model.row_col(0,0) += scale;
+		buttons[index].model.row_col(1,1) += scale;
+		buttons[index].model.row_col(0,3) += offset;
+		buttons[index].model.row_col(1,3) += offset;
 
 		if(b != button_pressed && !smaller){
 			button_pressed = -1;
@@ -850,7 +885,7 @@ int IconBar::scale_button(int b, bool smaller){
 		return -1;
 	}		
 
-	return index-1;
+	return index;
 
 }
 

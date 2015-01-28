@@ -149,5 +149,6 @@ void client_message_reader::handle_message(msg::game_over *m) {
 
 void client_message_reader::handle_message(msg::spawn_random_stuff *m) {
     // TODO spawn random stuff
+    game->add_stuff(m->x, m->y);
 }
 

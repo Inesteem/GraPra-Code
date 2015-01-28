@@ -12,6 +12,7 @@
 #include <string>
 #include <iostream>
 #include <unordered_map>
+#include <cstdlib>
 
 using namespace std;
 
@@ -149,7 +150,7 @@ private:
 class Unit {
 
 public:
-    Unit(vec2f pos, vec2f view_dir, vec2f pos_group, vec2f start, vec2f end, simple_heightmap *sh, float base_height, float scale, float rot_angle, bool is_pac);
+    Unit(vec2f pos, vec2f view_dir, vec2f pos_group, vec2f start, vec2f end, simple_heightmap *sh, float base_height, float scale, float rot_angle, bool is_pac, unsigned int m_owner);
     matrix4x4f *getModel();
     void update(vec2f new_pos,float height);
         vec2f m_pos_group;
@@ -172,6 +173,7 @@ private:
     float m_cur_height;
     float m_rot_speed;
     bool last_step;
+    unsigned int m_owner;
 
     matrix4x4f m_model;
 
@@ -242,6 +244,17 @@ private:
 
 };
 
+
+class RandomStuff: public GameObject{
+public:
+	RandomStuff(Obj *obj, string name, int x, int y, float height, int type);	
+	
+	void draw();
+	int type;
+	texture_ref tex;
+	shader_ref shader;
+	
+};
 
 
 extern std::vector<Label*> labels;

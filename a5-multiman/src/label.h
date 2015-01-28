@@ -159,26 +159,6 @@ class SlideBar {
 };
 
 
-class StatusBar {
-
-	ObjHandler *objhandler;
-	shader_ref shader;
-	camera_ref camera;
-	mesh_ref mesh;
-	texture_ref texture;
-	Obj *obj;
-
-	public:
-		// Konstruktors
-		StatusBar(string name, ObjHandler *objhandler);
-		void render_statusbar();
-		void set_texture(char *name);
-
-
-		// Setters
-
-};
-
 
 
 #endif

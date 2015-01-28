@@ -253,7 +253,7 @@ class IconBar{
 	float far = 1000;
 	
 	float offset_button_y = 0.01 * fovy;
-	float scale_button_y = 0.05 * fovy;
+	float scale_button_y = 0.05 * fovy;			
 	
 	texture_ref background;
 	texture_ref picture[2];

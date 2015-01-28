@@ -69,12 +69,10 @@ namespace moac {
         this->ptr = ptr;
 
 		this->game = game;
-		this->statusbar = statusbar;
 		eb_set = false;
 		ob_set = false;
 		prepare_attack = false;
-		render_status_bar = true;
-		statusbar = new StatusBar("status_bar", objhandler);		
+		render_status_bar = true;		
 		slidebar = new SlideBar();	
 		slidebar->initialize_slidebar();	
 			
@@ -206,15 +204,15 @@ namespace moac {
 	
 	//iconbar
 	
-	void Action::check_button_clicked(int x, int y, int state){
+	int Action::check_button_clicked(int x, int y, int state){
 		
 		int button = iconbar->click(x,y,ClickWorldPosition);
 		if(state == 0){//down
-				iconbar->scale_button(button+1, true);
-				return;
+				iconbar->scale_button(button, true);
+				return button;
 		}
 		
-		int button_pressed = iconbar->scale_button(button+1, false);
+		int button_pressed = iconbar->scale_button(button, false);
 		switch(button_pressed){
 			//settlement
 			case 0 : upgrade_settlement(); 
@@ -223,9 +221,11 @@ namespace moac {
 			case 1 : upgrade_turret();
 					break;
 			
-			default : return;
+			case 4: break;//todo render menu
+			
+			default : return -1;
 		}
-		
+		return button;
 		
 	}
 

@@ -135,6 +135,13 @@ void Game::add_unit_group(unsigned int sourceId, unsigned int destinationId, uns
     }
 }
 
+void Game::add_stuff(unsigned int x, unsigned int y){
+	//todo: more stuff
+	//stuff.push_back(RandomStuff(m_objhandler->getObjByName("tonkrug"),"tonkrug",x,y,m_sh->get_height(x,y)));
+	stuff.push_back(RandomStuff(m_objhandler->getObjByName("plants"),"plants",x,y,m_sh->get_height(x,y), 1));
+}
+
+
 void Game::upgrade_building(unsigned int buildingId, unsigned int state, FRACTIONS frac){
     for(int i = 0; i < m_buildings.size(); i++){
 		if(m_buildings[i].get_id() == buildingId){
@@ -213,6 +220,10 @@ void Game::draw(){
     }
     for(int i = 0; i < m_buildings.size(); ++i){
         m_buildings[i].draw();
+    }
+    
+    for(int i = 0; i < stuff.size(); ++i){
+        stuff[i].draw();
     }
 
 

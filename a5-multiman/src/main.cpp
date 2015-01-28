@@ -42,49 +42,146 @@
 #include <sys/types.h>
 #include <stdlib.h> 
 #include <stdio.h> 
+#include <thread>
+#include <mutex>
 
 using namespace std;
 using namespace moac;
-
-void init_framebuffer();
-void init_matrices();
-
-framebuffer_ref the_fbuf;
-texture_ref shadowmap;
-texture_ref color;
-
-matrix4x4f *T;
-char hostName[1024];
-char hostname[1024];
-//char *hostName;
-
-
-int fraction = 1;
-Action *action;
-Menu *menu;
-
-// TODO REVMOVE
-UpgradeEffect *testEffect;
-
 #define doc(X)
 
+//functions
+void init_framebuffer();
+void init_matrices();
 void render_gui_overlay(bool gameover);
-//heightmap *the_heightmap;
+void actual_main();
+void reset();
+
+//important game logic bools
+bool standard_mouse = false;
+bool wireframe = false;
+bool screenshot = false;
+bool render_menu = true;
+static bool reload_pending = false;
+
+//loop   
+    static wall_time_timer key_timer;
+    static int frames = 0;
+    static wall_time_timer frames_timer;
+
+
+
+// TODO REMOVE
+UpgradeEffect *testEffect;
+
+
+//important game logic pointer
 simple_heightmap *sh;
 ObjHandler *objhandler;
 Game *game;
 client_message_reader *messageReader;
+Action *action;
+Menu *menu = nullptr;
 
-bool standard_mouse = false;
+//keys
 unsigned char navi_key = 0;
 unsigned char key_to_move_up = 'i',
 key_to_move_down = 'k',
 key_to_move_left = 'j',
 key_to_move_right = 'l';
 
-bool wireframe = false;
-bool screenshot = false;
-bool render_menu = true;
+
+//stuff
+framebuffer_ref the_fbuf;
+texture_ref shadowmap;
+texture_ref color;
+matrix4x4f *T;
+char hostname[1024];
+int fraction = 1;
+
+thread *t;
+mutex load_mutex;
+list<const char *> obj_to_load = { 
+	"tree", 				"./render-data/models/tree.obj",				"pos+norm+tc",
+    "tropical_tree", 		"./render-data/models/tropical_tree.obj", 		"pos+norm+tc",
+    "building_lot", 		"./render-data/models/building_lot.obj", 		"alpha-color-shader",
+    "upgrade_arrow",	 	"./render-data/models/cube.obj", 				"alpha-color-shader",
+    "house_pacman_lvl1", 	"./render-data/models/siedlung.obj", 			"alpha-color-shader",
+    "house_pacman_lvl2",	"./render-data/models/siedlung_lvl2.obj",		"alpha-color-shader",
+    "house_pacman_lvl3",	"./render-data/models/siedlung_lvl3.obj", 		"alpha-color-shader",
+    "house_bbm_lvl1", 		"./render-data/models/house_bbm_lvl1.obj",		"alpha-color-shader",
+    "house_bbm_lvl2", 		"./render-data/models/house_bbm_lvl2.obj",		"alpha-color-shader",
+    "house_bbm_lvl3", 		"./render-data/models/house_bbm_lvl3.obj",		"alpha-color-shader",
+    "turret_bbm_lvl1", 		"./render-data/models/tower_bbm_lvl1.obj", 		"alpha-color-shader",
+    "turret_pacman_lvl1", 	"./render-data/models/simple_tower_pacman.obj", "pos+norm+tc",
+    "bomberman",			"./render-data/models/bbm-nolegs.obj",			"unit-shader",
+    "tonkrug",				"./render-data/models/tonkrug.obj",				"alpha-color-shader",
+    "plants", 				"./render-data/models/plants.obj", 				"plant-shader"
+
+	}; 
+ 
+void load_obj() {
+	while(!obj_to_load.empty()){
+		load_mutex.lock();
+		
+		if(obj_to_load.size() == 0)
+			return;
+		
+		const char *name = obj_to_load.front();
+		obj_to_load.pop_front();
+		
+		
+		const char *path = obj_to_load.front();
+		obj_to_load.pop_front();
+		const char *shader = obj_to_load.front();
+		obj_to_load.pop_front();
+		
+		cout << name << " " << path << " " << shader << endl;
+		
+		load_mutex.unlock();
+		
+		objhandler->addObj(name, path, find_shader(shader));
+	}
+ 
+}
+
+void start_threads(bool start_threads){
+	
+	if(start_threads){
+		
+		thread threads[1];
+		
+		for(int i = 0;i<1;i++){
+			threads[i] = thread (load_obj);	
+		}
+
+		for(int i = 0;i<1;i++){
+			threads[i].join();	
+		}
+	} else
+		load_obj();
+
+	vector<string> filenames;
+    filenames.push_back("./render-data/models/pacman_1.obj");
+    filenames.push_back("./render-data/models/pacman_2.obj");
+    objhandler->makeObjFMS(filenames,"pacman",find_shader("ip2-shader"));
+
+
+
+    mesh_ref mesh = make_mesh("selection_circle",2);
+    vector<vec3f> pos = { vec3f(0,0,0) , vec3f(1,0,0), vec3f(1,0,1) , vec3f(0,0,1) };
+    vector<vec2f> tc = { vec2f(0,0), vec2f(0,1), vec2f(1,1), vec2f(1,0) } ;
+    vector<unsigned int> index =  { 0 ,1 ,2 , 2 ,3 ,0 };
+    bind_mesh_to_gl(mesh);
+    add_vertex_buffer_to_mesh(mesh, "in_pos", GL_FLOAT, 4, 3, (float*) pos.data() , GL_STATIC_DRAW);
+    add_vertex_buffer_to_mesh(mesh, "in_tc", GL_FLOAT, 4, 2, (float*) tc.data() , GL_STATIC_DRAW);
+    add_index_buffer_to_mesh(mesh, index.size(), (unsigned int *) index.data(), GL_STATIC_DRAW);
+    unbind_mesh_from_gl(mesh);
+    objhandler->addMeshObj("selection_circle",mesh,find_shader("selection_circle_shader"),find_texture("selection_circle.png") );
+	
+}
+
+
+
 
 SCM_DEFINE(s_set_keymap, "define-keymap", 1, 0, 0, (SCM str), "") {
     cout << "def km" << endl;
@@ -101,7 +198,6 @@ SCM_DEFINE(s_set_keymap, "define-keymap", 1, 0, 0, (SCM str), "") {
     return SCM_BOOL_T;
 }
 
-static bool reload_pending = false;
 
 
 void mouse_move(int x, int y) {
@@ -128,8 +224,8 @@ void mouse(int button, int state, int x, int y) {
     } else {
         if(button == GLUT_LEFT_BUTTON){ //eigene Gebaeude auswaehlen
             if(state == GLUT_DOWN){
-                action->handle_base_selection(x,y);
-                action->check_button_clicked(x,y, 0);
+                if(action->check_button_clicked(x,y, 0) == -1)
+					action->handle_base_selection(x,y);
             }else
                 action->check_button_clicked(x,y, 1);
 
@@ -150,11 +246,7 @@ void mouse(int button, int state, int x, int y) {
         else if(button == 4 && state != GLUT_DOWN)
             standard_keyboard('f', x, y);
 
-        
     }
-
-
-
 }
 
 void reset_labels(){
@@ -264,12 +356,15 @@ void menu_keyhandler(unsigned char key, int state){
                 index_hostname--;
         }
         menu->set_hostname(hostname);
+        break;
 
         //Enter
         //host game
     case 13 : if(menu->get_row() == 0){
             game->set_fraction(menu->get_frac());
 			action->init_iconbar(menu->get_frac());
+			
+			
             pid_t pID = fork();
 
             unsigned int level = menu->get_level();
@@ -310,17 +405,16 @@ void menu_keyhandler(unsigned char key, int state){
                 render_menu = false;
                 menu->reset_menu();
             }
-
         }
         //join game
         if(menu->get_row() == menu->get_row_max()-1){
-			action->init_iconbar(menu->get_frac());
             if(eingabe==0){
                 eingabe = 1;
                 hostname[index_hostname] = '<';
                 menu->set_enter(true);
                 menu->set_hostname(hostname);
             } else {
+				action->init_iconbar(menu->get_frac());
                 hostname[index_hostname] = '\0';
                 cout << ">" << hostname << "<" << endl;
                 //todo: fehlerbehandlung
@@ -330,7 +424,6 @@ void menu_keyhandler(unsigned char key, int state){
                 reset_hostname();
             }
 
-
         }
 
         if(menu->get_row() == -1){
@@ -339,7 +432,7 @@ void menu_keyhandler(unsigned char key, int state){
 
         break;
         //esc
-    case 27 : exit(0);
+    case 27 : exit(0); break;
 
     default : if(eingabe == 1 && index_hostname < max_length){
             hostname[index_hostname] = key;
@@ -457,8 +550,8 @@ struct render_time_table {
     }
 };
 
+    render_time_table render_timer; 
 void loop() {
-
 
     //
     // administrative
@@ -469,12 +562,12 @@ void loop() {
         reload_pending = false;
     }
 
-    render_time_table render_timer;
+//    render_time_table render_timer;
     render_timer.start_frame();
 
-    static wall_time_timer key_timer;
-    static int frames = 0;
-    static wall_time_timer frames_timer;
+//    static wall_time_timer key_timer;
+//    static int frames = 0;
+//    static wall_time_timer frames_timer;
     ++frames;
     float t = frames_timer.look(); // in ms
     if (t >= wall_time_timer::sec(1)) {
@@ -489,9 +582,8 @@ void loop() {
 
     render_timer.done_with("keys");
 
-    if(!render_menu) {
-        messageReader->read_and_handle();
-    }
+    messageReader->read_and_handle();
+ 
 
     //
     // update logic
@@ -581,14 +673,10 @@ void loop() {
     use_camera(find_camera("playercam"));
 
 
-    if(messageReader->m_init_done) {
-        game->draw();
-        action->draw();
-        testEffect->Render();
-    }
-    if(render_menu){
-        menu->draw(false);
-    }
+	game->draw();
+	action->draw();
+	testEffect->Render();
+
     render_timer.done_with("draw");
 
     //
@@ -635,9 +723,78 @@ void reset(){
     game->set_action(action);
 }
 
+void simple_loop(){
+			//
+		// administrative
+		//
+
+
+//		render_time_table render_timer;
+		render_timer.start_frame();
+
+//		static wall_time_timer key_timer;
+//		static int frames = 0;
+//		static wall_time_timer frames_timer;
+		++frames;
+		float t = frames_timer.look(); // in ms
+		if (t >= wall_time_timer::sec(1)) {
+			float per_sec = (frames*1000.0f)/t;
+			fps_buf[fps_id++%5] = per_sec;
+		}
+
+		if (key_timer.look() > wall_time_timer::msec(20)) {
+			check_navigation_keys();
+			key_timer.restart();
+		}
+
+		render_timer.done_with("keys");
+
+		use_camera(find_camera("playercam"));
+
+
+			
+		glClearColor(0,0,0,1);
+
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		if (wireframe)
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		else
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+
+		render_timer.done_with("draw");
+
+	
+		if(!render_menu) {
+				
+			messageReader->read_and_handle();
+			if(messageReader->m_init_done){
+				register_display_function(loop);
+				register_idle_function(loop); 
+			}
+		
+		
+		} else
+			menu->draw(false);
+		
+
+
+		//
+		// finishing up
+		//
+		check_for_gl_errors("display");
+		swap_buffers();
+
+		render_timer.done_with("swap");
+	
+	
+}
 
 
 void actual_main() {
+
+
+
     register_scheme_functions_for_key_handling();
     load_configfile("multiman.scm");
     cout << "cfg done" << endl;
@@ -648,8 +805,8 @@ void actual_main() {
 
     glutSpecialFunc(special_keyhandler);
 
-    register_display_function(loop);
-    register_idle_function(loop);
+    register_display_function(simple_loop);
+    register_idle_function(simple_loop);
     register_keyboard_function(keyhandler);
     register_keyboard_up_function(keyhandler_up);
 
@@ -657,114 +814,44 @@ void actual_main() {
     register_mouse_motion_function(mouse_move);
     glutIgnoreKeyRepeat(1);
 
-    //use_camera(find_camera("playercam"));
-
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
     glClearDepth(1.0);
 
-
-    //
-    // further initializations may go here
-    //
-    //the_heightmap = new heightmap("./render-data/images/eire.png", 6);
-    objhandler = new ObjHandler();
-    objhandler->addObj("tree", "./render-data/models/tree.obj", find_shader("pos+norm+tc"));
-    objhandler->addObj("tropical_tree", "./render-data/models/tropical_tree.obj", find_shader("pos+norm+tc"));
-    objhandler->addObj("building_lot", "./render-data/models/building_lot.obj", find_shader("alpha-color-shader"));
-    objhandler->addObj("upgrade_arrow", "./render-data/models/cube.obj", find_shader("alpha-color-shader"));
-    objhandler->addObj("house_pacman_lvl1", "./render-data/models/siedlung.obj", find_shader("alpha-color-shader"));
-    objhandler->addObj("house_pacman_lvl2", "./render-data/models/siedlung_lvl2.obj", find_shader("alpha-color-shader"));
-    objhandler->addObj("house_pacman_lvl3", "./render-data/models/siedlung_lvl3.obj", find_shader("alpha-color-shader"));
-    objhandler->addObj("house_bbm_lvl1", "./render-data/models/house_bbm_lvl1.obj", find_shader("alpha-color-shader"));
-    objhandler->addObj("house_bbm_lvl2", "./render-data/models/house_bbm_lvl2.obj", find_shader("alpha-color-shader"));
-    objhandler->addObj("house_bbm_lvl3", "./render-data/models/house_bbm_lvl3.obj", find_shader("alpha-color-shader"));
-    objhandler->addObj("turret_bbm_lvl1", "./render-data/models/tower_bbm_lvl1.obj", find_shader("alpha-color-shader"));
-    objhandler->addObj("turret_pacman_lvl1", "./render-data/models/simple_tower_pacman.obj", find_shader("pos+norm+tc"));
-    objhandler->addObj("bomberman","./render-data/models/bbm-nolegs.obj",find_shader("unit-shader"));
-    vector<string> filenames;
-    filenames.push_back("./render-data/models/pacman_1.obj");
-    filenames.push_back("./render-data/models/pacman_2.obj");
-    objhandler->makeObjFMS(filenames,"pacman",find_shader("ip2-shader"));
-    //      objhandler->addObj("house_pacman", "./render-data/models/house_pacman.obj", find_shader("pos+norm+tc"));
-
-
-
-    mesh_ref mesh = make_mesh("selection_circle",2);
-    vector<vec3f> pos = { vec3f(0,0,0) , vec3f(1,0,0), vec3f(1,0,1) , vec3f(0,0,1) };
-    vector<vec2f> tc = { vec2f(0,0), vec2f(0,1), vec2f(1,1), vec2f(1,0) } ;
-    vector<unsigned int> index =  { 0 ,1 ,2 , 2 ,3 ,0 };
-    bind_mesh_to_gl(mesh);
-    add_vertex_buffer_to_mesh(mesh, "in_pos", GL_FLOAT, 4, 3, (float*) pos.data() , GL_STATIC_DRAW);
-    add_vertex_buffer_to_mesh(mesh, "in_tc", GL_FLOAT, 4, 2, (float*) tc.data() , GL_STATIC_DRAW);
-    // add_vertex_buffer_to_mesh(m_mesh, "in_normal", GL_FLOAT, m_width*m_height, 3,nullptr, GL_STATIC_DRAW );
-    add_index_buffer_to_mesh(mesh, index.size(), (unsigned int *) index.data(), GL_STATIC_DRAW);
-    unbind_mesh_from_gl(mesh);
-    objhandler->addMeshObj("selection_circle",mesh,find_shader("selection_circle_shader"),find_texture("selection_circle.png") );
-
-    objhandler->addObj("status_bar", "./render-data/models/menu.obj", find_shader("menu-shader"), vec3f(-1,-1,-1), vec3f(1,1,1));
-    //      objhandler->addObj("status_bar", "./render-data/models/menu.obj", find_shader("menu-shader"));
-    //       objhandler->addObj("tree", "./render-data/models/menu.obj", find_shader("pos+norm+tc"));
-    //  objhandler->addObj("bomb","./render-data/models/bbm.obj", find_shader("pos+norm+tc"));
-
-    sh = new simple_heightmap();
-
-    menu   = new Menu();
-    menu->init(&render_menu);
-    menu->set_mode(menu->GAMESTART);
-
-
-    game = new Game(objhandler,sh, messageReader,menu);
-
-    messageReader = new client_message_reader(game);
-
-
     // set different cursors
-
     glutSetCursor(GLUT_CURSOR_INFO);
 
     // Dark blue background
     glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
+	
+	if(menu == nullptr){	
+		menu   = new Menu();
+		menu->init(&render_menu);
+		menu->set_mode(menu->GAMESTART);
+	}
+	
+    objhandler = new ObjHandler();   
+//	t = new thread(start_threads,true);  
+//	t->join();
+//	delete t;
+	start_threads(false);
 
-    action = new Action(game, objhandler,&reset);
-    game->set_action(action);
-
-    // TODO REMOVE
     vec3f o = vec3f(0,10,0);
     vec3f c = vec3f(0, 1, 0);
     testEffect = new UpgradeEffect(o, c);
 
     init_framebuffer();
-
-    //
-    // pass control to the renderer. won't return.
-    //
+    sh = new simple_heightmap();
+    game = new Game(objhandler,sh, messageReader,menu);
+    messageReader = new client_message_reader(game);
+    action = new Action(game, objhandler,&reset);
+    game->set_action(action);	
+		
     enter_glut_main_loop();
-    
-
 }
 
 
-int main(int argc, char **argv)
-{
-    //parse_cmdline(argc, argv);
-
-    hostName[1023] = '\0';
-
-    if(argc == 2) {
-        //cout << "Usage: ./multiman <host name>" << endl;
-        // exit(0);
-        int i = 0;
-        do{
-            hostName[i] = argv[1][i];
-            i++;
-        }while(argv[1][i] != '\0');
-
-
-    } else
-        gethostname(hostName, 1023);
-    //		hostName = argv[1];
-
+int main(int argc, char **argv) {
 
     render_settings::screenres_x = cmdline.res_x;
     render_settings::screenres_y = cmdline.res_y;

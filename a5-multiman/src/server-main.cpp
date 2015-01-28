@@ -73,7 +73,6 @@ void initGame(unsigned int level) {
                 msg::spawn_random_stuff srs = make_message<msg::spawn_random_stuff>();
                 srs.x = c;
                 srs.y = r;
-
                 broadcast(&srs);
             }
             else if(color.x > 0.9f) { // red

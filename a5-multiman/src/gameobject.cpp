@@ -2,11 +2,13 @@
 #include "gameobject.h"
 
 #include "label.h"
+#include "mutex"
 #include "limits"
 #include <cmath>
 
 
 std::vector<Label*> labels;
+mutex obj_mutex;
 
 //wrapper for objloader
 Obj::Obj(string name, int id, string filename, shader_ref shader):id(id),name(name),shader(shader){
@@ -182,26 +184,58 @@ ObjHandler::ObjHandler(){
 
 //adds an .obj
 void ObjHandler::addObj_changeable(string name, string filename, shader_ref shader, int changes){
-    objs.push_back(Obj(name,objs.size(),filename, shader, changes));	
+	
+	Obj o(name,objs.size(),filename, shader, changes);
+	
+	obj_mutex.lock();
+		objs.push_back(o);
+	obj_mutex.unlock();	
 }
 void ObjHandler::addObj(string name, string filename, shader_ref shader){
 
-    objs.push_back(Obj(name,objs.size(),filename, shader));
+    Obj o(name,objs.size(),filename, shader);
+	obj_mutex.lock();
+		objs.push_back(o);
+	obj_mutex.unlock();	
+
 }
 void ObjHandler::addObj(string name, string filename, shader_ref shader, vec3f bb_min, vec3f bb_max){
 
-    objs.push_back(Obj(name,objs.size(),filename, shader, bb_min, bb_max));
+    Obj o(name,objs.size(),filename, shader, bb_min, bb_max);
+
+	obj_mutex.lock();
+		objs.push_back(o);
+	obj_mutex.unlock();	
+
 }
 
 void ObjHandler::addObj_withScale(string name, string filename, shader_ref shader, vec3f scale){
-    objs.push_back(Obj(name,objs.size(),filename,shader,scale));
+    
+    Obj o(name,objs.size(),filename,shader,scale);
+
+	obj_mutex.lock();
+		objs.push_back(o);
+	obj_mutex.unlock();	
+
 }
 
 void ObjHandler::addMeshObj(string name, mesh_ref mesh, shader_ref shader, texture_ref tex){
-    objs.push_back(Obj(name, objs.size(), mesh, tex, shader));
+
+
+    Obj o(name, objs.size(), mesh, tex, shader);
+
+	obj_mutex.lock();
+		objs.push_back(o);
+	obj_mutex.unlock();	
+
 }
 void ObjHandler::makeObjFMS(vector<string> filenames, string name, shader_ref shader){
-    objs.push_back(Obj(name,objs.size(),filenames, shader));
+    Obj o(name,objs.size(),filenames, shader);
+
+	obj_mutex.lock();
+		objs.push_back(o);
+	obj_mutex.unlock();	
+
 }
 
 
@@ -325,6 +359,109 @@ Tree::Tree(Obj *obj, string name, int x, int y, float height): GameObject(obj,na
 
 
     m_model = m_model*tmp*scale;
+}
+RandomStuff::RandomStuff(Obj *obj, string name, int x, int y, float height, int type): GameObject(obj,name, find_shader("pos+norm+tc"), height), type(type){
+    identifier = 'r';
+    m_pos = vec2f(x,y);
+    vec2f add= vec2f(random_float()*0.2,random_float()*0.2);
+    m_pos = m_pos+add;
+    matrix4x4f scale;
+    make_unit_matrix4x4f(&scale);
+    float scale_factor = (random_float()*0.5)+0.5;
+    scale.col_major[0 * 4 + 0] =  scale_factor;
+    scale.col_major[1 * 4 + 1] =  scale_factor;
+    scale.col_major[2 * 4 + 2] =  scale_factor;
+    vec4f t = vec4f(m_center.x,m_center.y,m_center.z,0);
+    t = scale * t;
+    m_center = vec3f(t.x,t.y,t.z);
+    m_model.col_major[3 * 4 + 0] = m_pos.x*render_settings::tile_size_x;
+    m_model.col_major[3 * 4 + 1] = m_center.y + m_height;
+    m_model.col_major[3 * 4 + 2] = m_pos.y*render_settings::tile_size_y;
+
+    matrix4x4f tmp;
+    make_unit_matrix4x4f(&tmp);
+    vec3f axis = vec3f(0,1,0);
+    make_rotation_matrix4x4f(&tmp,&axis,M_PI*random_float());
+
+    m_model = m_model*tmp*scale;
+    
+    int r = rand() % 13 + 1;
+    
+    if(type == 1){//plant
+		switch(r){
+			case 1 : tex = find_texture("plant_1"); cout << "plant_1 added" << endl; break;
+			case 2 : tex = find_texture("plant_2"); cout << "plant_2 added" << endl; break;
+			case 3 : tex = find_texture("plant_3"); cout << "plant_3 added" << endl; break;
+			case 4 : tex = find_texture("plant_4"); cout << "plant_4 added" << endl; break;
+			case 5 : tex = find_texture("plant_5"); cout << "plant_5 added" << endl; break;
+			case 6 : tex = find_texture("plant_6"); cout << "plant_6 added" << endl; break;
+			case 7 : tex = find_texture("plant_7"); cout << "plant_7 added" << endl; break;
+			case 8 : tex = find_texture("plant_8"); cout << "plant_8 added" << endl; break;
+			case 9 : tex = find_texture("plant_9"); cout << "plant_9 added" << endl; break;
+			case 10 : tex = find_texture("plant_10"); cout << "plant_10 added" << endl; break;
+			case 11 : tex = find_texture("plant_11"); cout << "plant_11 added" << endl; break;
+			case 12 : tex = find_texture("plant_12"); cout << "plant_12 added" << endl; break;
+			default : tex = find_texture("plant_13"); cout << "plant_13 added" << endl; break;	
+			
+		}
+		shader = find_shader("plant-shader");
+		
+	}
+    
+}
+
+void RandomStuff::draw(){
+	
+	int loc;
+	bind_shader(shader);
+
+
+	glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    
+	for (vector<drawelement*>::iterator it = m_obj->drawelements->begin(); it != m_obj->drawelements->end(); ++it) {
+		drawelement *de = *it;
+		
+		float use_alpha = 2;// dont use alpha for all objects but those with playercolor
+		
+		if(index_buffer_length_of_mesh((de->meshes.front())) == 6)
+			use_alpha = 1;
+		
+		de->Modelmatrix(&m_model);
+		setup_dir_light(shader);
+		de->apply_default_matrix_uniforms(shader);
+		de->apply_default_tex_uniforms_and_bind_textures(shader);
+	
+
+		bind_texture(tex, 0);
+		loc = glGetUniformLocation(gl_shader_object(shader), "diffuse_tex");
+		glUniform1i(loc, 0);	
+		
+//		vec3f color = vec3f(0.9,0.2,0.2);
+//		loc = glGetUniformLocation(gl_shader_object(shader_t), "color");
+//		glUniform3fv(loc, 1,(float *)&color);				
+
+//		loc = glGetUniformLocation(gl_shader_object(shader_t), "use_alpha");
+//		glUniform1f(loc,use_alpha);
+
+//		float lighting = 1; //use lighting (except objects with playercolor)
+//		loc = glGetUniformLocation(gl_shader_object(find_shader("alpha-color-shader")), "use_lighting");
+//		glUniform1f(loc,lighting);
+
+//		float depth = -1; // normal depth 
+//		loc = glGetUniformLocation(gl_shader_object(find_shader("alpha-color-shader")), "depth");
+//		glUniform1f(loc,depth);
+
+
+		de->draw_em();
+		de->unbind();
+		unbind_texture(tex);
+	}	
+
+	glDisable(GL_BLEND);
+	unbind_shader(shader);
+	
+	
 }
 
 //BUILDINGS
@@ -489,7 +626,6 @@ void Building::draw(){
 
 			de->draw_em();
 			de->unbind();
-			i++;
 		}
 		
     } else if (FRACTION == 1 && state == msg::building_state::house_lvl1 || state == msg::building_state::house_lvl2 || state == msg::building_state::house_lvl3) {
@@ -1069,7 +1205,7 @@ void UnitGroup::spawn_unit_row(unsigned int size){
                                    ,start
                                    ,end
                                    ,m_sh
-                                  , m_center.y, m_scale,rot, is_pac));
+                                  , m_center.y, m_scale,rot, is_pac,m_owner));
             m_spawned++;
 
         }
@@ -1093,7 +1229,7 @@ void UnitGroup::spawn_unit_row(unsigned int size){
                                    ,start
                                    ,end
                                    ,m_sh
-                                  , m_center.y, m_scale, rot, is_pac));
+                                  , m_center.y, m_scale, rot, is_pac,m_owner));
             m_spawned++;
 
         }
@@ -1104,7 +1240,7 @@ void UnitGroup::spawn_unit_row(unsigned int size){
 
 // UNIT
 
-Unit::Unit(vec2f pos, vec2f view_dir, vec2f pos_group, vec2f start, vec2f end, simple_heightmap *sh, float base_height, float scale, float rot_angle, bool is_pac): m_pos(pos), m_view_dir(view_dir),is_pac(is_pac), m_pos_group(pos_group), m_start(start), m_end(end), m_sh(sh), m_base_height(base_height){
+Unit::Unit(vec2f pos, vec2f view_dir, vec2f pos_group, vec2f start, vec2f end, simple_heightmap *sh, float base_height, float scale, float rot_angle, bool is_pac,unsigned int m_owner): m_pos(pos), m_view_dir(view_dir),is_pac(is_pac), m_pos_group(pos_group), m_start(start), m_end(end), m_sh(sh), m_base_height(base_height),m_owner(m_owner){
     make_unit_matrix4x4f(&m_model);
     m_model.col_major[0 * 4 + 0] = scale;
     m_model.col_major[1 * 4 + 1] = scale;
@@ -1119,7 +1255,7 @@ Unit::Unit(vec2f pos, vec2f view_dir, vec2f pos_group, vec2f start, vec2f end, s
     move = true;
 
     if(!is_pac) {
-        vec3f color = get_player_color(PLAYER_ID);
+        vec3f color = get_player_color(m_owner);
         vec3f position = vec3f(pos.x, base_height, pos.y);
         m_bombermanEffect = new BombermanEffect(position, color);
     }
