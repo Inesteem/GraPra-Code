@@ -111,8 +111,6 @@ void GameStage::handleClientSettings(unsigned int playerId, unsigned int colorId
 
 void GameStage::Update()
 {
-	
-	
     if(m_gameOver) return;
 
     int winner = checkGameOver();
@@ -196,13 +194,17 @@ void GameStage::addArmy(unsigned int sourceBuildingID, unsigned int destinationB
 Army::Army(GameStage *gameStage, Building *sourceBuilding, Building *destinationBuilding, unsigned int unitCount)
     : GameObject(gameStage, 0, 0, 0)
 {
+    PathNode sourceNode(sourceBuilding->m_x, sourceBuilding->m_y);
+    PathNode destinationNode(destinationBuilding->m_x, destinationBuilding->m_y);
+    Path *path = new Path(gameStage, sourceNode, destinationNode, gameStage->m_mapX, gameStage->m_mapY);
+
     int unitsLeft = unitCount;
 
     for(;;) {
         int troupUnits = unitsLeft > s_maxTroupSize ? s_maxTroupSize : unitsLeft;
         cout << "creating troup, size: " << troupUnits << endl;
         unitsLeft -= s_maxTroupSize;
-        Troup *t = new Troup(gameStage, sourceBuilding, destinationBuilding, troupUnits, GameStage::s_nextTroup++);
+        Troup *t = new Troup(gameStage, path, sourceBuilding, destinationBuilding, troupUnits, GameStage::s_nextTroup++);
         m_toSpawn.push_back(t);
 
         if(unitsLeft <= 0) break;
@@ -347,43 +349,37 @@ void GameStage::upgrade_building_turret(unsigned int buildingId){
     m_buildings[buildingId]->KillUnits(units);
 }
 
-Troup::Troup(GameStage *gameStage, Building *sourceBuilding, Building *destinationBuilding, unsigned int unitCount, unsigned int id)
-    : GameObject(gameStage, 0, 0, id), m_unitCount(unitCount), m_source(sourceBuilding), m_destination(destinationBuilding)
+Troup::Troup(GameStage *gameStage, Path *path, Building *sourceBuilding, Building *destinationBuilding, unsigned int unitCount, unsigned int id)
+    : GameObject(gameStage, 0, 0, id), m_path(path), m_unitCount(unitCount), m_source(sourceBuilding), m_destination(destinationBuilding)
 {
     m_x = sourceBuilding->m_x;
     m_y = sourceBuilding->m_y;
 
-    PathNode sourceNode(sourceBuilding->m_x, sourceBuilding->m_y);
-
-    PathNode destinationNode(destinationBuilding->m_x, destinationBuilding->m_y);
-
-    m_path = new Path(this, sourceNode, destinationNode, gameStage->m_mapX, gameStage->m_mapY);
-
     m_stepTimer.start();
+
+    m_currentDestination = 0;
 }
 
 bool Troup::NextDestination()
 {
-    PathNode currentDestination = m_path->m_nodes.front();
-    m_path->m_nodes.pop_front();
+    m_currentDestination++;
+
+    if(m_currentDestination >= m_path->m_nodes.size() - 1) {
+
+        // arrived at destination
+        cout << "Troup " << m_id << " arrived at destination." << endl;
+        return true;
+    }
+
+    PathNode currentDestination = m_path->m_nodes.at(m_currentDestination);
+    //m_path->m_nodes.pop_front();
 
     m_x = currentDestination.mapX;
     m_y = currentDestination.mapY;
 
-    PathNode nextDestination = m_path->m_nodes.front();
+    PathNode nextDestination = m_path->m_nodes.at(m_currentDestination + 1);
 
     cout << "Troup " << m_id << " now at destination (" << m_x << "," << m_y << "), next (" << nextDestination.mapX << "," << nextDestination.mapY << ")" << endl;
-
-//    if((m_x < 0 || m_x > 32) && (m_y < 0 || m_y > 32)){
-//        exit(-1); //TODO
-//    }
-    if(m_path->m_nodes.empty()) {
-
-        // arrived at destination
-        cout << "Troup " << m_id << " arrived at destination." << endl;
-        delete m_path;
-        return true;
-    }
 
     msg::next_troup_destination ntd = make_message<msg::next_troup_destination>();
     ntd.mapX = nextDestination.mapX;
@@ -498,7 +494,7 @@ void Building::IncomingTroup(Troup *troup)
 
 }
 
-Path::Path(Troup *troup, PathNode &source, PathNode &destination, unsigned int x, unsigned int y) : m_mapX(x), m_mapY(y), m_troup(troup)
+Path::Path(GameStage *gameStage, PathNode &source, PathNode &destination, unsigned int x, unsigned int y) : m_mapX(x), m_mapY(y), m_gameStage(gameStage)
 {
     //FindDirectPath(source, destination);
     FindPathAStar(source, destination);
@@ -634,7 +630,7 @@ void Path::ExpandNode(PathNode current, PathNode endPosition)
     if(current.mapX < m_mapX - 1 && current.mapY < m_mapY - 1) neighbours.push_back(PathNode(current.mapX + 1, current.mapY + 1));
 
     for(auto & neighbour : neighbours) {
-        if(!m_troup->m_gameStage->m_map[neighbour.mapY][neighbour.mapX]) {
+        if(!m_gameStage->m_map[neighbour.mapY][neighbour.mapX]) {
             // check if way is blocked
             //cout << "BLOCKED" << endl;
             continue;
@@ -745,8 +741,8 @@ void Path::DumpPath(string file)
     for(int r = 0; r < m_mapY; r++) {
         cout << endl;
         for(int c = 0; c < m_mapX; c++) {
-            color[(m_mapY - 1 - r) * m_mapX + c]= m_troup->m_gameStage->m_map[r][c] ? vec3f(1,1,1) : vec3f(0,0,0);
-            cout << (m_troup->m_gameStage->m_map[r][c] ? "  " : ". ");
+            color[(m_mapY - 1 - r) * m_mapX + c]= m_gameStage->m_map[r][c] ? vec3f(1,1,1) : vec3f(0,0,0);
+            cout << (m_gameStage->m_map[r][c] ? "  " : ". ");
         }
     }
 
@@ -760,10 +756,10 @@ void Path::DumpPath(string file)
         color[(m_mapY - 1 - y) + x * m_mapX] = vec3f(1, 0, 0);
     }
 
-    int startX = this->m_troup->m_source->m_x;
-    int startY = this->m_troup->m_source->m_y;
-    int endX = this->m_troup->m_destination->m_x;
-    int ednY = this->m_troup->m_destination->m_y;
+    //int startX = this->m_troup->m_source->m_x;
+    //int startY = this->m_troup->m_source->m_y;
+    //int endX = this->m_troup->m_destination->m_x;
+    //int ednY = this->m_troup->m_destination->m_y;
 
     save_png3f(color, m_mapX, m_mapY, ("./render-data/images/" + file).c_str());
 }

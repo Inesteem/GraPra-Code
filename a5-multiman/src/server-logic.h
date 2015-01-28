@@ -56,12 +56,12 @@ class Path
     float **m_cost;
     PathNode **m_parent;
 
-    Troup *m_troup;
+    GameStage *m_gameStage;
 
 public:
-    list<PathNode> m_nodes;
+    vector<PathNode> m_nodes;
 
-    Path(Troup *troup, PathNode &source, PathNode &destination, unsigned int x, unsigned int y);
+    Path(GameStage *gameStage, PathNode &source, PathNode &destination, unsigned int x, unsigned int y);
 };
 
 class Building : public GameObject
@@ -86,6 +86,8 @@ class Troup : public GameObject
     unsigned int m_stepTime = 300;
     wall_time_timer m_stepTimer;
 
+    unsigned int m_currentDestination;
+
 public:
     unsigned int m_unitCount;
 
@@ -94,7 +96,7 @@ public:
 
     Path *m_path;
 
-    Troup(GameStage *gameStage, Building *sourceBuilding, Building *destinationBuilding, unsigned int unitCount, unsigned int id);
+    Troup(GameStage *gameStage, Path *path, Building *sourceBuilding, Building *destinationBuilding, unsigned int unitCount, unsigned int id);
 
     bool NextDestination();
     bool Update();

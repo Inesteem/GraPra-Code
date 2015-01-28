@@ -44,6 +44,12 @@ public:
 
 	void game_over(int winner_id);
 
+    UnitGroup* get_unit(int id){
+        for(int i =0; i < m_unitgroups.size(); ++i){
+        if(id = m_unitgroups[i].m_id )return &m_unitgroups[i];
+        }
+        return nullptr;
+    }
 
     vector<vec3f> *get_planes();
 
@@ -64,7 +70,7 @@ public:
     vector<vec3f> player_colors = { vec3f(1.,1.,1.),vec3f(0.7,0.7,0.7), vec3f(1,0,0),vec3f(1,1,0),vec3f(1,0,1),vec3f(0,1,1),vec3f(0,0,1),
                                                                 vec3f(0,1,0),vec3f(1,0.5,1),vec3f(0.5,1,1),vec3f(1,1,0.5) };
 
-
+    vector<Building>* get_buildings();
                                     
     unsigned int m_color_id_for_player[10];
     vec3f get_player_color(int playerId);

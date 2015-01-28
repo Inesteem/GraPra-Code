@@ -205,9 +205,9 @@ void Label::set_model(matrix4x4f model){
 void Label::initialize_gui_overlay() {
 
 	mesh = make_mesh("quad", 2);
-    vec3f pos[4] = { {-0.5,-0.5,0}, {0.5,-0.5,0}, {0.5,0.5,0}, {-0.5,0.5,0} };	
-	vec2f tc[4] = { {0,1}, {1,1}, {1,0}, {0,0} };
-	unsigned int idx[6] = { 0, 1, 2, 2, 3, 0 };
+    vec3f pos[4] = { {-0.5,-0.5,0}, {0.5,-0.5,0}, {0.5,0.5,0}, {-0.5,0.5,0} };
+    vec2f tc[4] = { {0,1}, {1,1}, {1,0}, {0,0} };
+    unsigned int idx[6] = { 0, 1, 2, 2, 3, 0 };
 
 //	mesh = make_mesh("quad", 2);
 //	vec3f pos[4] = { {0,0,-10}, {1,0,-10}, {1,1,-10}, {0,1,-10} };
@@ -215,11 +215,11 @@ void Label::initialize_gui_overlay() {
 //	unsigned int idx[6] = { 0, 1, 2, 2, 3, 0 };
 
 
-	
-	bind_mesh_to_gl(mesh);
-	add_vertex_buffer_to_mesh(mesh, "in_pos", GL_FLOAT, 4, 3, (float *) pos, GL_STATIC_DRAW);
-	add_vertex_buffer_to_mesh(mesh, "in_tc", GL_FLOAT, 4, 2, (float *) tc, GL_STATIC_DRAW);
-	add_index_buffer_to_mesh(mesh, 6, idx, GL_STATIC_DRAW);
+
+    bind_mesh_to_gl(mesh);
+    add_vertex_buffer_to_mesh(mesh, "in_pos", GL_FLOAT, 4, 3, (float *) pos, GL_STATIC_DRAW);
+    add_vertex_buffer_to_mesh(mesh, "in_tc", GL_FLOAT, 4, 2, (float *) tc, GL_STATIC_DRAW);
+    add_index_buffer_to_mesh(mesh, 6, idx, GL_STATIC_DRAW);
 	unbind_mesh_from_gl(mesh);
 	
 }

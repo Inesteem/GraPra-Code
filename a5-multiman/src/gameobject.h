@@ -104,6 +104,7 @@ public:
 
     void upgrade(Obj *obj, int state);
     float dist_to(vec3f &pos);
+
     void draw();
     void draw_selection_circle();
     void draw_pm_house();
@@ -125,20 +126,24 @@ public:
     void change_owner(unsigned int owner);
     bool check_for_upgrade_turret(int state);
     bool check_for_upgrade_settlement(int state);
-
-
+    void unit_in_range(int unit_id);
+    void send_unit_kill_message(int unit_id);
+    void draw_boooom(vec2f pos, float time, float dest_height);
     int m_size;
-
+    bool  turret;
 
 private:
+    matrix4x4f m_boom_model;
+
+    Obj *m_boom;
     wall_time_timer rot_timer;
     Obj *selection_circle;
     Obj *upgrade_arrow;
     matrix4x4f arrow_model;
     Label *label;
-    
-    bool settlement, turret;
-    
+    wall_time_timer attack_timer;
+    bool settlement;
+    int m_attacke_unit_id = -1;
     unsigned int unit_count;
     unsigned int real_unit_count;
     unsigned int id;
@@ -156,10 +161,14 @@ public:
     Unit(Game *game, vec2f pos, vec2f view_dir, vec2f pos_group, vec2f start, vec2f end, simple_heightmap *sh, float base_height, float scale, float rot_angle, bool is_pac, unsigned int m_owner);
     matrix4x4f *getModel();
     void update(vec2f new_pos,float height);
-        vec2f m_pos_group;
-          bool move = false;
+    vec2f m_pos_group;
+    bool move = false;
 
-          void drawParticleEffect();
+    vec2f get_pos(){
+        return vec2f(m_model.col_major[3*4+0],m_model.col_major[3*4+1]);
+    }
+
+    void drawParticleEffect();
 private:
     wall_time_timer movement_timer;
     wall_time_timer wobble_timer;
@@ -198,6 +207,10 @@ public:
     float get_height(float x, float y){
         m_sh->get_height(x,y);
     }
+    vec2f get_cur_pos(){
+        return m_units[0].get_pos();
+    }
+    void check_turret_in_range();
     bool draw_as_mesh;
     unsigned int m_id;
     unsigned int m_unit_count;

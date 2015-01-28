@@ -179,6 +179,20 @@ void start_threads(bool start_threads, ObjHandler *objhandler,list<const char *>
     add_index_buffer_to_mesh(mesh, index.size(), (unsigned int *) index.data(), GL_STATIC_DRAW);
     unbind_mesh_from_gl(mesh);
     objhandler->addMeshObj("selection_circle",mesh,find_shader("selection_circle_shader"),find_texture("selection_circle.png") );
+
+    pos.clear();
+    tc.clear();
+    index.clear();
+    mesh_ref tmesh = make_mesh("boom",2);
+    pos = { vec3f(-0.5,-0.5,0), vec3f(0.5,-0.5,0), vec3f(0.5,0.5,0), vec3f(-0.5,0.5,0) };
+    tc = { vec2f(0,1), vec2f(1,1), vec2f(1,0), vec2f(0,0) };
+     index =  { 0, 1, 2, 2, 3, 0 };
+    bind_mesh_to_gl(tmesh);
+    add_vertex_buffer_to_mesh(tmesh, "in_pos", GL_FLOAT, 4, 3, (float*) pos.data() , GL_STATIC_DRAW);
+    add_vertex_buffer_to_mesh(tmesh, "in_tc", GL_FLOAT, 4, 2, (float*) tc.data() , GL_STATIC_DRAW);
+    add_index_buffer_to_mesh(tmesh, index.size(), (unsigned int *) index.data(), GL_STATIC_DRAW);
+    unbind_mesh_from_gl(tmesh);
+    objhandler->addMeshObj("boom",tmesh,find_shader("boom-shader"),find_texture("boom") );
 	
 }
 
@@ -217,7 +231,7 @@ void mouse(int button, int state, int x, int y) {
 
     }
 
-    if(render_menu || !messageReader->m_init_done){
+    if(render_menu || !messageReader->m_init_done) {
         return;
     }
 
@@ -284,7 +298,7 @@ void standard_keyboard(unsigned char key, int x, int y)
         break;
     case 'r':
 
-       if(dist > 25 ){
+       if(dist > 15 ){
             copy_vec3f(&tmp, &cam_dir);
             mul_vec3f_by_scalar(&tmp, &tmp, cgl_cam_move_factor);
             add_components_vec3f(&cam_pos, &cam_pos, &tmp);
