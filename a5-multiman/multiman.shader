@@ -30,7 +30,7 @@
         uniform float tile_size_y;
         uniform float g_height;
         uniform float g_width;
-        uniform ivec2 pos;
+        uniform vec2 pos;
         uniform layout(rgba8) image2D height_map;
 
         bool hit(ivec2 hit){
@@ -38,26 +38,30 @@
             float offset_y = radius*tile_size_y;
             float offset_x = radius*tile_size_x;
 
-            if(hit.x > pos.x  + offset_x ) return false;
-            if(hit.x < pos.x - offset_x) return false;
-            if(hit.y > pos.y + offset_y ) return false;
-            if(hit.y < pos.y - offset_y) return false;
-            return true;
+            if(distance(hit,vec2(pos.x+((g_width/2)  ),pos.y+((g_width/2)))) < radius*g_width ) return true;
+
+            return false;
         }
         bool outerhit(ivec2 hit){
-            float offset = radius*15;
-            if(hit.x > pos.x + offset/2 + offset + offset ) return false;
-            if(hit.x < pos.x + offset/2 - offset + offset) return false;
-            if(hit.y > pos.y + offset/2 + offset + offset) return false;
-            if(hit.y < pos.y + offset/2 - offset + offset) return false;
-            return true;
+            float dist = (distance(hit,vec2(pos.x+((g_width/2)  ),pos.y+((g_width/2)))));
+            if (dist >(radius)*g_width && dist < (radius+1)*g_width  ) return true;
+
+            return false;
+        }
+
+        float compute_height(float new, float old){
+            return old*exp(-clamp(distance(old,new),0,1));
         }
 
         void main() {
             ivec2 storePos = ivec2(gl_GlobalInvocationID.yx);
             ivec2 size = imageSize(height_map);
-            if( hit(storePos) ){
-//                ivec2 t = imageSize(height_map);
+            if (outerhit(storePos)){
+                float h = imageLoad(height_map, storePos.yx).x;
+                h = compute_height(height,h);
+                imageStore(height_map, storePos.yx, vec4(h,h,h,1));
+            }else if( hit(storePos) ){
+
                 imageStore(height_map, storePos.yx, vec4(height, height, height, 1));
             }
         }
