@@ -38,12 +38,28 @@ void GameStage::handleClientSettings(unsigned int playerId, unsigned int colorId
         }
     }
 
+	bool free_color = false;
+	while(!free_color && m_players.size() != 0){
+	
+		for(int i = 0; i < m_players.size(); i++){
+			if(m_players[i].m_colorId == actualColorId){
+				actualColorId++;
+				break;
+			}
+			else if( i ==  m_players.size()-1)
+				free_color = true;
+		}	
+	}
+	
     Player player(playerId, frac, actualColorId);
     m_players.push_back(player);
     msg::new_player np = make_message<msg::new_player>();
     np.playerId = playerId;
     np.colorId = player.m_colorId;
     np.frac = frac;
+    
+    broadcast(&np);
+ 
  
 	for(int i = 0; i < start_buildings.size();i++){
 		if(start_buildings[i]->m_player == playerId){
@@ -53,11 +69,12 @@ void GameStage::handleClientSettings(unsigned int playerId, unsigned int colorId
 	}
     
 
-    broadcast(&np);
 }
 
 void GameStage::Update()
 {
+	
+	
     if(m_gameOver) return;
 
     int winner = checkGameOver();
@@ -128,6 +145,9 @@ int GameStage::checkGameOver() {
 
 void GameStage::addArmy(unsigned int sourceBuildingID, unsigned int destinationBuildingID, unsigned int unitCount)
 {
+	
+
+	
     Building *a = m_buildings[sourceBuildingID];
     Building *b = m_buildings[destinationBuildingID];
 
