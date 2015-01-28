@@ -119,46 +119,46 @@ list<const char *> obj_to_load = {
 
 	}; 
  
-void load_obj() {
-	while(!obj_to_load.empty()){
-		load_mutex.lock();
+void load_obj(ObjHandler *objhandler,list<const char *> *obj_to_load, mutex *load_mutex) {
+	while(!obj_to_load->empty()){
+		load_mutex->lock();
 		
-		if(obj_to_load.size() == 0)
+		if(obj_to_load->size() == 0)
 			return;
 		
-		const char *name = obj_to_load.front();
-		obj_to_load.pop_front();
+		const char *name = obj_to_load->front();
+		obj_to_load->pop_front();
 		
 		
-		const char *path = obj_to_load.front();
-		obj_to_load.pop_front();
-		const char *shader = obj_to_load.front();
-		obj_to_load.pop_front();
+		const char *path = obj_to_load->front();
+		obj_to_load->pop_front();
+		const char *shader = obj_to_load->front();
+		obj_to_load->pop_front();
 		
 		cout << name << " " << path << " " << shader << endl;
 		
-		load_mutex.unlock();
+		load_mutex->unlock();
 		
 		objhandler->addObj(name, path, find_shader(shader));
 	}
  
 }
 
-void start_threads(bool start_threads){
+void start_threads(bool start_threads, ObjHandler *objhandler,list<const char *> *obj_to_load, mutex *load_mutex){
 	
 	if(start_threads){
 		
 		thread threads[1];
 		
 		for(int i = 0;i<1;i++){
-			threads[i] = thread (load_obj);	
+			threads[i] = thread (load_obj,objhandler,obj_to_load,load_mutex);	
 		}
 
 		for(int i = 0;i<1;i++){
 			threads[i].join();	
 		}
 	} else
-		load_obj();
+		load_obj(objhandler,obj_to_load,load_mutex);
 
 	vector<string> filenames;
     filenames.push_back("./render-data/models/pacman_1.obj");
@@ -825,10 +825,10 @@ void actual_main() {
     glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
 	
     objhandler = new ObjHandler();   
-//	t = new thread(start_threads,true);  
+//	t = new thread(start_threads,true, objhandler,&obj_to_load,&load_mutex);  
 //	t->join();
 //	delete t;
-	start_threads(false);
+	start_threads(false, objhandler,&obj_to_load,&load_mutex);
 
     vec3f o = vec3f(0,10,0);
     vec3f c = vec3f(0, 1, 0);
