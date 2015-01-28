@@ -55,6 +55,7 @@ void init_matrices();
 void render_gui_overlay(bool gameover);
 void actual_main();
 void reset();
+void simple_loop();
 
 //important game logic bools
 bool standard_mouse = false;
@@ -223,12 +224,6 @@ void mouse_move(int x, int y) {
 }
 
 void mouse(int button, int state, int x, int y) {
-    // TODO REMOVE
-    if(button == GLUT_MIDDLE_BUTTON && state == GLUT_DOWN) {
-        testEffect->Start();
-
-    }
-
     if(render_menu){
         return;
     }
@@ -296,7 +291,7 @@ void standard_keyboard(unsigned char key, int x, int y)
         break;
     case 'r':
 
-       if(dist > 25 ){
+       if(dist > 15 ){
             copy_vec3f(&tmp, &cam_dir);
             mul_vec3f_by_scalar(&tmp, &tmp, cgl_cam_move_factor);
             add_components_vec3f(&cam_pos, &cam_pos, &tmp);
@@ -727,15 +722,16 @@ void load_configfile(const char *);
 
 
 void reset(){
+	
+    render_menu = true;
+    register_display_function(simple_loop);
+    register_idle_function(simple_loop);		
+	
     delete sh;
     delete game;
-    delete messageReader;
-    delete action;
     
     sh = new simple_heightmap();
     game = new Game(objhandler,sh, messageReader,menu);
-    messageReader = new client_message_reader(game);
-    action = new Action(game, objhandler, &reset);
     game->set_action(action);
 }
 

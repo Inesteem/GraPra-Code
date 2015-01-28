@@ -69,7 +69,8 @@ namespace msg {
             building_upgrade_house,
             building_upgrade_turret,
             client_settings,
-            game_over
+            game_over,
+            client_left
 		};
 	}
 
@@ -198,6 +199,11 @@ namespace msg {
         uint8_t frac;
         uint8_t colorId;
     } __attribute__((aligned(8)));
+    
+    struct client_left : public message {
+        client_left() : message(code::client_left) {}
+        uint16_t playerId;
+    } __attribute__((aligned(8)));
 }
 
 template<typename M> M make_message() {
@@ -246,6 +252,7 @@ protected:
     virtual void handle_message(msg::client_settings *m) { warn(m); }
     virtual void handle_message(msg::spawn_random_stuff *m) { warn(m); }
     virtual void handle_message(msg::new_player *m) { warn(m); }
+    virtual void handle_message(msg::client_left *m) { warn(m); }
 
 
 

@@ -930,8 +930,8 @@ void IconBar::init_buttons(){
 			
 			model.row_col(0,0) = 0.12 * fovy;
 			model.row_col(1,1) = scale_button_y;
-			model.row_col(0,3) =  0.5 * fovy - (0.4 * fovy)/2 + offset_button_y;
-			model.row_col(1,3) =  0.5 * fovy - (0.4 * fovy)/2 + 3*offset_button_y;
+			model.row_col(0,3) =  0.5 * fovy - (0.4 * fovy)/2 + 2 * offset_button_y + 0.12 * fovy;
+			model.row_col(1,3) =  0.5 * fovy - 5*offset_button_y;
 			x_offset = model.row_col(0,3) + 2*x_offset;
 			if(i == 8){
 				model.row_col(0,0) = 0.4 * fovy;	
@@ -940,7 +940,7 @@ void IconBar::init_buttons(){
 				model.row_col(1,3) = 0.5 * fovy - (model.row_col(1,1))/2;
 			}
 			else if( i == 10)
-				model.row_col(0,3) =  0.5 * fovy - (0.4 * fovy)/2 + 2 * offset_button_y + 0.12 * fovy;
+				model.row_col(1,3) -= scale_button_y+2*offset_button_y;
 			
 			
 		}
@@ -988,8 +988,15 @@ int IconBar::click(int x, int y, vec3f (*ptr)(int x, int y)){
 
 
 	if(-rel_depth >= (depth_button_s - depth_acc_button_s) && -rel_depth <= (depth_button_s + depth_acc_button_s)){
+
+		if(exit_game && rel_y > 0.3 && rel_y < 0.51){
+			cout << "click_no : " << rel_y << " : " << pos.y << endl;
+			return 9;
+		}
 		
-		if(rel_y > 0.9){
+		if(exit_game) return -1;
+		
+		else if(rel_y > 0.9){
 			cout << "click_menu : " << rel_y << " : " << pos.y << endl;
 			return 4;
 		}
@@ -1004,7 +1011,14 @@ int IconBar::click(int x, int y, vec3f (*ptr)(int x, int y)){
 	}
 	else if(-rel_depth >= (depth_button_t - depth_acc_button_t) && -rel_depth <= (depth_button_t + depth_acc_button_t)){	
 
-		if(rel_y > 0.88){
+		if(exit_game && rel_y >0.3 && rel_y < 0.51){
+			cout << "click_yes : " << rel_y << " : " << pos.y << endl;
+			return 10;
+		}
+		
+		if(exit_game) return -1;
+
+		else if(rel_y > 0.88){
 			cout << "click_main : " << rel_y << " : " << pos.y << endl;
 			return 5;
 		}
@@ -1038,10 +1052,10 @@ void IconBar::clicked_menu(int button){
 				 cout << "here" << endl;
 				 break;
 				 
-		case 9 : exit_game = false;
-				 break;
+		case 9 : exit(0);
 				 
-		case 10 : exit(0); 
+		case 10 : exit_game = false;
+				 break; 
 
 		default : break;
 	}

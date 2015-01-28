@@ -9,6 +9,15 @@
 namespace moac {
 
     void Action::reset(){
+		eb_set = false;
+		ob_set = false;
+		prepare_attack = false;
+		render_status_bar = true;		
+		
+	    msg::client_left cl = make_message<msg::client_left>();
+		cl.playerId = PLAYER_ID;
+		game->m_messageReader->send_message(cl);
+		
         ptr();
     }
 
@@ -114,6 +123,13 @@ namespace moac {
 	}
 
 
+	void Action::lost_building(int id){
+		if(id == own_building->get_id()){
+			iconbar->selected_building(nullptr);
+            prepare_attack = false;
+		}
+	}
+
 	bool Action::handle_enemys_base(float x, float y){
 		
         vec3f wp = ClickWorldPosition(x,y);
@@ -121,7 +137,7 @@ namespace moac {
 
         if (!ob_set || building == nullptr || own_building->get_id() == building->get_id()){
 			eb_set = false;
-       //     ob_set = false;
+            ob_set = false;
 			game->set_selected(nullptr);
 			iconbar->selected_building(nullptr);
             prepare_attack = false;
@@ -149,8 +165,7 @@ namespace moac {
 
 		//keine Auswahl, falls bereits Gebaeude ausgewaehlt, verfaellt diese Wahl
         if (building == nullptr || building->get_owner_id() != own_id){
-        //if (building == nullptr){
-		//	ob_set = false;
+			ob_set = false;
 			return false;
 		}
 		
@@ -211,7 +226,7 @@ namespace moac {
 				iconbar->scale_button(button, true);
 				return button;
 		}
-		
+		msg::client_left cl = make_message<msg::client_left>();
 		int button_pressed = iconbar->scale_button(button, false);
 		switch(button_pressed){
 			//settlement
@@ -224,7 +239,7 @@ namespace moac {
 			case 4:  call_menu(button_pressed);
 					break;
 			
-			case 5: 
+			case 5: reset();
 					break;//todo render main menu
 
 			case 6:  call_menu(button_pressed);
@@ -232,6 +247,15 @@ namespace moac {
 					
 			case 7: call_menu(button_pressed);
 					break;//todo pause
+					//exit
+			case 9: 
+					cl.playerId = PLAYER_ID;
+					game->m_messageReader->send_message(cl);
+					call_menu(button_pressed);
+					break;
+			
+			case 10:call_menu(button_pressed);
+					break;
 			
 			default : return -1;
 		}
@@ -247,8 +271,7 @@ namespace moac {
 		iconbar->update();	
 	}
 	void Action::call_menu(int button){
-		 iconbar->clicked_menu(button);	
-		 cout << button << endl;
+		iconbar->clicked_menu(button);	
 	}
 
 }

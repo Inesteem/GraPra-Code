@@ -1,4 +1,5 @@
 #include "clientside-networking.h"
+#include "messages.h"
 
 //#include "cmdline.h"
 
@@ -19,7 +20,6 @@ void client_message_reader::send_message(msg::message &msg) {
 	catch (boost::system::system_error &err) {
 		cerr << "Error sending message to the server: " << err.what() << "\nExiting." << endl;
 		//quit(-1);
-		exit(EXIT_FAILURE);
 	}
 }
 
