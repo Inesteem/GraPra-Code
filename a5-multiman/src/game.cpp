@@ -194,7 +194,8 @@ void Game::upgrade_building(unsigned int buildingId, unsigned int state, FRACTIO
                     Building b = m_buildings[i];
                     vec2f pos = b.get_pos();
                     pos = vec2f(pos.x /** render_settings::tile_size_x - ((render_settings::tile_size_x)*b.m_size)/2.0f */ , pos.y /** render_settings::tile_size_y - ((render_settings::tile_size_y)*b.m_size)/2.0f*/);
-                    m_sh->set_heights(pos,m_sh->get_height(pos.x,pos.y),b.m_size); break;}
+            //        m_sh->set_heights(pos,m_sh->get_height(pos.x,pos.y),b.m_size); 
+					break;}
                 case msg::building_state::turret_lvl1 :{
                     m_buildings[i].upgrade(m_objhandler->getObjByName("turret_pacman_lvl1"),state);
                     m_buildings[i].change_size(2);
@@ -231,7 +232,7 @@ void Game::upgrade_building(unsigned int buildingId, unsigned int state, FRACTIO
                     Building b = m_buildings[i];
                     vec2f pos = b.get_pos();
                     pos = vec2f(pos.x /** render_settings::tile_size_x - ((render_settings::tile_size_x)*b.m_size)/2.0f */ , pos.y /** render_settings::tile_size_y - ((render_settings::tile_size_y)*b.m_size)/2.0f*/);
-                    m_sh->set_heights(pos,m_sh->get_height(pos.x,pos.y),b.m_size);
+           //         m_sh->set_heights(pos,m_sh->get_height(pos.x,pos.y),b.m_size);
                     break;}
                 case msg::building_state::turret_lvl1 :{m_buildings[i].upgrade(m_objhandler->getObjByName("turret_bbm_lvl1"),state);
                     m_buildings[i].change_size(2);
