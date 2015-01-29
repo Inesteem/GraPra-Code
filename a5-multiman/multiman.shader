@@ -360,7 +360,7 @@
         uniform mat4 model;
         out vec3 out_pos;
         void main() {
-                gl_Position =  vec4(in_pos,1.);
+//                gl_Position =  vec4(in_pos,1.);
                 out_pos = in_pos;
         }
 }
@@ -424,9 +424,11 @@
         uniform mat4 view;
         uniform sampler2D height_map;
         vec3 interpolate(vec3 bl, vec3 br, vec3 tr, vec3 tl){
+
                 float u = gl_TessCoord.x;
                 float v = gl_TessCoord.y;
-
+                u = clamp (u,0,1);
+                v = clamp (v,0,1);
                 vec3 b = mix(bl,br,u);
                 vec3 t = mix(tl,tr,u);
                 return mix(b,t,v);
@@ -439,7 +441,12 @@
             tePatchDistance = gl_TessCoord;
 
             out_pos = interpolate(tcPosition[0],tcPosition[1],tcPosition[2],tcPosition[3]);
+
             out_pos.y = texture(height_map,vec2(out_pos.z, out_pos.x));
+            if(out_pos.x == 0 || out_pos.z == 0 || out_pos.z == 1 || out_pos.x == 1){
+                out_pos.y = 0;
+            }
+
             out_pos = (model*vec4(out_pos, 1)).xyz;
             gl_Position = proj * view * vec4(out_pos, 1);
         }
@@ -475,7 +482,7 @@
 
             gPatchDistance = tePatchDistance[0];
             gTriDistance = vec3(1, 0, 0);
-            gl_Position = gl_in[0].gl_Position;
+            gl_Position =proj * view * vec4(out_pos[0], 1);
             pos = out_pos[0]; EmitVertex();
 
 //            A = out_pos[0] - out_pos[1];
@@ -483,7 +490,7 @@
 //            gFacetNormal = normal * normalize(cross(A, B));
             gPatchDistance = tePatchDistance[1];
             gTriDistance = vec3(0, 1, 0);
-            gl_Position = gl_in[1].gl_Position;
+            gl_Position = proj * view * vec4(out_pos[1], 1);
             pos = out_pos[1]; EmitVertex();
 
 //            A = out_pos[1] - out_pos[2];
@@ -491,7 +498,7 @@
 //            gFacetNormal = normal * normalize(cross(A, B));
             gPatchDistance = tePatchDistance[2];
             gTriDistance = vec3(0, 0, 1);
-            gl_Position = gl_in[2].gl_Position;
+            gl_Position = proj * view * vec4(out_pos[2], 1);
             pos = out_pos[2]; EmitVertex();
 
             EndPrimitive();

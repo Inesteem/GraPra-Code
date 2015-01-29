@@ -341,12 +341,17 @@ Tree::Tree(Game *game, Obj *obj, string name, int x, int y, float height): GameO
     m_pos = m_pos+add;
     matrix4x4f scale;
     make_unit_matrix4x4f(&scale);
+
     float scale_factor = (random_float()*0.5)+0.5;
+    if(obj->name == "tropical_tree"){
+        scale_factor += 1;
+    }
     scale.col_major[0 * 4 + 0] =  scale_factor;
     scale.col_major[1 * 4 + 1] =  scale_factor;
     scale.col_major[2 * 4 + 2] =  scale_factor;
     vec4f t = vec4f(m_center.x,m_center.y,m_center.z,0);
     t = scale * t;
+
     m_center = vec3f(t.x,t.y,t.z);
     m_model.col_major[3 * 4 + 0] = m_pos.x*render_settings::tile_size_x;
     m_model.col_major[3 * 4 + 1] = m_center.y + m_height;
