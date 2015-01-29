@@ -1,0 +1,68 @@
+***************************************
+*-------------------------------------*
+*----- Pacman vs. Bomberman Wars -----*
+*-------------------------------------*
+***************************************
+
+---------------------------------------
+------------ How to play? -------------
+---------------------------------------
+
+=== Main menu ===
+
+- Navigate rows using up/down arrow keys
+- Change option using left/right arrow keys
+
+=== Start a server ===
+
+- First choose fraction bomberman/pacman
+- Choose level 1 to 4
+- Choose favourite color
+- Choose number of players
+- Select Host game and press enter
+
+=== Join as a client ===
+
+- Only choose fraction and color
+- Select join game and press enter
+- Enter the name of the computer the server runs on
+- Press enter again
+
+=== Troup handling ===
+
+- Once the game has started you control only one house, when you select it (mouse left click) a circle will be drawn around it
+- The other buildings are enemy houses or construction sites
+- You can send troups from one building to another
+- To do so, first select the start building
+- Then click and hold the right mouse button on the destination building
+- Moving the mouse up or down while holding the right button will change the amount of units you will send
+- After releasing the mouse button, the selected number of units will start moving to the destination building
+
+=== Game over ===
+
+- You lose the game if you have no buildings left
+- The game is over if there is only one player left
+
+=== Upgrades ===
+
+- The menu bar (bottom of the screen) shows information about the currently selected building
+- You can see how many units are in it, the defence value (how many enemy units it takes to neutralize on unit in this house) and how many new units will be generated each second
+- The two leftmost buttons will upgrade the building, you can choose between settlement and turret
+- The settlement upgrade will make the house bigger and more units will be generated each second
+- If you upgrade the building to a turret it will stop generating units but will be harder to attack by the enemy (the defence value will increase)
+
+---------------------------------------
+------- Assignment sheet notes --------
+---------------------------------------
+
+=== A1 ===
+Terrain Rendering war deutlich mehr als angedacht, mit Tessilation und Computation shader
+
+
+=== A8/A12 ===
+Kaempfe der sich bewegenden Truppen haben wir nicht mehr geschafft, dafuer andere Sachen noch gemacht
+
+=== A13 BONUS ===
+Diesen Aufgaben hatten wir auf dem Blatt keine Punkte gegeben, aber am Ende doch viel Arbeit reingesteckt
+Als zu verrechnen der Fehlenden Punkte A8/A12 denke ich, das Menue hat auf jeden fall einen Punkt verdient,
+genauso wie das Ausbauen der Tuerme mit verschiedenen Models und Eigenschaften
