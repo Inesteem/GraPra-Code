@@ -42,7 +42,7 @@ void simple_heightmap::init( const std::string filename, int width, int height){
 //    }
     for(int i = 0; i <= m_g_height; ++i){
         for(int j = 0; j <= m_g_width; ++j){
-            pos[i + j * (m_g_height+1)] = vec3f((float)j/(float)m_g_width,get_height(i,j),(float)i/(float)m_g_height);
+            pos[i + j * (m_g_height+1)] = vec3f((float)j/(float)m_g_width,0,(float)i/(float)m_g_height);
 //            pos[i + j *m_g_height].y =  m_heights[i*(m_width/m_g_width)  + j*(m_height/m_g_height) *m_g_height].x ;
 
 //            m_heights[i + j *m_height] = colors[i + j *m_height].x * render_settings::height_factor;
