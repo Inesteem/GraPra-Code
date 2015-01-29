@@ -577,14 +577,14 @@ int Building::get_defence_value(){
 	
 		
 }
-float Building::get_unit_production(){
+int Building::get_unit_production(){
 	if(!settlement) return -1;
 	if(state == msg::building_state::house_lvl1)
-		return msg::unit_generation_time::UpgradeRateLvl1/1000;
+		return 1;
 	if(state == msg::building_state::house_lvl2)
-		return msg::unit_generation_time::UpgradeRateLvl2/1000;
+		return 2;
 	if(state == msg::building_state::house_lvl3)
-		return msg::unit_generation_time::UpgradeRateLvl3/1000;
+		return 3;
 	return -1;	
 }
 
@@ -735,15 +735,15 @@ void Building::draw(){
 				de->unbind();
 			}
 		
-    } else if (FRACTION == 1 && state == msg::building_state::house_lvl1 || state == msg::building_state::house_lvl2 || state == msg::building_state::house_lvl3) {
+    } else if (FRACTION == PAC && state == msg::building_state::house_lvl1 || state == msg::building_state::house_lvl2 || state == msg::building_state::house_lvl3) {
 		draw_bbm_house();
 		
-    } else if (FRACTION == 1 && state == msg::building_state::turret_lvl1) {
+    } else if (FRACTION == PAC && state == msg::building_state::turret_lvl1 || state == msg::building_state::turret_lvl2) {
 		draw_bbm_house();
     } else if (state == msg::building_state::house_lvl1 || state == msg::building_state::house_lvl2 || state == msg::building_state::house_lvl3) {
 		draw_pm_house();
 		
-    } else if (state == msg::building_state::turret_lvl1) {
+    } else if (state == msg::building_state::turret_lvl1 || state == msg::building_state::turret_lvl2) {
 		draw_pm_house();
 		
 	} else {

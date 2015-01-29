@@ -274,7 +274,6 @@ class IconBar{
 	
 	void init_modelmatrices();
 	void init_buttons();
-	void draw_buttons();
 	void draw_buttons_2();
 	void draw_building();
 	
@@ -293,5 +292,21 @@ public:
 	
 };
 
+
+class LoadScreen{
+
+	shader_ref shader;
+	vector<texture_ref> textures;
+	mesh_ref mesh;
+	camera_ref camera;
+	matrix4x4f model;
+	int index = 0;
+	
+public: 
+
+	LoadScreen(camera_ref camera);
+	void draw();	
+	
+};
 
 #endif

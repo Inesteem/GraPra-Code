@@ -810,67 +810,6 @@ void IconBar::draw_buttons_2(){
 		
 	
 }
-//defect
-void IconBar::draw_buttons(){
-	
-	vec3f color = vec3f(-1,-1,-1);
-	loc = glGetUniformLocation(gl_shader_object(shader), "color");
-	glUniform3fv(loc, 1,(float *)&color);		
-
-	//unit_button
-	
-	loc = glGetUniformLocation(gl_shader_object(shader), "model");
-	glUniformMatrix4fv(loc, 1, GL_FALSE, buttons[3].model.col_major);	
-
-
-	bind_texture(buttons[3].textures[buttons[3].state],0);
-	loc = glGetUniformLocation(gl_shader_object(shader), "tex");	
-	glUniform1i(loc, 0);	
-	
-	draw_mesh(mesh);	
-
-	unbind_texture(buttons[3].textures[buttons[3].state]);
-
-	
-
-	//settlement_button
-
-	loc = glGetUniformLocation(gl_shader_object(shader), "depth");
-	glUniform1f(loc,depth_button_s);	
-
-	loc = glGetUniformLocation(gl_shader_object(shader), "model");
-	glUniformMatrix4fv(loc, 1, GL_FALSE, buttons[1].model.col_major);	
-
-	bind_texture(buttons[1].textures[buttons[1].state], 0);
-
-	loc = glGetUniformLocation(gl_shader_object(shader), "tex");	
-	glUniform1i(loc, 0);	
-	
-	draw_mesh(mesh);	
-	
-	unbind_texture(buttons[1].textures[buttons[1].state]);
-	
-	//turret_button	
-
-	loc = glGetUniformLocation(gl_shader_object(shader), "depth");
-	glUniform1f(loc,depth_button_t);	
-		
-	loc = glGetUniformLocation(gl_shader_object(shader), "model");
-	glUniformMatrix4fv(loc, 1, GL_FALSE, buttons[2].model.col_major);	
-
-
-	bind_texture(buttons[2].textures[buttons[2].state], 0);
-	
-	loc = glGetUniformLocation(gl_shader_object(shader), "tex");
-	glUniform1i(loc, 0);
-	
-	draw_mesh(mesh);	
-	
-	unbind_texture(buttons[2].textures[buttons[2].state]);	
-	
-	buttons[4].draw(shader, mesh);
-		
-}
 
 void IconBar::init_modelmatrices(){
 	
@@ -1106,7 +1045,7 @@ void IconBar::update(){
 		int type  = building->get_type();
 		int level = building->get_level();
 		int state = building->get_state();
-		float unit_count = building->get_unit_count();
+		int unit_count = building->get_unit_count();
 		
 		std::stringstream l_1,l_2;
 		l_1 << unit_count;
@@ -1135,7 +1074,13 @@ void IconBar::update(){
 				buttons[3].state = 0;
 			else
 				buttons[3].state = 2;
-			l_2 << building->get_unit_production();
+				
+			switch(building->get_unit_production()){
+				case 1 : l_2 << "0.5"; break;
+				case 2 : l_2 << "1.0"; break;
+				case 3 : l_2 << "2.0"; break;
+				default: l_2 << "0.0"; break;
+			}
 			label_2->update_gui_texture_string(&l_2);
 		} 
 		//turret
@@ -1182,4 +1127,99 @@ void IconBar::selected_building(Building *building){
 	else
 		building_selected = true;
 	
+}
+
+LoadScreen::LoadScreen( camera_ref camera): camera(camera){
+	mesh = make_mesh("quad", 2);
+	vec3f pos[4] = { {0,0,-10}, {1,0,-10}, {1,1,-10}, {0,1,-10} };	
+	vec2f tc[4] = { {0,1}, {1,1}, {1,0}, {0,0} };
+	unsigned int idx[6] = { 0, 1, 2, 2, 3, 0 };	
+	
+	textures.push_back(find_texture("load_screen_0"));
+	textures.push_back(find_texture("load_screen_1"));
+	textures.push_back(find_texture("load_screen_2"));
+	textures.push_back(find_texture("load_screen_3"));
+	textures.push_back(find_texture("load_screen_4"));
+	textures.push_back(find_texture("black_screen"));
+	textures.push_back(find_texture("load_screen_5"));
+	
+	shader = find_shader("simple-menu-shader");
+	
+	bind_mesh_to_gl(mesh);
+	add_vertex_buffer_to_mesh(mesh, "in_pos", GL_FLOAT, 4, 3, (float *) pos, GL_STATIC_DRAW);
+	add_vertex_buffer_to_mesh(mesh, "in_tc", GL_FLOAT, 4, 2, (float *) tc, GL_STATIC_DRAW);
+	add_index_buffer_to_mesh(mesh, 6, idx, GL_STATIC_DRAW);
+	unbind_mesh_from_gl(mesh);
+
+	make_unit_matrix4x4f(&model);
+	model.row_col(0,0) = 50;
+	model.row_col(1,1) = 50;
+	model.row_col(0,3) = 0.f;
+	model.row_col(1,3) = 0.f;
+	
+}
+	 	
+void LoadScreen::draw(){
+    
+   
+// Dark blue background
+	glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+	 
+    
+    vec3f player_color = vec3f(0.7,0.7,0.7);
+	camera_ref old_cam = current_camera();
+	use_camera(camera);
+	bind_shader(shader);
+	int loc;
+	
+	loc = glGetUniformLocation(gl_shader_object(shader), "proj");
+	glUniformMatrix4fv(loc, 1, GL_FALSE, projection_matrix_of_cam(current_camera())->col_major);
+
+	loc = glGetUniformLocation(gl_shader_object(shader), "view");
+	glUniformMatrix4fv(loc, 1, GL_FALSE, gl_view_matrix_of_cam(current_camera())->col_major);
+	loc = glGetUniformLocation(gl_shader_object(shader), "model");
+	glUniformMatrix4fv(loc, 1, GL_FALSE, model.col_major);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+	glDepthMask(GL_TRUE);
+
+
+	vec3f color = vec3f(0.8,0.2,0.8);
+	loc = glGetUniformLocation(gl_shader_object(shader), "color");
+	glUniform3fv(loc, 1,(float *)&color);		
+
+	loc = glGetUniformLocation(gl_shader_object(shader), "p_color");
+	glUniform3fv(loc, 1,(float *)&player_color);	
+
+
+	bind_texture(textures[index], 0);
+	loc = glGetUniformLocation(gl_shader_object(shader), "tex");
+	glUniform1i(loc, 0);
+
+	loc = glGetUniformLocation(gl_shader_object(shader), "depth");
+	glUniform1f(loc,0.0000001);
+
+
+	bind_mesh_to_gl(mesh);
+	draw_mesh(mesh);
+
+
+	unbind_mesh_from_gl(mesh);
+	
+	unbind_shader(shader);
+	glDisable(GL_BLEND);
+	unbind_texture(textures[index]);
+
+	use_camera(old_cam);
+	index++; 
+	if(index >= textures.size())
+		index = 0;
+
+	check_for_gl_errors("display");
+	swap_buffers();
+		
 }

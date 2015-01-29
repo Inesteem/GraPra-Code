@@ -122,7 +122,7 @@ public:
 	int get_type();
 	int get_level();
 	int get_defence_value();
-	float get_unit_production();
+	int get_unit_production();
     void change_owner(unsigned int owner);
     bool check_for_upgrade_turret(int state);
     bool check_for_upgrade_settlement(int state);

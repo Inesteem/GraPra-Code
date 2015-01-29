@@ -1,4 +1,3 @@
-
 #include <iostream>
 #include <iomanip>
 #include <cstdlib>
@@ -66,9 +65,9 @@ bool render_menu = true;
 static bool reload_pending = false;
 
 //loop   
-    static wall_time_timer key_timer;
-    static int frames = 0;
-    static wall_time_timer frames_timer;
+static wall_time_timer key_timer;
+static int frames = 0;
+static wall_time_timer frames_timer;
 
 
 
@@ -83,6 +82,7 @@ Game *game;
 client_message_reader *messageReader;
 Action *action;
 Menu *menu = nullptr;
+LoadScreen *loadscreen;
 
 //keys
 unsigned char navi_key = 0;
@@ -114,7 +114,7 @@ list<const char *> obj_to_load = {
     "house_bbm_lvl2", 		"./render-data/models/house_bbm_lvl2.obj",		"alpha-color-shader",
     "house_bbm_lvl3", 		"./render-data/models/house_bbm_lvl3.obj",		"alpha-color-shader",
     "turret_bbm_lvl1", 		"./render-data/models/tower_bbm_lvl1.obj", 		"alpha-color-shader",
-    "turret_pacman_lvl1", 	"./render-data/models/simple_tower_pacman.obj", "pos+norm+tc",
+    "turret_pacman_lvl1", 	"./render-data/models/simple_tower_pacman.obj", "alpha-color-shader",
     "bomberman",			"./render-data/models/bbm-nolegs.obj",			"unit-shader",
     "tonkrug",				"./render-data/models/tonkrug.obj",				"alpha-color-shader",
     "plants", 				"./render-data/models/plants.obj", 				"plant-shader"
@@ -142,6 +142,9 @@ void load_obj(ObjHandler *objhandler,list<const char *> *obj_to_load, mutex *loa
 		load_mutex->unlock();
 		
 		objhandler->addObj(name, path, find_shader(shader));
+		
+		loadscreen->draw();	
+		
 	}
  
 }
@@ -167,7 +170,7 @@ void start_threads(bool start_threads, ObjHandler *objhandler,list<const char *>
     filenames.push_back("./render-data/models/pacman_2.obj");
     objhandler->makeObjFMS(filenames,"pacman",find_shader("ip2-shader"));
 
-
+	loadscreen->draw();	
 
     mesh_ref mesh = make_mesh("selection_circle",2);
     vector<vec3f> pos = { vec3f(0,0,0) , vec3f(1,0,0), vec3f(1,0,1) , vec3f(0,0,1) };
@@ -179,6 +182,8 @@ void start_threads(bool start_threads, ObjHandler *objhandler,list<const char *>
     add_index_buffer_to_mesh(mesh, index.size(), (unsigned int *) index.data(), GL_STATIC_DRAW);
     unbind_mesh_from_gl(mesh);
     objhandler->addMeshObj("selection_circle",mesh,find_shader("selection_circle_shader"),find_texture("selection_circle.png") );
+
+	loadscreen->draw();
 
     pos.clear();
     tc.clear();
@@ -193,6 +198,8 @@ void start_threads(bool start_threads, ObjHandler *objhandler,list<const char *>
     add_index_buffer_to_mesh(tmesh, index.size(), (unsigned int *) index.data(), GL_STATIC_DRAW);
     unbind_mesh_from_gl(tmesh);
     objhandler->addMeshObj("boom",tmesh,find_shader("boom-shader"),find_texture("boom") );
+
+	loadscreen->draw();	
 	
 }
 
@@ -217,7 +224,7 @@ SCM_DEFINE(s_set_keymap, "define-keymap", 1, 0, 0, (SCM str), "") {
 
 
 void mouse_move(int x, int y) {
-
+	
     if(render_menu)
         return;
 
@@ -845,8 +852,6 @@ void simple_loop(){
 		
 		} else if(init_menu)
 			menu->draw(false);
-		
-
 
 		//
 		// finishing up
@@ -892,6 +897,10 @@ void actual_main() {
 
     // Dark blue background
     glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
+
+    loadscreen = new LoadScreen(find_camera("orthocam"));
+	
+	loadscreen->draw();	
 	
     objhandler = new ObjHandler();   
 //	t = new thread(start_threads,true, objhandler,&obj_to_load,&load_mutex);  
@@ -920,7 +929,9 @@ void actual_main() {
     action = new Action(game, objhandler,&reset);
     game->set_action(action);	
 		
+    	
     enter_glut_main_loop();
+    
 }
 
 

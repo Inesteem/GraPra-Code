@@ -35,6 +35,7 @@
 (texture-from-file "game_loose" "Menu/game_loose.png" 'tex2d #t)
 (texture-from-file "game_paused" "Menu/game_paused.png" 'tex2d #t)
 (texture-from-file "game_start" "Menu/game_start.png" 'tex2d #t)
+(texture-from-file "black_screen" "Menu/black_screen.png" 'tex2d #t)
 
 (texture-from-file "plant_1" "./render-data/models/blends/textures/plants/NaturePlants0053_1_S.png" 'tex2d #t)
 (texture-from-file "plant_2" "./render-data/models/blends/textures/plants/NaturePlants0049_1_S.png" 'tex2d #t)
@@ -50,7 +51,6 @@
 (texture-from-file "plant_12" "./render-data/models/blends/textures/plants/NaturePlants0005_1_S.png" 'tex2d #t)
 (texture-from-file "plant_13" "./render-data/models/blends/textures/plants/NaturePlants0003_1_S.png" 'tex2d #t)
 
-(texture-from-file "pacman" "pacman.png" 'tex2d #t)
 (texture-from-file "interface_bbm" "Menu/InterfaceBomberman.png" 'tex2d #t)
 (texture-from-file "interface_bbm_menu" "Menu/InterfaceBomberman_menu.png" 'tex2d #t)
 (texture-from-file "interface_pm" "Menu/InterfacePacman.png" 'tex2d #t)
@@ -79,6 +79,13 @@
 (texture-from-file "exit_game" "Menu/exit_game.png" 'tex2d #t)
 (texture-from-file "yes" "Menu/yes.png" 'tex2d #t)
 (texture-from-file "no" "Menu/no.png" 'tex2d #t)
+
+(texture-from-file "load_screen_0" "Menu/load_screen_0.png" 'tex2d #t)
+(texture-from-file "load_screen_1" "Menu/load_screen_1.png" 'tex2d #t)
+(texture-from-file "load_screen_2" "Menu/load_screen_2.png" 'tex2d #t)
+(texture-from-file "load_screen_3" "Menu/load_screen_3.png" 'tex2d #t)
+(texture-from-file "load_screen_4" "Menu/load_screen_4.png" 'tex2d #t)
+(texture-from-file "load_screen_5" "Menu/load_screen_5.png" 'tex2d #t)
 
 (texture-from-file "test" "explosions-04.png" 'tex2d #t)
 

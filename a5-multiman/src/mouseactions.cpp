@@ -91,8 +91,13 @@ namespace moac {
 	}
 
 	void Action::upgrade_settlement(){
+
+		bool upgradeable = own_building->check_for_upgrade_settlement(own_building->get_state()+1);
+		if(own_building->get_state() == msg::building_state::turret_lvl1 || own_building->get_state() == msg::building_state::turret_lvl2)
+			upgradeable = own_building->check_for_upgrade_settlement(msg::building_state::house_lvl1);
+        
  
-        if(ob_set && game->m_player_id == own_building->get_owner_id() && own_building->check_for_upgrade_settlement(own_building->get_state()+1)){
+        if(ob_set && game->m_player_id == own_building->get_owner_id() && upgradeable){
 				
             msg::building_upgrade_house buc = make_message<msg::building_upgrade_house>();
 			buc.buildingId = own_building->get_id();
@@ -106,7 +111,7 @@ namespace moac {
 	
 	void Action::upgrade_turret(){
 		bool upgradeable = own_building->check_for_upgrade_turret(own_building->get_state()+1);
-		if(own_building->get_state() == msg::building_state::house_lvl1)
+		if(own_building->get_state() == msg::building_state::house_lvl1 || own_building->get_state() == msg::building_state::house_lvl2 || own_building->get_state() == msg::building_state::house_lvl3)
 			upgradeable = own_building->check_for_upgrade_turret(msg::building_state::turret_lvl1);
         
         if(ob_set && game->m_player_id == own_building->get_owner_id() && upgradeable){

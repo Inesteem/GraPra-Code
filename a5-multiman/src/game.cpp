@@ -8,6 +8,7 @@
 int PLAYER_ID;
 int FRACTION;
 int COLORID;
+static int first_base = 0;
 wall_time_timer rot_timer;
 
 Game::Game(ObjHandler *objhandler, simple_heightmap *sh, client_message_reader *message_reader, Menu *menu): m_objhandler(objhandler), m_sh(sh), m_messageReader(message_reader),menu(menu)
@@ -36,17 +37,36 @@ void Game::add_building(string name, int size, int x, int y, unsigned int id){
 	
 
 }
-
 void Game::change_building_owner(int building_id, int new_owner, FRACTIONS frac){
     for(int i = 0; i < m_buildings.size(); i++){
         if(m_buildings[i].get_id() == building_id){
             if(m_buildings[i].get_owner_id() == -1 && new_owner != -1) {
                 this->upgrade_building(i, msg::building_state::house_lvl1,frac);
-				if(m_selected != nullptr && building_id == m_selected->get_id()){
-					m_selected == nullptr;
-					action->lost_building(building_id);
+
+				//focus cam to base at the begin of the game
+				if(first_base == 0 && new_owner == PLAYER_ID){
+					first_base = 1;
+					vec3f cam_pos, cam_dir, cam_up;
+					matrix4x4f m = m_buildings[i].get_model_matrix();
+					vec3f b_pos = vec3f(m.row_col(0,3),m.row_col(1,3),m.row_col(2,3));
+					
+				    matrix4x4f *lookat_matrix = lookat_matrix_of_cam(current_camera());
+					extract_dir_vec3f_of_matrix(&cam_dir, lookat_matrix);
+					extract_up_vec3f_of_matrix(&cam_up, lookat_matrix);
+					
+					cam_pos = b_pos - (cam_dir * 20);
+					change_lookat_of_cam(current_camera(), &cam_pos, &cam_dir, &cam_up);
+					recompute_gl_matrices_of_cam(current_camera());
+				
 				}
+				
             }
+			
+			if(m_selected != nullptr && building_id == m_selected->get_id()){
+				m_selected == nullptr;
+				action->lost_building(building_id);
+			}
+            
             m_buildings[i].change_owner(new_owner);
             return;
         }
@@ -100,6 +120,7 @@ vector<vec3f> *Game::get_planes(){
 }
 
 void Game::init(string filename, int widht, int height, int id){
+	first_base = 0;
     m_player_id = id;
     PLAYER_ID = id;
 	
@@ -198,11 +219,18 @@ void Game::upgrade_building(unsigned int buildingId, unsigned int state, FRACTIO
 					break;}
                 case msg::building_state::turret_lvl1 :{
                     m_buildings[i].upgrade(m_objhandler->getObjByName("turret_pacman_lvl1"),state);
-                    m_buildings[i].change_size(2);
+                    m_buildings[i].change_size(1);
                     Building b = m_buildings[i];
                     vec2f pos = b.get_pos();
                     pos = vec2f(pos.x /** render_settings::tile_size_x - ((render_settings::tile_size_x)*b.m_size)/2.0f */, pos.y /** render_settings::tile_size_y - ((render_settings::tile_size_y)*b.m_size)/2.0f*/);
                     m_sh->set_heights(pos,m_sh->get_height(pos.x,pos.y),b.m_size);
+                    break;}
+                case msg::building_state::turret_lvl2 :{
+                    m_buildings[i].upgrade(m_objhandler->getObjByName("turret_pacman_lvl1"),state);
+                    m_buildings[i].change_size(2);
+                    Building b = m_buildings[i];
+                    vec2f pos = b.get_pos();
+                    pos = vec2f(pos.x /** render_settings::tile_size_x - ((render_settings::tile_size_x)*b.m_size)/2.0f */, pos.y /** render_settings::tile_size_y - ((render_settings::tile_size_y)*b.m_size)/2.0f*/);
                     break;}
                 default :{ m_buildings[i].upgrade(m_objhandler->getObjByName("building_lot"), state);
                     m_buildings[i].change_size(1);
@@ -235,11 +263,17 @@ void Game::upgrade_building(unsigned int buildingId, unsigned int state, FRACTIO
            //         m_sh->set_heights(pos,m_sh->get_height(pos.x,pos.y),b.m_size);
                     break;}
                 case msg::building_state::turret_lvl1 :{m_buildings[i].upgrade(m_objhandler->getObjByName("turret_bbm_lvl1"),state);
-                    m_buildings[i].change_size(2);
+                    m_buildings[i].change_size(1);
                     Building b = m_buildings[i];
                     vec2f pos = b.get_pos();
                     pos = vec2f(pos.x /** render_settings::tile_size_x - ((render_settings::tile_size_x)*b.m_size)/2.0f */ , pos.y /** render_settings::tile_size_y - ((render_settings::tile_size_y)*b.m_size)/2.0f*/);
                     m_sh->set_heights(pos,m_sh->get_height(pos.x,pos.y),b.m_size);
+                    break;}
+                case msg::building_state::turret_lvl2 :{m_buildings[i].upgrade(m_objhandler->getObjByName("turret_bbm_lvl1"),state);
+                    m_buildings[i].change_size(2);
+                    Building b = m_buildings[i];
+                    vec2f pos = b.get_pos();
+                    pos = vec2f(pos.x /** render_settings::tile_size_x - ((render_settings::tile_size_x)*b.m_size)/2.0f */ , pos.y /** render_settings::tile_size_y - ((render_settings::tile_size_y)*b.m_size)/2.0f*/);
                     break;}
                 default :{ m_buildings[i].upgrade(m_objhandler->getObjByName("building_lot"), state);
                     Building b = m_buildings[i];
