@@ -569,6 +569,25 @@ int Building::get_level(){
 }
 
 
+int Building::get_defence_value(){
+	if(!turret) return -1;
+	if(state == msg::building_state::turret_lvl1)
+		return msg::defence_value::TowerLvl1;
+	return msg::defence_value::TowerLvl2;
+	
+		
+}
+float Building::get_unit_production(){
+	if(!settlement) return -1;
+	if(state == msg::building_state::house_lvl1)
+		return msg::unit_generation_time::UpgradeRateLvl1/1000;
+	if(state == msg::building_state::house_lvl2)
+		return msg::unit_generation_time::UpgradeRateLvl2/1000;
+	if(state == msg::building_state::house_lvl3)
+		return msg::unit_generation_time::UpgradeRateLvl3/1000;
+	return -1;	
+}
+
 void Building::upgrade(Obj *obj, int state){
 	
 	m_obj = obj;

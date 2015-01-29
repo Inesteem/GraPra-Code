@@ -496,11 +496,23 @@ void special_keyhandler( int key, int x, int y ){
 void keyhandler(unsigned char key, int x, int y) {
 
     if(render_menu){
+
+		if(!messageReader->m_init_done) {
+			msg::client_left cl = make_message<msg::client_left>();
+			switch(key){
+				case 'Y': reset();break;
+				case 'N': cl.playerId = PLAYER_ID;
+							game->m_messageReader->send_message(cl);
+							exit(0); break;
+			}
+			
+		}
+
         menu_keyhandler(key, 0);
         return;
 
     }
-	if(!messageReader->m_init_done) return;
+
 
 
     if (key == 'W')      wireframe = !wireframe;
@@ -612,9 +624,9 @@ void loop() {
     //
     // update logic
     //
-    testEffect->Update();
     if(messageReader->m_init_done) {
         game->update();
+		testEffect->Update();
     }
     render_timer.done_with("updates");
 
@@ -696,11 +708,16 @@ void loop() {
 
     use_camera(find_camera("playercam"));
 
-
-	game->draw();
-	action->draw();
-	testEffect->Render();
-
+    if(messageReader->m_init_done) {
+		game->draw();
+		action->draw();
+		testEffect->Render();
+	} else {
+		render_menu = true;
+		register_display_function(simple_loop);
+		register_idle_function(simple_loop); 
+		
+	}
     render_timer.done_with("draw");
 
     //
@@ -713,6 +730,9 @@ void loop() {
     render_timer.done_with("swap");
     // 	render_timer.print_summary();
     // 	cout << "-----" << endl;
+    
+    
+    
 }
 
 void gl_error(unsigned int source, unsigned int type, unsigned int id, unsigned int severity, int length, const char* message, void*) {
@@ -735,6 +755,7 @@ void load_configfile(const char *);
 
 
 void reset(){
+	
 	init_menu = false;
 
     register_display_function(simple_loop);

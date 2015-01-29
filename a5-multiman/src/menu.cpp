@@ -120,7 +120,6 @@ void Menu::draw_background(bool blend){
 		glDepthMask(GL_FALSE);
 		
 		texture_ref tex;
-		
 		switch (mode){
 			case GAMESTART : tex = game_start; break;
 			case GAMEPAUSED : tex = game_paused; break;
@@ -967,7 +966,6 @@ void IconBar::init_buttons(){
 		int j_max = j+tex_count[i]; 
 		for(;j < j_max; j++){
 			buttons[i].add_texture(texture_names[j]);
-			cout << i << " : " << texture_names[j] << endl;
 		}
 		
 
@@ -997,44 +995,36 @@ int IconBar::click(int x, int y, vec3f (*ptr)(int x, int y)){
 	if(-rel_depth >= (depth_button_s - depth_acc_button_s) && -rel_depth <= (depth_button_s + depth_acc_button_s)){
 
 		if(exit_game && rel_y > 0.3 && rel_y < 0.51){
-			cout << "click_no : " << rel_y << " : " << pos.y << endl;
 			return 9;
 		}
 		
 		if(exit_game) return -1;
 		
 		else if(rel_y > 0.9){
-			cout << "click_menu : " << rel_y << " : " << pos.y << endl;
 			return 4;
 		}
 		else if(rel_y > 0.8){
-			cout << "click_pause : " << rel_y << " : " << pos.y << endl;
 			return 6;
 		}
 		else {
-			cout << "click_settlement" << endl;
 			return 0;
 		}	
 	}
 	else if(-rel_depth >= (depth_button_t - depth_acc_button_t) && -rel_depth <= (depth_button_t + depth_acc_button_t)){	
 
 		if(exit_game && rel_y >0.3 && rel_y < 0.51){
-			cout << "click_yes : " << rel_y << " : " << pos.y << endl;
 			return 10;
 		}
 		
 		if(exit_game) return -1;
 
 		else if(rel_y > 0.88){
-			cout << "click_main : " << rel_y << " : " << pos.y << endl;
 			return 5;
 		}
 		else if(rel_y > 0.5){
-			cout << "click_exit : " << rel_y << " : " << pos.y << endl;
 			return 7;
 		}
 		else {
-			cout << "click_turret" << endl;
 			return 1;
 		}
 	}
@@ -1056,7 +1046,6 @@ void IconBar::clicked_menu(int button){
 		
 		case 7 : exit_game = true;
 				 open_menu = false;
-				 cout << "here" << endl;
 				 break;
 				 
 		case 9 : exit(0);
@@ -1117,7 +1106,7 @@ void IconBar::update(){
 		int type  = building->get_type();
 		int level = building->get_level();
 		int state = building->get_state();
-		int unit_count = building->get_unit_count();
+		float unit_count = building->get_unit_count();
 		
 		std::stringstream l_1,l_2;
 		l_1 << unit_count;
