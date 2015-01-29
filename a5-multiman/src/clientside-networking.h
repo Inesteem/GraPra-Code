@@ -14,7 +14,7 @@ public:
     client_message_reader(Game *game);
 
 	void send_message(msg::message &msg);
-    void networking_prologue(char *hostName);
+    int networking_prologue(char *hostName);
 
     bool m_init_done;
 

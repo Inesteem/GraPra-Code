@@ -443,11 +443,25 @@ void menu_keyhandler(unsigned char key, int state){
                 hostname[index_hostname] = '\0';
                 cout << ">" << hostname << "<" << endl;
                 //todo: fehlerbehandlung
-                messageReader->networking_prologue(hostname);
-                render_menu = false;
-                menu->reset_menu();
-                reset_hostname();
-            }
+                if(messageReader->networking_prologue(hostname) == -1){
+					reset_hostname();
+					glClearColor(0,0,0,1);
+					glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+					menu->set_hostname("no host found");
+					glClearColor(0,0,0,1);
+					menu->draw(false);
+					check_for_gl_errors("display");
+					swap_buffers();
+					sleep(1);
+					reset_hostname();
+					eingabe = 1;
+					
+				}else{
+					render_menu = false;
+					menu->reset_menu();
+					reset_hostname();
+				}
+			}
 
         }
 
@@ -466,8 +480,7 @@ void menu_keyhandler(unsigned char key, int state){
             hostname[index_hostname] = key;
             hostname[++index_hostname] = '<';
             menu->set_hostname(hostname);
-        } else
-            cout << "normal : " << (int)key << endl;
+        } 
 
     }
 }

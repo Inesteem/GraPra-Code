@@ -23,7 +23,7 @@ void client_message_reader::send_message(msg::message &msg) {
 	}
 }
 
-void client_message_reader::networking_prologue(char *hostName) {
+int client_message_reader::networking_prologue(char *hostName) {
 	using boost::asio::ip::tcp;
 	
 	try {
@@ -69,8 +69,10 @@ void client_message_reader::networking_prologue(char *hostName) {
 		//wall_time_timer timer;
 		//while (timer.look() < 1337) { drawStartScreen(true, true, addText); }
 		
-		exit(EXIT_FAILURE);
+	//	exit(EXIT_FAILURE);
+	return -1;
 	}
+	return 0;
 }
 
 client_message_reader::client_message_reader(Game *game) : message_reader(), game(game), m_init_done(false) {}
