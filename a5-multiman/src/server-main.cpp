@@ -238,10 +238,21 @@ int main(int argc, char **argv)
 			}
 			wtt.start();
 			for (int i = 0; i < client_connections::sockets; ++i) {
+
+                // player left?
+                bool playerLeft = false;
+                for(int j = 0; j < left_player.size();j++){
+                    if(i == left_player[j]) {
+                        playerLeft = true;
+                        break;
+                    }
+                }
+                if(playerLeft) continue;
+
                 client_connections::reader[i]->read_and_handle();
                 if (client_connections::reader[i]->eof()) {
-					cerr << "Player " << i << " disconnected. Exiting." << endl;
-					quit(0);
+                    cerr << "Player " << i << " disconnected." << endl;
+                    //quit(0);
                 }
 			}
 
@@ -264,7 +275,7 @@ int main(int argc, char **argv)
 		std::cerr << e.what() << std::endl;
 	}
 	catch (quit_signal &sig) {
-		exit(sig.status);
+        exit(sig.status);
 	}
 
 	return 0;
