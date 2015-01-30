@@ -68,7 +68,7 @@ protected:
                                                                 vec3f(0,1,0),vec3f(1,0.5,1),vec3f(0.5,1,1),vec3f(1,1,0.5) };
 
 	vector<int> nums = {-1,1,1,1,1,-1};
-    vector<int> max_nums = {-1,2,8,11,4,-1};
+    vector<int> max_nums = {-1,2,4,11,8,-1};
 	vector<int> min_nums = {-1,1,1,1,1,-1};
 	
 	client_message_reader *message_reader;
