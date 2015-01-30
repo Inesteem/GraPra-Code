@@ -12,7 +12,7 @@
 ;(make-orthographic-camera "lightcam" (list 0 10 995) (list 0 -1 0) (list 1 0 0) 10 -10 10 -10 10 5000)
 
 (define cam (make-perspective-camera "cam" (list 0.561 0.687 0.386) (list -0.045 -0.993 0.105) (list 0.998 -0.043 0.024) 45 1 0.01 10))
-(define playercam (make-perspective-camera "playercam" (list 16 20 16) (list 0 -0.9 0.4) (list 0 0.4 0.9) 45 1 1 100))
+(define playercam (make-perspective-camera "playercam" (list 16 20 16) (list 0 -0.9 0.4) (list 0 0.4 0.9) 45 1 1 200))
 (define orthocam (make-orthographic-camera "orthocam" (list  0.0 0.0 0.0) (list 0.0 0.0 -1.0) (list 0.0 1.0 0.0) 50 0 50 0 0.01 1000))
 
 (use-camera playercam)

@@ -877,6 +877,11 @@ void simple_loop(){
 	
 }
 
+void resize(int w, int h)
+{
+    standard_resize_func(w, h);
+}
+
 
 void actual_main() {
 
@@ -896,6 +901,7 @@ void actual_main() {
     register_idle_function(simple_loop);
     register_keyboard_function(keyhandler);
     register_keyboard_up_function(keyhandler_up);
+    register_resize_function(resize);
 
     register_mouse_function(mouse);
     register_mouse_motion_function(mouse_move);

@@ -19,8 +19,8 @@ void send_message(int player, msg::message *m) {
         boost::asio::write(*client_connections::socket[player], boost::asio::buffer(m, m->message_size), boost::asio::transfer_all());
     }
     catch (boost::system::system_error &err) {
-        cerr << "Error sending message to client of player " << player << ": " << err.what() << "\nExiting." << endl;
-        quit(-1);
+        //cerr << "Error sending message to client of player " << player << ": " << err.what() << "\nExiting." << endl;
+        //quit(-1);
     }
 }
 

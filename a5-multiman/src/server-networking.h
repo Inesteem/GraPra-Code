@@ -7,6 +7,8 @@
 
 using namespace std;
 
+extern vector<int> left_player;
+
 void send_message(int player, msg::message *m);
 void broadcast(msg::message *m);
 
