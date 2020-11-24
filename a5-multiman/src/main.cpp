@@ -1,3 +1,5 @@
+#define GLM_FORCE_RADIANS
+
 #include <iostream>
 #include <iomanip>
 #include <cstdlib>
@@ -382,9 +384,11 @@ void menu_keyhandler(unsigned char key, int state){
 			menu->set_hostname(hostname);
 			break;
 
-        //Enter
-        //host game
-    case 13 : if(menu->get_row() == 0){
+    //Enter
+    case 13 : 
+    
+		//host game
+		if(menu->get_row() == 0){
             game->deliver_settings(menu->get_frac(),menu->get_player_color()-1);
 			action->init_iconbar(menu->get_frac());
 			
@@ -745,7 +749,7 @@ void loop() {
     //
     check_for_gl_errors("display");
     swap_buffers();
-    unbind_texture(shadowmap);
+    //unbind_texture(shadowmap);
 
     render_timer.done_with("swap");
     // 	render_timer.print_summary();
@@ -912,7 +916,7 @@ void actual_main() {
     glClearDepth(1.0);
 
     // set different cursors
-    glutSetCursor(GLUT_CURSOR_INFO);
+ //   glutSetCursor(GLUT_CURSOR_INFO);
 
     // Dark blue background
     glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
@@ -934,11 +938,8 @@ void actual_main() {
     init_framebuffer();
     sh = new simple_heightmap();
 
-
     menu = new Menu();
-
     game = new Game(objhandler,sh, messageReader,menu);
-
 
     menu->init(game, &render_menu);
     menu->set_mode(menu->GAMESTART);

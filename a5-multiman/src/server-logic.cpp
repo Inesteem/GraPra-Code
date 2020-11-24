@@ -63,7 +63,6 @@ void GameStage::lostClient(int playerId){
 		}
 	}
 }
-
 void GameStage::handleClientSettings(unsigned int playerId, unsigned int colorId, unsigned int frac ){
     unsigned int actualColorId = colorId;
     if(!playerColorAvailable(colorId)) {
@@ -93,7 +92,8 @@ void GameStage::handleClientSettings(unsigned int playerId, unsigned int colorId
     m_players.push_back(player);
     msg::new_player np = make_message<msg::new_player>();
     np.playerId = playerId;
-    np.colorId = player.m_colorId;
+ //   np.colorId = player.m_colorId;
+    np.colorId = playerId;
     np.frac = frac;
     
     broadcast(&np);

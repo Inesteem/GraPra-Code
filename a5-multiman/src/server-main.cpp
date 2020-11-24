@@ -187,6 +187,8 @@ int main(int argc, char **argv)
     }
 
     int numPlayers = atoi(argv[1]);
+    
+    cout << "Players: " << numPlayers << endl;
   
 
 
